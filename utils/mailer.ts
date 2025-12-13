@@ -19,7 +19,7 @@ export const sendEmail = async ({
 }: EmailOptions): Promise<void> => {
   try {
     await transporter.sendMail({
-      from: `"نظام التسجيل" <${process.env.EMAIL_USER}>`,
+      from: `Hacherha App`,
       to,
       subject,
       text,
