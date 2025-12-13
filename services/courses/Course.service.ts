@@ -63,7 +63,7 @@ class CtrlCourseService {
     }
 
     const course = await Course.findById(id)
-      .populate("teacher", "-password -available -suspended -resetPass -suspensionReason -suspensionEnd -createdAt -updatedAt -__v")
+      .populate("teacher")
       .populate({
         path: "sessions",
         options: { sort: { createdAt: -1 } },
@@ -253,7 +253,7 @@ class CtrlCourseService {
 
     const courses = await Course.find(filter)
       .sort({ createdAt: -1 })
-      .select("-__v -video")
+      .select("-__v")
       .populate("teacher");
 
     return courses;
