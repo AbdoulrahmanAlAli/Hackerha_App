@@ -15,15 +15,19 @@ export const sendEmail = async ({
   to,
   subject,
   text,
-  html, 
+  html,
 }: EmailOptions): Promise<void> => {
   try {
     await transporter.sendMail({
-      from: `Hacherha App`,
+      from: `"Hackerha App" <${process.env.EMAIL_USER}>`,
+      envelope: {
+        from: process.env.EMAIL_USER,
+        to,
+      },
       to,
       subject,
       text,
-      html, // Make sure to pass this through
+      html,
     });
     console.log("Email sent successfully");
   } catch (error) {
