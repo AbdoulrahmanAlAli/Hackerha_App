@@ -110,11 +110,9 @@ const validateUpdateExam = (obj: Partial<IExam>): joi.ValidationResult => {
     duration: joi
       .string()
       .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/)
-      .required()
       .messages({
         "string.empty": "المدة مطلوبة",
-        "string.pattern.base": "المدة يجب أن تكون بالتنسيق 00:00 أو 00:00:00",
-        "any.required": "المدة مطلوبة",
+        "string.pattern.base": "المدة يجب أن تكون بالتنسيق 00:00 أو 00:00:00"
       }),
   });
 

@@ -70,7 +70,7 @@ class QuestionService {
 
     if (!question) throw new NotFoundError("فشل إنشاء السؤال");
 
-    return { message: "تم إنشاء السؤال بنجاح" };
+    return { id: question.id, message: "تم إنشاء السؤال بنجاح" };
   }
 
   // Get question by ID

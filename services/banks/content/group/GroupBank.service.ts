@@ -33,7 +33,7 @@ class GroupBankService {
 
     if (!groupBank) throw new NotFoundError("فشل إنشاء المجموعة");
 
-    return { message: "تم إنشاء المجموعة بنجاح" };
+    return { id: groupBank.id, message: "تم إنشاء المجموعة بنجاح" };
   }
 
   // Get group Bank by ID

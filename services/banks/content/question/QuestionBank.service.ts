@@ -39,9 +39,7 @@ class QuestionBankService {
       });
 
       if (existingQuestions.length >= 1) {
-        throw new BadRequestError(
-          "لا يمكن إضافة أكثر من سؤال واحد"
-        );
+        throw new BadRequestError("لا يمكن إضافة أكثر من سؤال واحد");
       }
     }
 
@@ -76,7 +74,7 @@ class QuestionBankService {
 
     if (!questionBank) throw new NotFoundError("فشل إنشاء السؤال");
 
-    return { message: "تم إنشاء السؤال بنجاح" };
+    return { id: questionBank.id, message: "تم إنشاء السؤال بنجاح" };
   }
 
   // Get question Bank by ID

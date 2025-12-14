@@ -17,7 +17,6 @@ const GroupSchema = new Schema<IGroup>(
     },
     totalMark: {
       type: Number,
-      required: [true, "علامة الفروب مطلوبة"],
     },
   },
   {
@@ -69,7 +68,6 @@ const validateCreateGroup = (obj: IGroup): joi.ValidationResult => {
       }),
     totalMark: joi.number().required().messages({
       "number.empty": "علامة الفروب مطلوبة",
-      "any.required": "علامة الفروب مطلوبة",
     }),
   });
 

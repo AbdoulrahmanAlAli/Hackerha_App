@@ -16,7 +16,6 @@ const GroupBankSchema = new Schema<IGroupBank>(
     },
     totalMark: {
       type: Number,
-      required: [true, "علامة الفروب مطلوبة"],
     },
   },
   {
@@ -85,7 +84,6 @@ const validateCreateGroupBank = (obj: IGroupBank): joi.ValidationResult => {
       }),
     totalMark: joi.number().required().messages({
       "number.empty": "علامة الفروب مطلوبة",
-      "any.required": "علامة الفروب مطلوبة",
     }),
   });
 

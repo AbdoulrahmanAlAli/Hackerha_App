@@ -33,7 +33,7 @@ class GroupService {
 
     if (!group) throw new NotFoundError("فشل إنشاء المجموعة");
 
-    return { message: "تم إنشاء المجموعة بنجاح" };
+    return { id: group.id, message: "تم إنشاء المجموعة بنجاح" };
   }
 
   // Get group by ID

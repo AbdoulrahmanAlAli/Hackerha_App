@@ -7,9 +7,7 @@ import checkRole from "../../middlewares/checkRole";
 const router: Router = Router();
 
 // Public routes
-router
-  .route("/current")
-  .get(verifyToken, versionController.getCurrentVersion);
+router.route("/current").get(versionController.getCurrentVersion);
 
 // Protected admin routes
 router
