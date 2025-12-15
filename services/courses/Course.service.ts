@@ -184,22 +184,6 @@ class CtrlCourseService {
       firstSession: firstSession,
     };
 
-    if (courseWithStats.video) {
-      courseWithStats.video = await VideoTokenService.createVideoToken(
-        id,
-        courseWithStats.video,
-        studentId || undefined
-      );
-    }
-
-    if (courseNotEnrolled.video) {
-      courseNotEnrolled.video = await VideoTokenService.createVideoToken(
-        id,
-        courseNotEnrolled.video,
-        studentId || undefined
-      );
-    }
-
     if (role === "student") {
       if (!studentId) {
         throw new BadRequestError("معرف الطالب مطلوب");
@@ -372,6 +356,7 @@ class CtrlCourseService {
     if (!mongoose.Types.ObjectId.isValid(studentId)) {
       throw new NotFoundError("معرف الطالب غير صالح");
     }
+
     const course = await Course.findById(courseId);
     if (!course) throw new NotFoundError("الكورس غير موجود");
 
@@ -382,31 +367,21 @@ class CtrlCourseService {
       throw new BadRequestError("الطالب غير مسجل في هذا الكورس");
     }
 
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
-      await Student.findByIdAndUpdate(
-        studentId,
-        { $pull: { enrolledCourses: courseId } },
-        { session, new: true }
-      );
+      // Update student
+      await Student.findByIdAndUpdate(studentId, {
+        $pull: { enrolledCourses: courseId },
+      });
 
-      await Course.findByIdAndUpdate(
-        courseId,
-        { $pull: { students: studentId } },
-        { session, new: true }
-      );
-
-      await session.commitTransaction();
-      session.endSession();
+      // Update course
+      await Course.findByIdAndUpdate(courseId, {
+        $pull: { students: studentId },
+      });
 
       return {
         message: "تم إزالة الطالب من الكورس بنجاح",
       };
     } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
       throw error;
     }
   }
