@@ -79,6 +79,7 @@ class AuthStudentService {
       password: studentData.password,
       device_id: studentData.device_id,
       otp: hashedOtp,
+      fcmToken: studentData.fcmToken,
       available: false,
     });
 
