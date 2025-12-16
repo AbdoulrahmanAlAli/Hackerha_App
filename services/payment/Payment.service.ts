@@ -97,7 +97,7 @@ class PaymentService {
         html: paymentHtml(
           rawCode,
           course.name,
-          student.userName,
+          student.firstName + " " + student.lastName,
           student.universityNumber
         ),
       });
@@ -113,7 +113,7 @@ class PaymentService {
       courseId: paymentData.courseId,
       price: paymentData.price,
       studentId: student._id,
-      adminName: admin.userName, // Use admin's userName as adminName
+      adminName: admin.firstName + " " + admin.lastName, // Use admin's userName as adminName
       studentNumber: student.phoneNumber,
       expiresAt,
     });
@@ -123,9 +123,9 @@ class PaymentService {
       code: rawCode, // Return the raw code only once
       expiresAt,
       paymentCodeId: paymentCode._id,
-      adminName: admin.userName,
+      adminName: admin.firstName + " " + admin.lastName,
       studentNumber: paymentData.studentNumber,
-      studentName: student.userName,
+      studentName: student.firstName + " " + student.lastName,
     };
   }
 

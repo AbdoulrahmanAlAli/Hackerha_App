@@ -2,7 +2,8 @@ import { Document, Types } from "mongoose";
 
 export interface IStudent extends Document {
   profilePhoto: string;
-  userName: string;
+  firstName: string;
+  lastName: string;
   phoneNumber: string;
   academicYear:
     | "السنة الأولى"
@@ -31,9 +32,13 @@ export interface IStudent extends Document {
   contents: Types.ObjectId[];
   courses: Types.ObjectId[];
   sessions: Types.ObjectId[];
-  exams: Types.ObjectId[]
+  exams: Types.ObjectId[];
 }
 
 export interface IOtp extends Document {
   otp: string;
+}
+
+export interface IUpdateFcmToken {
+  fcmToken?: string;
 }

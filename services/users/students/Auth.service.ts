@@ -68,7 +68,8 @@ class AuthStudentService {
     const hashedOtp = await OTPUtils.encryptOTP(otp);
 
     const student = await Student.create({
-      userName: studentData.userName,
+      firstName: studentData.firstName,
+      lastName: studentData.lastName,
       phoneNumber: studentData.phoneNumber,
       academicYear: studentData.academicYear,
       universityNumber: studentData.universityNumber,

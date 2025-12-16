@@ -9,14 +9,20 @@ const StudentSchema = new Schema<IStudent>(
     profilePhoto: {
       type: String,
       default:
-        "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+        "https://i.postimg.cc/JzCB3CDX/Profile-Picture-Container-(2).pngg",
       required: true,
     },
-    userName: {
+    firstName: {
       type: String,
-      required: [true, "الاسم الكامل مطلوب"],
+      required: [true, "الاسم مطلوب"],
       trim: true,
-      maxlength: [100, "الاسم الكامل يجب ألا يتجاوز 100 حرف"],
+      maxlength: [100, "الاسم يجب ألا يتجاوز 100 حرف"],
+    },
+    lastName: {
+      type: String,
+      required: [true, "الاسم الاحير مطلوب"],
+      trim: true,
+      maxlength: [100, "الاسم الاحير يجب ألا يتجاوز 100 حرف"],
     },
     phoneNumber: {
       type: String,
@@ -196,10 +202,15 @@ const validationOtp = (obj: IOtp): joi.ValidationResult => {
 // Validation Create Student
 const validateCreateStudent = (obj: IStudent): joi.ValidationResult => {
   const schema = joi.object({
-    userName: joi.string().max(100).required().messages({
-      "string.empty": "الاسم الكامل مطلوب",
-      "string.max": "الاسم الكامل يجب ألا يتجاوز 100 حرف",
-      "any.required": "الاسم الكامل مطلوب",
+    firstName: joi.string().max(100).required().messages({
+      "string.empty": "الاسم مطلوب",
+      "string.max": "الاسم يجب ألا يتجاوز 100 حرف",
+      "any.required": "الاسم مطلوب",
+    }),
+    lastName: joi.string().max(100).required().messages({
+      "string.empty": "الاسم الاحير مطلوب",
+      "string.max": "الاسم الاحير يجب ألا يتجاوز 100 حرف",
+      "any.required": "الاسم الاحير مطلوب",
     }),
     phoneNumber: joi.string().required().messages({
       "string.empty": "الرقم مطلوب",
@@ -322,10 +333,13 @@ const validateUpdateStudent = (
   obj: Partial<IStudent>
 ): joi.ValidationResult => {
   const schema = joi.object({
-    userName: joi.string().max(100).messages({
-      "string.empty": "الاسم الكامل مطلوب",
-      "string.max": "الاسم الكامل يجب ألا يتجاوز 100 حرف",
-      "any.required": "الاسم الكامل مطلوب",
+    firstName: joi.string().max(100).required().messages({
+      "string.empty": "الاسم مطلوب",
+      "string.max": "الاسم يجب ألا يتجاوز 100 حرف",
+    }),
+    lastName: joi.string().max(100).required().messages({
+      "string.empty": "الاسم الاحير مطلوب",
+      "string.max": "الاسم الاحير يجب ألا يتجاوز 100 حرف",
     }),
     phoneNumber: joi.string().messages({
       "string.empty": "الرقم مطلوب",
@@ -352,10 +366,13 @@ const validateUpdateImportantStudent = (
   obj: Partial<IStudent>
 ): joi.ValidationResult => {
   const schema = joi.object({
-    userName: joi.string().max(100).messages({
-      "string.empty": "الاسم الكامل مطلوب",
-      "string.max": "الاسم الكامل يجب ألا يتجاوز 100 حرف",
-      "any.required": "الاسم الكامل مطلوب",
+    firstName: joi.string().max(100).required().messages({
+      "string.empty": "الاسم مطلوب",
+      "string.max": "الاسم يجب ألا يتجاوز 100 حرف",
+    }),
+    lastName: joi.string().max(100).required().messages({
+      "string.empty": "الاسم الاحير مطلوب",
+      "string.max": "الاسم الاحير يجب ألا يتجاوز 100 حرف",
     }),
     phoneNumber: joi.string().messages({
       "string.empty": "الرقم مطلوب",
@@ -410,6 +427,17 @@ const validateUpdateSuspendedStudent = (
   return schema.validate(obj);
 };
 
+const validateUpdateFcmToken = (
+  obj: Partial<IStudent>
+): joi.ValidationResult => {
+  const schema = joi.object({
+    fcmToken: joi.string().allow(null, "").optional().messages({
+      "string.base": "FCM Token يجب أن يكون نصًا",
+    }),
+  });
+  return schema.validate(obj);
+};
+
 export {
   Student,
   validationOtp,
@@ -421,4 +449,5 @@ export {
   validatePasswourd,
   validateUpdateSuspendedStudent,
   validateUpdateImportantStudent,
+  validateUpdateFcmToken,
 };

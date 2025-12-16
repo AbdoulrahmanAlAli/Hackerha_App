@@ -166,7 +166,11 @@ class NotificationService {
       }
 
       if (!student.fcmToken) {
-        console.log(`الطالب ${student.userName} ليس لديه رمز FCM`);
+        console.log(
+          `الطالب ${
+            student.firstName + " " + student.lastName
+          } ليس لديه رمز FCM`
+        );
         return;
       }
 
@@ -198,7 +202,9 @@ class NotificationService {
 
       const response = await admin.messaging().send(message);
       console.log(
-        `تم إرسال الإشعار بنجاح إلى ${student.userName}: ${response}`
+        `تم إرسال الإشعار بنجاح إلى ${
+          student.firstName + " " + student.lastName
+        }: ${response}`
       );
     } catch (error: any) {
       console.error(`خطأ في إرسال الإشعار إلى الطالب ${studentId}:`, error);
@@ -275,7 +281,9 @@ class NotificationService {
             (fcmResponse: messaging.SendResponse, index: number) => {
               if (!fcmResponse.success) {
                 console.log(
-                  `فشل إرسال الإشعار العام إلى الطالب: ${batch[index].userName}`,
+                  `فشل إرسال الإشعار العام إلى الطالب: ${
+                    batch[index].firstName + " " + batch[index].lastName
+                  }`,
                   fcmResponse.error
                 );
 

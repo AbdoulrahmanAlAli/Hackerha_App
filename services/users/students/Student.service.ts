@@ -11,12 +11,17 @@ import {
   validatePasswourd,
   validateUpdateSuspendedStudent,
   validateUpdateImportantStudent,
+  validateUpdateFcmToken,
 } from "../../../models/users/students/Student.model";
 import { OTPUtils } from "../../../utils/generateOtp";
 import { sendEmail } from "../../../utils/mailer";
 import { html, resetPasswordHtml } from "../../../utils/mailHtml";
 import bcrypt from "bcrypt";
-import { CheckStudentExistenceParams, ExistenceResults, ICloudinaryFile } from "../../../utils/types";
+import {
+  CheckStudentExistenceParams,
+  ExistenceResults,
+  ICloudinaryFile,
+} from "../../../utils/types";
 import { Course } from "../../../models/courses/Course.model";
 import mongoose, { Types } from "mongoose";
 import { Session } from "../../../models/courses/session/Session.model";
@@ -295,7 +300,8 @@ class CtrlStudentService {
       id,
       {
         $set: {
-          userName: studentData.userName,
+          firstName: studentData.firstName,
+          lastName: studentData.lastName,
           phoneNumber: studentData.phoneNumber,
           academicYear: studentData.academicYear,
         },
@@ -377,7 +383,8 @@ class CtrlStudentService {
       id,
       {
         $set: {
-          userName: studentData.userName,
+          firstName: studentData.firstName,
+          lastName: studentData.lastName,
           phoneNumber: studentData.phoneNumber,
           academicYear: studentData.academicYear,
           universityNumber: studentData.universityNumber,
@@ -584,61 +591,69 @@ class CtrlStudentService {
   }
 
   // ~ Get => /api/hackit/ctrl/student/check-existence ~ Check if phone, email, or university number exists
-  static async checkStudentExistence(checkData: CheckStudentExistenceParams): Promise<ExistenceResults> {
-  const { phoneNumber, email, universityNumber } = checkData;
+  static async checkStudentExistence(
+    checkData: CheckStudentExistenceParams
+  ): Promise<ExistenceResults> {
+    const { phoneNumber, email, universityNumber } = checkData;
 
-  // Validate that at least one field is provided
-  if (!phoneNumber && !email && !universityNumber) {
-    throw new BadRequestError(
-      "يجب تقديم رقم الهاتف أو البريد الإلكتروني أو الرقم الجامعي للتحقق"
-    );
-  }
-
-  const existenceResults: ExistenceResults = {};
-
-  // Check email existence if provided
-  if (email) {
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      throw new BadRequestError("صيغة البريد الإلكتروني غير صحيحة");
+    // Validate that at least one field is provided
+    if (!phoneNumber && !email && !universityNumber) {
+      throw new BadRequestError(
+        "يجب تقديم رقم الهاتف أو البريد الإلكتروني أو الرقم الجامعي للتحقق"
+      );
     }
-    
-    const emailExists = await Student.findOne({ 
-      email, 
-      available: true 
-    }).select('_id').lean();
-    
-    existenceResults.emailExists = !!emailExists;
-  }
 
-  // Check phone number existence if provided
-  if (phoneNumber) {
-    const phoneNumberExists = await Student.findOne({ 
-      phoneNumber, 
-      available: true 
-    }).select('_id').lean();
-    
-    existenceResults.phoneNumberExists = !!phoneNumberExists;
-  }
+    const existenceResults: ExistenceResults = {};
 
-  // Check university number existence if provided
-  if (universityNumber) {
-    // Optional: Add university number validation
-    if (universityNumber <= 0) {
-      throw new BadRequestError("الرقم الجامعي يجب أن يكون رقمًا موجبًا");
+    // Check email existence if provided
+    if (email) {
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        throw new BadRequestError("صيغة البريد الإلكتروني غير صحيحة");
+      }
+
+      const emailExists = await Student.findOne({
+        email,
+        available: true,
+      })
+        .select("_id")
+        .lean();
+
+      existenceResults.emailExists = !!emailExists;
     }
-    
-    const universityNumberExists = await Student.findOne({ 
-      universityNumber, 
-      available: true 
-    }).select('_id').lean();
-    
-    existenceResults.universityNumberExists = !!universityNumberExists;
-  }
 
-  return existenceResults;
-}
+    // Check phone number existence if provided
+    if (phoneNumber) {
+      const phoneNumberExists = await Student.findOne({
+        phoneNumber,
+        available: true,
+      })
+        .select("_id")
+        .lean();
+
+      existenceResults.phoneNumberExists = !!phoneNumberExists;
+    }
+
+    // Check university number existence if provided
+    if (universityNumber) {
+      // Optional: Add university number validation
+      if (universityNumber <= 0) {
+        throw new BadRequestError("الرقم الجامعي يجب أن يكون رقمًا موجبًا");
+      }
+
+      const universityNumberExists = await Student.findOne({
+        universityNumber,
+        available: true,
+      })
+        .select("_id")
+        .lean();
+
+      existenceResults.universityNumberExists = !!universityNumberExists;
+    }
+
+    return existenceResults;
+  }
 
   // ~ Patch => /api/hackit/ctrl/student/bank/:bankId/content/:contentId/user/:id ~ Add bank and content for student
   static async addBankAndContentForStudent(
@@ -875,6 +890,46 @@ class CtrlStudentService {
     ]);
 
     return result;
+  }
+
+  // ~ Put => /api/hackit/ctrl/student/update-fcm-token/:id ~ Update FCM Token For Student
+  static async updateFcmToken(studentData: Partial<IStudent>, id: string) {
+    const { error } = validateUpdateFcmToken(studentData);
+    if (error) {
+      throw new BadRequestError(error.details[0].message);
+    }
+
+    const existingStudent = await Student.findById(id);
+    if (!existingStudent) {
+      throw new NotFoundError("الطالب غير موجود");
+    }
+
+    if (!existingStudent.available) {
+      throw new BadRequestError("الحساب غير مفعل");
+    }
+
+    if (existingStudent.suspended) {
+      throw new BadRequestError("حسابك مقيد");
+    }
+
+    // تحديث FCM Token فقط
+    const updatedStudent = await Student.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          fcmToken: studentData.fcmToken || null,
+        },
+      },
+      { new: true, runValidators: true }
+    ).select("_id fcmToken");
+
+    if (!updatedStudent) {
+      throw new Error("فشل تحديث");
+    }
+
+    return {
+      message: "تم تحديث بنجاح",
+    };
   }
 }
 

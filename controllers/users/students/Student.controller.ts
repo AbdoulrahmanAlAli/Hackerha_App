@@ -345,6 +345,25 @@ class CtrlStudentController {
       res.status(200).json(result);
     }
   );
+
+  // ~ Put => /api/hackit/ctrl/student/update-fcm-token/:id ~ Update FCM Token
+  updateFcmToken = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+      const user = (req as AuthenticatedRequest).user;
+      const targetUserId = req.params.id;
+
+      if (user?.id !== targetUserId) {
+        throw new ForbiddenError("غير مصرح لك بتحديث FCM Token");
+      }
+
+      const result = await CtrlStudentService.updateFcmToken(
+        req.body,
+        targetUserId
+      );
+
+      res.status(200).json(result);
+    }
+  );
 }
 
 export const ctrlStudentController = new CtrlStudentController();

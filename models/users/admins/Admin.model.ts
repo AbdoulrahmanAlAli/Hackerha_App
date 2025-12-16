@@ -6,11 +6,17 @@ import bcrypt from "bcrypt";
 // Admin Schema
 const AdminSchema = new Schema<IAdmin>(
   {
-    userName: {
+    firstName: {
       type: String,
-      required: [true, "اسم المستخدم مطلوب"],
+      required: [true, "الاسم مطلوب"],
       trim: true,
-      maxlength: [100, "اسم المستخدم يجب ألا يتجاوز 100 حرف"],
+      maxlength: [100, "الاسم يجب ألا يتجاوز 100 حرف"],
+    },
+    lastName: {
+      type: String,
+      required: [true, "الاسم الاحير مطلوب"],
+      trim: true,
+      maxlength: [100, "الاسم الاحير يجب ألا يتجاوز 100 حرف"],
     },
     phoneNumber: {
       type: String,
@@ -61,16 +67,21 @@ AdminSchema.pre("save", async function (next) {
 // Admin Model
 const Admin: Model<IAdmin> = mongoose.model<IAdmin>("Admin", AdminSchema);
 
-// Admin Indexes 
+// Admin Indexes
 AdminSchema.index({ createdAt: -1 });
 
 // Validation: Create Admin
 const validateCreateAdmin = (obj: IAdmin): joi.ValidationResult => {
   const schema = joi.object({
-    userName: joi.string().max(100).required().messages({
-      "string.empty": "اسم المستخدم مطلوب",
-      "string.max": "اسم المستخدم يجب ألا يتجاوز 100 حرف",
-      "any.required": "اسم المستخدم مطلوب",
+    firstName: joi.string().max(100).required().messages({
+      "string.empty": "الاسم مطلوب",
+      "string.max": "الاسم يجب ألا يتجاوز 100 حرف",
+      "any.required": "الاسم مطلوب",
+    }),
+    lastName: joi.string().max(100).required().messages({
+      "string.empty": "الاسم الاحير مطلوب",
+      "string.max": "الاسم الاحير يجب ألا يتجاوز 100 حرف",
+      "any.required": "الاسم الاحير مطلوب",
     }),
     phoneNumber: joi
       .string()
@@ -100,9 +111,13 @@ const validateCreateAdmin = (obj: IAdmin): joi.ValidationResult => {
 // Validation: Update Admin
 const validateUpdateAdmin = (obj: Partial<IAdmin>): joi.ValidationResult => {
   const schema = joi.object({
-    userName: joi.string().max(100).messages({
-      "string.empty": "اسم المستخدم مطلوب",
-      "string.max": "اسم المستخدم يجب ألا يتجاوز 100 حرف",
+    firstName: joi.string().max(100).required().messages({
+      "string.empty": "الاسم مطلوب",
+      "string.max": "الاسم يجب ألا يتجاوز 100 حرف",
+    }),
+    lastName: joi.string().max(100).required().messages({
+      "string.empty": "الاسم الاحير مطلوب",
+      "string.max": "الاسم الاحير يجب ألا يتجاوز 100 حرف",
     }),
     phoneNumber: joi
       .string()
@@ -142,9 +157,4 @@ const validateLoginAdmin = (obj: Partial<IAdmin>): joi.ValidationResult => {
   return schema.validate(obj);
 };
 
-export {
-  Admin,
-  validateCreateAdmin,
-  validateUpdateAdmin,
-  validateLoginAdmin,
-};
+export { Admin, validateCreateAdmin, validateUpdateAdmin, validateLoginAdmin };

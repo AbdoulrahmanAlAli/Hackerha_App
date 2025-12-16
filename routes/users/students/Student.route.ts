@@ -166,4 +166,14 @@ router
     checkRole(["student"]),
     ctrlStudentController.addCourseAndExamForStudent
   );
+
+// ~ Put => /api/hackit/ctrl/student/update-fcm-token/:id ~ Update FCM Token
+router
+  .route("/update-fcm-token/:id")
+  .put(
+    verifyToken,
+    checkRole(["student"]),
+    ctrlStudentController.updateFcmToken
+  );
+
 export default router;

@@ -2,7 +2,8 @@ import { Document } from "mongoose";
 
 export interface ITeacher extends Document {
   profilePhoto: string;
-  userName: string;
+  firstName: string;
+  lastName: string;
   phoneNumber: string;
   gender: "ذكر" | "انثى";
   birth: Date;

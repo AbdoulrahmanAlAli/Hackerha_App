@@ -220,7 +220,8 @@ class CtrlTeacherService {
       id,
       {
         $set: {
-          userName: teacherData.userName,
+          firstName: teacherData.firstName,
+          lastName: teacherData.lastName,
           phoneNumber: teacherData.phoneNumber,
         },
       },
@@ -299,7 +300,8 @@ class CtrlTeacherService {
       id,
       {
         $set: {
-          userName: teacherData.userName,
+          firstName: teacherData.firstName,
+          lastName: teacherData.lastName,
           phoneNumber: teacherData.phoneNumber,
           gender: teacherData.gender,
           birth: teacherData.birth,

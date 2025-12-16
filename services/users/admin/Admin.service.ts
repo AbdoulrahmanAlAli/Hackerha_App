@@ -25,7 +25,7 @@ class CtrlAdminService {
 
     return admin;
   }
-  
+
   // ~ Post => /api/hackit/ctrl/admin/create ~ Create New Admin
   static async createNewAdmin(adminData: IAdmin) {
     const { error } = validateCreateAdmin(adminData);
@@ -42,7 +42,8 @@ class CtrlAdminService {
           email: adminData.email,
         }),
         Admin.findOne({
-          userName: adminData.userName,
+          firstName: adminData.firstName,
+          lastName: adminData.lastName,
         }),
       ]);
 
@@ -58,7 +59,6 @@ class CtrlAdminService {
       throw new BadRequestError("اسم المستخدم مسجل مسبقاً");
     }
 
-
     const admin = await Admin.create(adminData);
 
     const token = generateJWT({
@@ -71,7 +71,8 @@ class CtrlAdminService {
       token,
       admin: {
         id: admin.id,
-        userName: admin.userName,
+        firstName: admin.firstName,
+        lastName: admin.lastName,
         email: admin.email,
         phoneNumber: admin.phoneNumber,
       },
@@ -128,9 +129,10 @@ class CtrlAdminService {
     }
 
     // Check for duplicate username
-    if (adminData.userName) {
+    if (adminData.firstName && adminData.lastName) {
       const existingUsername = await Admin.findOne({
-        userName: adminData.userName,
+        userName: adminData.firstName,
+        lastName: adminData.lastName,
         _id: { $ne: id },
       });
       if (existingUsername)
