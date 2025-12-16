@@ -156,6 +156,8 @@ class NotificationService {
 
   private static async sendPushToStudent(studentId: string, notification: any) {
     try {
+      console.log(`Attempting to send notification to student: ${studentId}`);
+
       const student = await Student.findById(studentId).select(
         "fcmToken userName"
       );
@@ -164,6 +166,8 @@ class NotificationService {
         console.log(`الطالب غير موجود: ${studentId}`);
         return;
       }
+
+      console.log(`Student FCM Token: ${student.fcmToken}`);
 
       if (!student.fcmToken) {
         console.log(
