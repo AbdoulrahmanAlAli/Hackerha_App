@@ -158,6 +158,37 @@ class AuthStudentService {
       throw new BadRequestError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
     }
 
+    if (existingInStudent.suspended) {
+      throw new BadRequestError(
+        "حسابك مقيد لا يمكنك تسجيل الدخول, يرجى التواصل بالدعم التقني"
+      );
+    }
+
+    if (existingInStudent.device_id_reset) {
+      await Student.findByIdAndUpdate(
+        existingInStudent.id,
+        {
+          $set: {
+            device_id: studentData.device_id,
+            device_id_reset: false, // إعادة تعيين إلى false بعد التحديث
+          },
+        },
+        { new: true, runValidators: true }
+      );
+
+      // إنشاء التوكن بعد التحديث
+      const token = generateJWT({
+        id: existingInStudent.id,
+        role: "student",
+      });
+
+      return {
+        message: "تم تسجيل الدخول بنجاح وتم تحديث معرف الجهاز",
+        token,
+        deviceUpdated: true,
+      };
+    }
+
     if (existingInStudent.device_id != studentData.device_id) {
       await Student.findByIdAndUpdate(
         existingInStudent.id,

@@ -82,6 +82,10 @@ const StudentSchema = new Schema<IStudent>(
       type: String,
       required: [true, "device_Id is required"],
     },
+    device_id_reset: {
+      type: Boolean,
+      default: false,
+    },
     available: {
       type: Boolean,
       default: false,
@@ -438,6 +442,18 @@ const validateUpdateFcmToken = (
   return schema.validate(obj);
 };
 
+const validateUpdateDeviceIdReset = (
+  obj: Partial<IStudent>
+): joi.ValidationResult => {
+  const schema = joi.object({
+    device_id_reset: joi.boolean().required().messages({
+      "boolean.base": "device_id_reset يجب أن يكون قيمة منطقية",
+      "any.required": "device_id_reset مطلوب",
+    }),
+  });
+  return schema.validate(obj);
+};
+
 export {
   Student,
   validationOtp,
@@ -450,4 +466,5 @@ export {
   validateUpdateSuspendedStudent,
   validateUpdateImportantStudent,
   validateUpdateFcmToken,
+  validateUpdateDeviceIdReset,
 };

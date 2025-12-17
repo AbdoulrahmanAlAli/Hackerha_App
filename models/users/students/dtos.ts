@@ -19,6 +19,7 @@ export interface IStudent extends Document {
   otp: string;
   fcmToken?: string;
   device_id: string;
+  device_id_reset: boolean;
   available: boolean;
   suspended: boolean;
   resetPass: boolean;
@@ -41,4 +42,8 @@ export interface IOtp extends Document {
 
 export interface IUpdateFcmToken {
   fcmToken?: string;
+}
+
+export interface IUpdateDeviceIdReset {
+  device_id_reset: boolean;
 }

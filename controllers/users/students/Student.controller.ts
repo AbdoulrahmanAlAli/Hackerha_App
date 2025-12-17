@@ -364,6 +364,26 @@ class CtrlStudentController {
       res.status(200).json(result);
     }
   );
+
+  // ~ Put => /api/hackit/ctrl/student/update-device-id-reset/:id ~ Update device_id_reset (Admin Only)
+  updateDeviceIdReset = asyncHandler(
+    async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+      const user = (req as AuthenticatedRequest).user;
+      const targetUserId = req.params.id;
+
+      // التحقق من أن المستخدم هو أدمن فقط
+      if (user?.role !== "admin") {
+        throw new ForbiddenError("غير مصرح لك، هذا الإجراء مسموح للأدمن فقط");
+      }
+
+      const result = await CtrlStudentService.updateDeviceIdReset(
+        req.body,
+        targetUserId
+      );
+
+      res.status(200).json(result);
+    }
+  );
 }
 
 export const ctrlStudentController = new CtrlStudentController();

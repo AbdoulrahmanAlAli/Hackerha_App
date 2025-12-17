@@ -12,6 +12,7 @@ import {
   validateUpdateSuspendedStudent,
   validateUpdateImportantStudent,
   validateUpdateFcmToken,
+  validateUpdateDeviceIdReset,
 } from "../../../models/users/students/Student.model";
 import { OTPUtils } from "../../../utils/generateOtp";
 import { sendEmail } from "../../../utils/mailer";
@@ -929,6 +930,39 @@ class CtrlStudentService {
 
     return {
       message: "تم تحديث بنجاح",
+    };
+  }
+
+  // ~ Put => /api/hackit/ctrl/student/update-device-id-reset/:id ~ Update device_id_reset For Student (Admin Only)
+  static async updateDeviceIdReset(studentData: Partial<IStudent>, id: string) {
+    const { error } = validateUpdateDeviceIdReset(studentData);
+    if (error) {
+      throw new BadRequestError(error.details[0].message);
+    }
+
+    const existingStudent = await Student.findById(id);
+    if (!existingStudent) {
+      throw new NotFoundError("الطالب غير موجود");
+    }
+
+    // تحديث device_id_reset فقط
+    const updatedStudent = await Student.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          device_id_reset: studentData.device_id_reset,
+        },
+      },
+      { new: true, runValidators: true }
+    ).select("_id device_id_reset");
+
+    if (!updatedStudent) {
+      throw new Error("فشل تحديث device_id_reset");
+    }
+
+    return {
+      message: "تم تحديث device_id_reset بنجاح",
+      device_id_reset: updatedStudent.device_id_reset,
     };
   }
 }

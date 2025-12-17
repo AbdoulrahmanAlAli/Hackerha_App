@@ -176,4 +176,11 @@ router
     ctrlStudentController.updateFcmToken
   );
 
+// ~ Put => /api/hackit/ctrl/student/update-device-id-reset/:id ~ Update device_id_reset (Admin Only)
+router.route("/update-device-id-reset/:id").put(
+  verifyToken,
+  checkRole(["admin"]), // فقط الأدمن مسموح له
+  ctrlStudentController.updateDeviceIdReset
+);
+
 export default router;
