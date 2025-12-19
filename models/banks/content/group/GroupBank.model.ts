@@ -16,6 +16,7 @@ const GroupBankSchema = new Schema<IGroupBank>(
     },
     totalMark: {
       type: Number,
+      default: null,
     },
   },
   {
@@ -82,9 +83,12 @@ const validateCreateGroupBank = (obj: IGroupBank): joi.ValidationResult => {
       .messages({
         "alternatives.types": "العنوان الرئيسي يجب أن يكون نصاً أو فارغاً",
       }),
-    totalMark: joi.number().required().messages({
-      "number.empty": "علامة الفروب مطلوبة",
-    }),
+    totalMark: joi
+      .alternatives()
+      .try(joi.number().allow(null), joi.allow(null)) // السماح بقيمة null
+      .messages({
+        "alternatives.types": "علامة الفروب يجب أن تكون رقماً أو فارغة",
+      }),
   });
 
   return schema.validate(obj);
@@ -104,9 +108,12 @@ const validateUpdateGroupBank = (
       .messages({
         "alternatives.types": "العنوان الرئيسي يجب أن يكون نصاً أو فارغاً",
       }),
-    totalMark: joi.number().messages({
-      "number.empty": "علامة الفروب مطلوبة",
-    }),
+    totalMark: joi
+      .alternatives()
+      .try(joi.number().allow(null), joi.allow(null)) // السماح بقيمة null
+      .messages({
+        "alternatives.types": "علامة الفروب يجب أن تكون رقماً أو فارغة",
+      }),
   });
 
   return schema.validate(obj);

@@ -125,6 +125,7 @@ class GroupService {
     }
 
     const group = await Group.findByIdAndDelete(id);
+    console.log(group)
     if (!group) throw new NotFoundError("المجموعة غير موجودة");
     return { message: "تم حذف المجموعة بنجاح" };
   }

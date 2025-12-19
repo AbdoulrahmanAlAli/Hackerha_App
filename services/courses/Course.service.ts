@@ -66,11 +66,11 @@ class CtrlCourseService {
       .populate("teacher")
       .populate({
         path: "sessions",
-        options: { sort: { createdAt: -1 } },
+        options: { sort: { number: 1 } }, // تغيير الترتيب حسب number
       })
       .populate({
         path: "exams",
-        options: { sort: { createdAt: -1 } },
+        options: { sort: { number: 1 } }, // تغيير الترتيب حسب number
       })
       .populate({
         path: "comments",
@@ -119,22 +119,29 @@ class CtrlCourseService {
       number: 1,
     }).lean();
 
-    // إصلاح الخطأ والترتيب من الأقدم للأحدث
+    // التعديل: دمج الجلسات والامتحانات وترتيبها حسب number
     const allActivities = [
       ...sessions.map((session) => ({
         ...session,
         type: "session" as const,
+        orderNumber: (session as any).number,
       })),
       ...exams.map((exam) => ({
         ...exam,
         type: "exam" as const,
+        orderNumber: (exam as any).number,
       })),
     ].sort((a, b) => {
-      // التحقق من وجود createdAt واستخدامه للترتيب
-      const dateA = new Date((a as any).createdAt).getTime();
-      const dateB = new Date((b as any).createdAt).getTime();
-      return dateA - dateB; // من الأقدم إلى الأحدث
+      // الترتيب حسب orderNumber (رقم الجلسة أو الامتحان)
+      const numA = a.orderNumber || 0;
+      const numB = b.orderNumber || 0;
+      return numA - numB; // من الأصغر إلى الأكبر
     });
+
+    // إزالة orderNumber من النتيجة النهائية إذا أردت
+    const cleanedActivities = allActivities.map(
+      ({ orderNumber, ...rest }) => rest
+    );
 
     // إزالة sessions و exams من النتيجة
     const {
@@ -156,11 +163,9 @@ class CtrlCourseService {
           ? course.price * (1 - course.discount.rate / 100)
           : course.price,
       isDiscounted: course.discount?.dis || false,
-      sessionsAndExams: allActivities,
-      // FIRST THING: Add file count
+      sessionsAndExams: cleanedActivities, // استخدام النتيجة المرتبة
       totalFiles: totalFiles,
       totalCourseDuration: totalCourseDuration,
-      // SECOND THING: Add first session separately
       firstSession: firstSession,
       whatsapp: whatsappField,
     };
@@ -177,10 +182,8 @@ class CtrlCourseService {
           ? course.price * (1 - course.discount.rate / 100)
           : course.price,
       isDiscounted: course.discount?.dis || false,
-      // FIRST THING: Add file count for non-enrolled too
       totalFiles: totalFiles,
       totalCourseDuration: totalCourseDuration,
-      // SECOND THING: Add first session for non-enrolled too
       firstSession: firstSession,
     };
 

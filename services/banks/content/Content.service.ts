@@ -13,8 +13,7 @@ import { Student } from "../../../models/users/students/Student.model";
 class CtrlContentService {
   // ~ Get => /api/hackit/ctrl/content ~ Get All Content
   static async getAllContents() {
-    const contents = await Content.find()
-      .sort({ createdAt: -1 });
+    const contents = await Content.find().sort({ createdAt: -1 });
     return contents;
   }
 
@@ -29,8 +28,9 @@ class CtrlContentService {
 
   // ~ Get => /api/hackit/ctrl/content/bank/:bankId ~ Get Content by Bank ID
   static async getContentByBankId(bankId: string) {
-    const contents = await Content.find({ bank: bankId })
-      .sort({ createdAt: -1 });
+    const contents = await Content.find({ bank: bankId }).sort({
+      createdAt: -1,
+    });
 
     if (!contents || contents.length === 0) {
       throw new NotFoundError("لم يتم العثور على محتوى لهذا البنك");
@@ -48,7 +48,7 @@ class CtrlContentService {
 
     const newContent = await Content.create(contentData);
     if (!newContent) throw new NotFoundError("فشل إنشاء المحتوى");
-    return { message: "تم إنشاء المحتوى بنجاح" };
+    return { id: newContent.id, message: "تم إنشاء المحتوى بنجاح" };
   }
 
   // ~ Put => /api/hackit/ctrl/content/:id ~ Update Content

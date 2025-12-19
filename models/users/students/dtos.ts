@@ -12,7 +12,7 @@ export interface IStudent extends Document {
     | "السنة الرابعة"
     | "السنة الخامسة";
   universityNumber: number;
-  gender: "ذكر" | "انثى";
+  gender: "ذكر" | "أنثى";
   birth: Date;
   email: string;
   password: string;

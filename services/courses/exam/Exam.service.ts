@@ -26,7 +26,7 @@ class ExamService {
       courseId: examData.courseId,
       number: examData.number,
     });
-    if (!examWithSameNumber) {
+    if (examWithSameNumber) {
       throw new BadRequestError("الرقم موجود بالفعل 1");
     }
 
@@ -34,7 +34,7 @@ class ExamService {
       courseId: examData.courseId,
       number: examData.number,
     });
-    if (!sessionWithSameNumber) {
+    if (sessionWithSameNumber) {
       throw new BadRequestError("الرقم موجود بالفعل 2");
     }
 
@@ -42,7 +42,7 @@ class ExamService {
 
     if (!exam) throw new NotFoundError("فشل إنشاء الاختبار");
 
-    return { message: "تم إنشاء الامتحان بنجاح" };
+    return { id: exam.id, message: "تم إنشاء الامتحان بنجاح" };
   }
 
   // Get exam by ID

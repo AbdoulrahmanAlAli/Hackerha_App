@@ -54,17 +54,9 @@ class QuestionService {
       image = file.path;
     }
 
-    let totalMarkShare;
-    if (group.mainTitle === null) {
-      totalMarkShare = group.totalMark;
-    } else {
-      totalMarkShare = questionData.mark;
-    }
-
     const question = await Question.create({
       ...questionData,
       image,
-      mark: totalMarkShare,
     });
     await question.populate("groupId", "mainTitle");
 

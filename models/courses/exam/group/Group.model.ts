@@ -17,6 +17,7 @@ const GroupSchema = new Schema<IGroup>(
     },
     totalMark: {
       type: Number,
+      default: null,
     },
   },
   {
@@ -66,9 +67,12 @@ const validateCreateGroup = (obj: IGroup): joi.ValidationResult => {
       .messages({
         "alternatives.types": "العنوان الرئيسي يجب أن يكون نصاً أو فارغاً",
       }),
-    totalMark: joi.number().required().messages({
-      "number.empty": "علامة الفروب مطلوبة",
-    }),
+    totalMark: joi
+      .alternatives()
+      .try(joi.number().allow(null), joi.allow(null)) // السماح بقيمة null
+      .messages({
+        "alternatives.types": "علامة الفروب يجب أن تكون رقماً أو فارغة",
+      }),
   });
 
   return schema.validate(obj);
@@ -86,9 +90,12 @@ const validateUpdateGroup = (obj: Partial<IGroup>): joi.ValidationResult => {
       .messages({
         "alternatives.types": "العنوان الرئيسي يجب أن يكون نصاً أو فارغاً",
       }),
-    totalMark: joi.number().messages({
-      "number.empty": "علامة الفروب مطلوبة",
-    }),
+    totalMark: joi
+      .alternatives()
+      .try(joi.number().allow(null), joi.allow(null)) // السماح بقيمة null
+      .messages({
+        "alternatives.types": "علامة الفروب يجب أن تكون رقماً أو فارغة",
+      }),
   });
 
   return schema.validate(obj);

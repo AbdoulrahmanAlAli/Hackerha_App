@@ -36,7 +36,7 @@ class CtrlSessionService {
       courseId: sessionData.courseId,
       number: sessionData.number,
     });
-    if (!sessionWithSameNumber) {
+    if (sessionWithSameNumber) {
       throw new BadRequestError("الرقم موجود بالفعل");
     }
 
@@ -44,7 +44,7 @@ class CtrlSessionService {
       courseId: sessionData.courseId,
       number: sessionData.number,
     });
-    if (!examWithSameNumber) {
+    if (examWithSameNumber) {
       throw new BadRequestError("الرقم موجود بالفعل");
     }
 

@@ -58,17 +58,9 @@ class QuestionBankService {
       image = file.path;
     }
 
-    let totalMarkShare;
-    if (group.mainTitle === null) {
-      totalMarkShare = group.totalMark;
-    } else {
-      totalMarkShare = questionData.mark;
-    }
-
     const questionBank = await QuestionBank.create({
       ...questionData,
       image,
-      mark: totalMarkShare,
     });
     await questionBank.populate("groupBankId", "mainTitle");
 
