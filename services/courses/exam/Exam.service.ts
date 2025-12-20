@@ -22,7 +22,7 @@ class ExamService {
     const course = await Course.findById(examData.courseId);
     if (!course) throw new NotFoundError("الكورس غير موجود");
 
-    const examWithSameNumber = await Exam.find({
+    const examWithSameNumber = await Exam.findOne({
       courseId: examData.courseId,
       number: examData.number,
     });
@@ -30,7 +30,7 @@ class ExamService {
       throw new BadRequestError("الرقم موجود بالفعل 1");
     }
 
-    const sessionWithSameNumber = await Session.find({
+    const sessionWithSameNumber = await Session.findOne({
       courseId: examData.courseId,
       number: examData.number,
     });
@@ -70,7 +70,7 @@ class ExamService {
       throw new NotFoundError("الاختبار غير موجود");
     }
 
-    const examWithSameNumber = await Exam.find({
+    const examWithSameNumber = await Exam.findOne({
       courseId: updateData.courseId,
       number: updateData.number,
     });
@@ -78,7 +78,7 @@ class ExamService {
       throw new BadRequestError("الرقم موجود بالفعل");
     }
 
-    const sessionWithSameNumber = await Session.find({
+    const sessionWithSameNumber = await Session.findOne({
       courseId: updateData.courseId,
       number: updateData.number,
     });
