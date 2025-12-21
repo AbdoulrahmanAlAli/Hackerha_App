@@ -19,7 +19,7 @@ export function generateBunnySignedIframeUrl(iframeUrl: string): string {
   const videoId = segments[2];
 
   // صلاحية الرابط: 3 ثواني فقط
-  const expires = Math.floor(Date.now() / 1000) + 5;
+  const expires = Math.floor(Date.now() / 1000) + 8;
 
   // حسب توثيق Bunny Stream:
   // SHA256_HEX(token_security_key + video_id + expiration)
