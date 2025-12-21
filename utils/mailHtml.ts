@@ -429,7 +429,7 @@ export const html = (otp: string) => `<!DOCTYPE html>
       <p class="security-note">
         إن لم تكن أنت من طلب تسجيل الدخول، ننصحك بتسجيل الدخول فوراً والتحقق من أمان حسابك،
         أو
-        <a href="https://example.com/support" style="color: #073b74; text-decoration: none;">
+        <a href="https://t.me/hackerha_support_team_bot" style="color: #073b74; text-decoration: none;">
           التواصل مع الدعم
         </a>.
       </p>
@@ -816,7 +816,7 @@ export const paymentHtml = (
 
       <p class="instructions">
         بعد الدفع سيتم تفعيل اشتراكك في الكورس تلقائياً.<br>
-        في حال وجود أي مشكلة يمكنك <a href="https://example.com/support">التواصل مع الدعم</a>.
+        في حال وجود أي مشكلة يمكنك <a href="https://t.me/hackerha_support_team_bot">التواصل مع الدعم</a>.
       </p>
 
     </div>
@@ -1333,7 +1333,7 @@ export const resetPasswordHtml = (otp: string) => `<!DOCTYPE html>
       جميع الحقوق محفوظة © 2025<br>
       هذه رسالة آلية، الرجاء عدم الرد على هذا البريد.<br>
       <small style="color: #aaa; font-size: 11px;">
-        للحصول على المساعدة، <a href="https://example.com/support">اتصل بالدعم</a>
+        للحصول على المساعدة، <a href="https://t.me/hackerha_support_team_bot">اتصل بالدعم</a>
       </small>
     </div>
   </div>
