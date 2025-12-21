@@ -37,8 +37,8 @@ const TeacherSchema = new Schema<ITeacher>(
     gender: {
       type: String,
       enum: {
-        values: ["ذكر", "أنثى"],
-        message: "يحب أن يكون ذكر أو أنثى",
+        values: ["ذكر", "انثى"],
+        message: "يحب أن يكون ذكر أو انثى",
       },
       required: [true, "نوع الجنس مطلوب"],
     },
@@ -158,8 +158,8 @@ const validateCreateTeacher = (obj: ITeacher): joi.ValidationResult => {
         "string.empty": "رقم الهاتف مطلوب",
         "any.required": "رقم الهاتف مطلوب",
       }),
-    gender: joi.string().valid("ذكر", "أنثى").required().messages({
-      "any.only": "يحب أن يكون ذكر أو أنثى",
+    gender: joi.string().valid("ذكر", "انثى").required().messages({
+      "any.only": "يحب أن يكون ذكر أو انثى",
       "any.required": "نوع الجنس مطلوب",
     }),
     birth: joi.date().required().messages({
