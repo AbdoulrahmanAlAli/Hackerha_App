@@ -102,26 +102,36 @@ class CtrlSessionService {
 
     const sessionHave = await Session.findById(id);
     if (!sessionHave) {
-      throw new NotFoundError("الحلسة غير موجوة");
+      throw new NotFoundError("الجلسة غير موجودة");
     }
 
-    if (sessionData.number) {
-      const examWithSameNumber = await Exam.findOne({
-        courseId: sessionData.courseId,
+    // إذا تم إرسال رقم جديد
+    if (
+      sessionData.number !== undefined &&
+      sessionData.number !== sessionHave.number
+    ) {
+      // التحقق من أن الرقم غير مستخدم في جلسة أخرى لنفس الكورس
+      const existingSessionWithSameNumber = await Session.findOne({
+        courseId: sessionData.courseId || sessionHave.courseId,
         number: sessionData.number,
+        _id: { $ne: id }, // استبعاد الجلسة الحالية
       });
-      if (!examWithSameNumber) {
-        throw new BadRequestError("الرقم موجود بالفعل");
+
+      if (existingSessionWithSameNumber) {
+        throw new BadRequestError("الرقم مستخدم بالفعل في جلسة أخرى");
       }
 
-      const sessionWithSameNumber = await Session.findOne({
-        courseId: sessionData.courseId,
+      // التحقق من أن الرقم غير مستخدم في امتحان لنفس الكورس
+      const existingExamWithSameNumber = await Exam.findOne({
+        courseId: sessionData.courseId || sessionHave.courseId,
         number: sessionData.number,
       });
-      if (!sessionWithSameNumber) {
-        throw new BadRequestError("الرقم موجود بالفعل");
+
+      if (existingExamWithSameNumber) {
+        throw new BadRequestError("الرقم مستخدم بالفعل في امتحان");
       }
     }
+
     const updatedSession = await Session.findByIdAndUpdate(id, sessionData, {
       new: true,
       runValidators: true,
