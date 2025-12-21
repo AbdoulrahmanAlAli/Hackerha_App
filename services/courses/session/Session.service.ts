@@ -105,22 +105,23 @@ class CtrlSessionService {
       throw new NotFoundError("الحلسة غير موجوة");
     }
 
-    const examWithSameNumber = await Exam.findOne({
-      courseId: sessionData.courseId,
-      number: sessionData.number,
-    });
-    if (!examWithSameNumber) {
-      throw new BadRequestError("الرقم موجود بالفعل");
-    }
+    if (sessionData.number) {
+      const examWithSameNumber = await Exam.findOne({
+        courseId: sessionData.courseId,
+        number: sessionData.number,
+      });
+      if (!examWithSameNumber) {
+        throw new BadRequestError("الرقم موجود بالفعل");
+      }
 
-    const sessionWithSameNumber = await Session.findOne({
-      courseId: sessionData.courseId,
-      number: sessionData.number,
-    });
-    if (!sessionWithSameNumber) {
-      throw new BadRequestError("الرقم موجود بالفعل");
+      const sessionWithSameNumber = await Session.findOne({
+        courseId: sessionData.courseId,
+        number: sessionData.number,
+      });
+      if (!sessionWithSameNumber) {
+        throw new BadRequestError("الرقم موجود بالفعل");
+      }
     }
-
     const updatedSession = await Session.findByIdAndUpdate(id, sessionData, {
       new: true,
       runValidators: true,

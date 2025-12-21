@@ -70,22 +70,23 @@ class ExamService {
       throw new NotFoundError("الاختبار غير موجود");
     }
 
-    const examWithSameNumber = await Exam.findOne({
-      courseId: updateData.courseId,
-      number: updateData.number,
-    });
-    if (!examWithSameNumber) {
-      throw new BadRequestError("الرقم موجود بالفعل");
-    }
+    if (updateData.number) {
+      const examWithSameNumber = await Exam.findOne({
+        courseId: updateData.courseId,
+        number: updateData.number,
+      });
+      if (!examWithSameNumber) {
+        throw new BadRequestError("الرقم موجود بالفعل");
+      }
 
-    const sessionWithSameNumber = await Session.findOne({
-      courseId: updateData.courseId,
-      number: updateData.number,
-    });
-    if (!sessionWithSameNumber) {
-      throw new BadRequestError("الرقم موجود بالفعل");
+      const sessionWithSameNumber = await Session.findOne({
+        courseId: updateData.courseId,
+        number: updateData.number,
+      });
+      if (!sessionWithSameNumber) {
+        throw new BadRequestError("الرقم موجود بالفعل");
+      }
     }
-
     const exam = await Exam.findByIdAndUpdate(examId, updateData, {
       new: true,
       runValidators: true,
