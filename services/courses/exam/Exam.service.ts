@@ -70,23 +70,34 @@ class ExamService {
       throw new NotFoundError("الاختبار غير موجود");
     }
 
-    if (updateData.number) {
-      const examWithSameNumber = await Exam.findOne({
-        courseId: updateData.courseId,
+    if (
+      updateData.number !== undefined &&
+      updateData.number !== examHave.number
+    ) {
+      const courseId = updateData.courseId || examHave.courseId;
+
+      // التحقق من أن الرقم غير مستخدم في امتحان آخر لنفس الكورس
+      const existingExamWithSameNumber = await Exam.findOne({
+        courseId: courseId,
         number: updateData.number,
+        _id: { $ne: examId }, // استبعاد الامتحان الحالي
       });
-      if (!examWithSameNumber) {
-        throw new BadRequestError("الرقم موجود بالفعل");
+
+      if (existingExamWithSameNumber) {
+        throw new BadRequestError("الرقم مستخدم بالفعل في امتحان آخر");
       }
 
-      const sessionWithSameNumber = await Session.findOne({
-        courseId: updateData.courseId,
+      // التحقق من أن الرقم غير مستخدم في جلسة لنفس الكورس
+      const existingSessionWithSameNumber = await Session.findOne({
+        courseId: courseId,
         number: updateData.number,
       });
-      if (!sessionWithSameNumber) {
-        throw new BadRequestError("الرقم موجود بالفعل");
+
+      if (existingSessionWithSameNumber) {
+        throw new BadRequestError("الرقم مستخدم بالفعل في جلسة");
       }
     }
+
     const exam = await Exam.findByIdAndUpdate(examId, updateData, {
       new: true,
       runValidators: true,
