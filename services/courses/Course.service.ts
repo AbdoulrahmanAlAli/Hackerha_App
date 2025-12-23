@@ -153,7 +153,7 @@ class CtrlCourseService {
 
     const courseWithStats = {
       ...courseWithoutArrays,
-      studentsCount: course.students?.length + course.fakeCount,
+      studentsCount: course.students?.length + (course.fakeCount || 0),
       sessionsCount: sessions.length,
       examsCount: exams.length,
       commentsCount: course.comments?.length || 0,
@@ -172,7 +172,7 @@ class CtrlCourseService {
 
     const courseNotEnrolled = {
       ...courseWithoutArrays,
-      studentsCount: course.students?.length + course.fakeCount,
+      studentsCount: course.students?.length + (course.fakeCount || 0),
       sessionsCount: sessions.length,
       examsCount: exams.length,
       commentsCount: course.comments?.length || 0,
@@ -247,7 +247,7 @@ class CtrlCourseService {
     // إضافة الحقول الجديدة
     const coursesWithStats = courses.map((course) => ({
       ...course,
-      studentsCount: course.students?.length + course.fakeCount,
+      studentsCount: course.students?.length + (course.fakeCount || 0),
       discountedPrice:
         course.discount?.dis && course.discount?.rate
           ? course.price * (1 - course.discount.rate / 100)
