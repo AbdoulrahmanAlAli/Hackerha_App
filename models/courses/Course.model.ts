@@ -97,6 +97,10 @@ const CourseSchema = new Schema<ICourse>(
       trim: true,
       maxlength: [1000, "المعلومات يجب ألا تتجاوز 1000 حرف"],
     },
+    fakeCount: {
+      type: Number,
+      default: 0,
+    },
     video: {
       type: String,
       trim: true,
@@ -294,6 +298,7 @@ const validateUpdateCourse = (obj: Partial<ICourse>): joi.ValidationResult => {
       "string.max": "الملاحظات يجب ألا تتجاوز 200 حرف",
     }),
     whatsapp: joi.string(),
+    fakeCount: joi.number(),
     teacher: joi.string().messages({
       "string.empty": "المعلم مطلوب",
       "any.required": "المعلم مطلوب",

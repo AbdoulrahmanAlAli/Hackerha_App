@@ -28,6 +28,9 @@ export interface ICourse extends Document {
   students: Types.ObjectId[];
   whatsapp: string;
 
+  // fake count
+  fakeCount: number;
+
   // Virtual fields (populated)
   sessions?: Types.ObjectId[];
   exams?: Types.ObjectId[];
