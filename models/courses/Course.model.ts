@@ -65,6 +65,7 @@ const CourseSchema = new Schema<ICourse>(
     whatsapp: {
       type: String,
       trim: true,
+      defaul: null,
     },
     type: {
       type: String,
@@ -234,7 +235,7 @@ const validateCreateCourse = (obj: ICourse): joi.ValidationResult => {
     note: joi.string().max(200).messages({
       "string.max": "الملاحظات يجب ألا تتجاوز 200 حرف",
     }),
-    whatsapp: joi.string(),
+    whatsapp: joi.string().default(null),
     type: joi.string().valid("نظري", "عملي", "شاملة").required().messages({
       "any.only": "يجب ان يكون نظري او عملي أو شاملة",
       "any.required": "نوع الكورس مطلوب",
