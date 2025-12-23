@@ -36,11 +36,12 @@ class CtrlCourseController {
       req.query;
 
     // Validate type if provided
-    if (type && !["نظري", "عملي"].includes(type as string)) {
+    if (type && !["نظري", "عملي", "شاملة"].includes(type as string)) {
       throw new BadRequestError("يجب ان يكون نظري او عملي أو شامل");
     }
 
-    // Validate year if provided
+    // Validate year if provided (يبقى كرقم للتحقق)
+    let yearString: string | undefined;
     if (year) {
       const yearNum = parseInt(year as string);
       if (isNaN(yearNum)) {
@@ -49,9 +50,11 @@ class CtrlCourseController {
       if (yearNum < 1 || yearNum > 5) {
         throw new BadRequestError("السنة الدراسية يجب أن تكون بين 1 و 5");
       }
+      yearString = year.toString(); // تحويل إلى string
     }
 
-    // Validate semester if provided
+    // Validate semester if provided (يبقى كرقم للتحقق)
+    let semesterString: string | undefined;
     if (semester) {
       const semesterNum = parseInt(semester as string);
       if (isNaN(semesterNum)) {
@@ -60,6 +63,7 @@ class CtrlCourseController {
       if (semesterNum < 1 || semesterNum > 2) {
         throw new BadRequestError("الفصل الدراسي يجب أن يكون 1 أو 2");
       }
+      semesterString = semester.toString(); // تحويل إلى string
     }
 
     if (createdLessThanDays) {
@@ -75,13 +79,13 @@ class CtrlCourseController {
       }
     }
 
-    // Prepare filters object
+    // Prepare filters object - إرسال strings بدلاً من numbers
     const filters = {
       name: name as string,
-      type: type as "نظري" | "عملي",
+      type: type as "نظري" | "عملي" | "شاملة",
       hasDiscount: hasDiscount ? hasDiscount === "true" : undefined,
-      year: year ? parseInt(year as string) : undefined,
-      semester: semester ? parseInt(semester as string) : undefined,
+      year: yearString, // ← إرسال كـ string
+      semester: semesterString, // ← إرسال كـ string
       createdLessThanDays: createdLessThanDays
         ? parseInt(createdLessThanDays as string)
         : undefined,

@@ -212,13 +212,12 @@ class CtrlCourseService {
     return courseWithStats;
   }
 
-  // ~ GET /api/hackit/ctrl/course - Get all courses
   static async getAllCourses(queryParams: {
     name?: string;
-    type?: "نظري" | "عملي";
+    type?: "نظري" | "عملي" | "شاملة";
     hasDiscount?: boolean;
-    year?: number;
-    semester?: number;
+    year?: string;
+    semester?: string;
     createdLessThanDays?: number;
   }) {
     const { name, type, hasDiscount, year, semester, createdLessThanDays } =
@@ -243,17 +242,21 @@ class CtrlCourseService {
       .select("-__v")
       .populate("teacher")
       .populate("students", "userName profilePhoto")
-      .lean();
+      .lean(); // استخدام lean للحصول على objects عادية
 
-    // إضافة studentsCount لكل كورس
-    const coursesWithStats = courses.map((course: any) => ({
+    // إضافة الحقول الجديدة
+    const coursesWithStats = courses.map((course) => ({
       ...course,
       studentsCount: course.students?.length || 0,
+      discountedPrice:
+        course.discount?.dis && course.discount?.rate
+          ? course.price * (1 - course.discount.rate / 100)
+          : course.price,
+      isDiscounted: course.discount?.dis || false,
     }));
 
     return coursesWithStats;
   }
-
   // ~ PUT /api/hackit/ctrl/course/:id - Update course
   static async updateCourse(id: string, courseData: Partial<ICourse>) {
     const { error } = validateUpdateCourse(courseData);
