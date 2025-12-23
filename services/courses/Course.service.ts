@@ -172,6 +172,7 @@ class CtrlCourseService {
 
     const courseNotEnrolled = {
       ...courseWithoutArrays,
+      
       studentsCount: course.students?.length + (course.fakeCount || 0),
       sessionsCount: sessions.length,
       examsCount: exams.length,
@@ -239,7 +240,7 @@ class CtrlCourseService {
 
     const courses = await Course.find(filter)
       .sort({ createdAt: -1 })
-      .select("-__v")
+      .select("-__v -whatsapp")
       .populate("teacher")
       .populate("students", "userName profilePhoto")
       .lean(); // استخدام lean للحصول على objects عادية
