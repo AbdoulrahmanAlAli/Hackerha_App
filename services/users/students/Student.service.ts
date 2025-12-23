@@ -338,10 +338,6 @@ class CtrlStudentService {
       throw new BadRequestError("الحساب غير مفعل");
     }
 
-    if (existingInactiveById.suspended) {
-      throw new BadRequestError("حسابك مقيد");
-    }
-
     const updatedStudent = await Student.findByIdAndUpdate(
       id,
       {
