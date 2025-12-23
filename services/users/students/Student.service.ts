@@ -41,7 +41,7 @@ class CtrlStudentService {
 
     const students = await Student.find(query)
       .select(
-        "userName phoneNumber email universityNumber academicYear gender birth profilePhoto available suspended enrolledCourses createdAt"
+        "firstName lastName device_id phoneNumber email universityNumber academicYear gender birth profilePhoto available suspended enrolledCourses createdAt"
       )
       .sort({ createdAt: -1 })
       .lean();

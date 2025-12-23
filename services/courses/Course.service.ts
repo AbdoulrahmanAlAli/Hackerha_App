@@ -241,9 +241,17 @@ class CtrlCourseService {
     const courses = await Course.find(filter)
       .sort({ createdAt: -1 })
       .select("-__v")
-      .populate("teacher");
+      .populate("teacher")
+      .populate("students", "userName profilePhoto")
+      .lean();
 
-    return courses;
+    // إضافة studentsCount لكل كورس
+    const coursesWithStats = courses.map((course: any) => ({
+      ...course,
+      studentsCount: course.students?.length || 0,
+    }));
+
+    return coursesWithStats;
   }
 
   // ~ PUT /api/hackit/ctrl/course/:id - Update course
