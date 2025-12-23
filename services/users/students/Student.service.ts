@@ -353,7 +353,7 @@ class CtrlStudentService {
       throw new Error("فشل في تقييد الحساب");
     }
 
-    return { message: "تم تقييد الحساب بنجاح" };
+    return { message: "تم تحديث تقييد الحساب بنجاح" };
   }
 
   // ~ Put => /api/hackit/ctrl/student/UpdateProfileImpStudentAdmin/:id ~ Change important details of student
