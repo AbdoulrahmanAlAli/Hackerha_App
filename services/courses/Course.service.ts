@@ -156,7 +156,7 @@ class CtrlCourseService {
       studentsCount:
         course.name === "برمجة 1"
           ? (course.students?.length || 0) + 20
-          : (course.students?.length || 0),
+          : course.students?.length || 0,
       sessionsCount: sessions.length,
       examsCount: exams.length,
       commentsCount: course.comments?.length || 0,
@@ -175,7 +175,10 @@ class CtrlCourseService {
 
     const courseNotEnrolled = {
       ...courseWithoutArrays,
-      studentsCount: course.students?.length || 0,
+      studentsCount:
+        course.name === "برمجة 1"
+          ? (course.students?.length || 0) + 20
+          : course.students?.length || 0,
       sessionsCount: sessions.length,
       examsCount: exams.length,
       commentsCount: course.comments?.length || 0,
@@ -250,7 +253,10 @@ class CtrlCourseService {
     // إضافة الحقول الجديدة
     const coursesWithStats = courses.map((course) => ({
       ...course,
-      studentsCount: course.students?.length || 0,
+      studentsCount:
+        course.name === "برمجة 1"
+          ? (course.students?.length || 0) + 20
+          : course.students?.length || 0,
       discountedPrice:
         course.discount?.dis && course.discount?.rate
           ? course.price * (1 - course.discount.rate / 100)
