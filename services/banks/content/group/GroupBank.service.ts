@@ -45,8 +45,7 @@ class GroupBankService {
     const groupBank = await GroupBank.findById(id)
       .populate("contentId", "title")
       .populate({
-        path: "questions",
-        options: { sort: { createdAt: 1 } }, // Optional: sort questions
+        path: "questions" // Optional: sort questions
       });
     if (!groupBank) throw new NotFoundError("المجموعة غير موجودة");
 
@@ -62,8 +61,7 @@ class GroupBankService {
     const allGroupsBank = await GroupBank.find({ contentId })
       .populate("contentId", "title")
       .populate({
-        path: "questions",
-        options: { sort: { createdAt: 1 } }, // Optional: sort questions
+        path: "questions" // Optional: sort questions
       });
 
     if (allGroupsBank.length === 0) {

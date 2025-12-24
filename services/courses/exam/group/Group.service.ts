@@ -45,8 +45,7 @@ class GroupService {
     const group = await Group.findById(id)
       .populate("examId", "title")
       .populate({
-        path: "questions",
-        options: { sort: { createdAt: 1 } }, // Optional: sort questions
+        path: "questions" // Optional: sort questions
       });
 
     if (!group) throw new NotFoundError("المجموعة غير موجودة");
@@ -64,8 +63,7 @@ class GroupService {
     const groups = await Group.find({ examId })
       .populate("examId", "title")
       .populate({
-        path: "questions",
-        options: { sort: { createdAt: 1 } }, // Optional: sort questions
+        path: "questions" // Optional: sort questions
       });
 
     if (groups.length === 0) {
