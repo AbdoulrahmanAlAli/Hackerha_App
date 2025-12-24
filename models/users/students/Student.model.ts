@@ -370,11 +370,11 @@ const validateUpdateImportantStudent = (
   obj: Partial<IStudent>
 ): joi.ValidationResult => {
   const schema = joi.object({
-    firstName: joi.string().max(100).required().messages({
+    firstName: joi.string().max(100).messages({
       "string.empty": "الاسم مطلوب",
       "string.max": "الاسم يجب ألا يتجاوز 100 حرف",
     }),
-    lastName: joi.string().max(100).required().messages({
+    lastName: joi.string().max(100).messages({
       "string.empty": "الاسم الاحير مطلوب",
       "string.max": "الاسم الاحير يجب ألا يتجاوز 100 حرف",
     }),

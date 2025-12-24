@@ -46,7 +46,7 @@ class GroupBankService {
       .populate("contentId", "title")
       .populate({
         path: "questions",
-        options: { sort: { createdAt: -1 } }, // Optional: sort questions
+        options: { sort: { createdAt: 1 } }, // Optional: sort questions
       });
     if (!groupBank) throw new NotFoundError("المجموعة غير موجودة");
 
@@ -63,7 +63,7 @@ class GroupBankService {
       .populate("contentId", "title")
       .populate({
         path: "questions",
-        options: { sort: { createdAt: -1 } }, // Optional: sort questions
+        options: { sort: { createdAt: 1 } }, // Optional: sort questions
       });
 
     if (allGroupsBank.length === 0) {

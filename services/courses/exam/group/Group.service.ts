@@ -46,7 +46,7 @@ class GroupService {
       .populate("examId", "title")
       .populate({
         path: "questions",
-        options: { sort: { createdAt: -1 } }, // Optional: sort questions
+        options: { sort: { createdAt: 1 } }, // Optional: sort questions
       });
 
     if (!group) throw new NotFoundError("المجموعة غير موجودة");
@@ -65,7 +65,7 @@ class GroupService {
       .populate("examId", "title")
       .populate({
         path: "questions",
-        options: { sort: { createdAt: -1 } }, // Optional: sort questions
+        options: { sort: { createdAt: 1 } }, // Optional: sort questions
       });
 
     if (groups.length === 0) {
