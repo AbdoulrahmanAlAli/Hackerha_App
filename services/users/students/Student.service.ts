@@ -622,8 +622,14 @@ class CtrlStudentService {
 
     // Check phone number existence if provided
     if (phoneNumber) {
+      // Remove leading zero if exists
+      let processedPhoneNumber = phoneNumber;
+      if (phoneNumber.startsWith("0")) {
+        processedPhoneNumber = phoneNumber.substring(1);
+      }
+
       const phoneNumberExists = await Student.findOne({
-        phoneNumber,
+        phoneNumber: processedPhoneNumber,
         available: true,
       })
         .select("_id")
