@@ -242,7 +242,7 @@ class PaymentService {
       .populate("courseId")
       .populate("studentId")
       .select(
-        "code universityNumber used expiresAt courseId studentId adminName studentNumber createdAt"
+        "code universityNumber used expiresAt courseId studentId adminName studentNumber createdAt price"
       )
       .sort({ createdAt: -1 });
 
