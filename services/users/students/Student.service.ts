@@ -37,6 +37,9 @@ class CtrlStudentService {
 
     if (universityNumber) {
       query.universityNumber = universityNumber;
+    }
+
+    if (phoneNumber) {
       query.phoneNumber = phoneNumber;
     }
 
