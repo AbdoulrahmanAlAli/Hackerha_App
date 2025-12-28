@@ -32,11 +32,12 @@ import { Exam } from "../../../models/courses/exam/Exam.model";
 
 class CtrlStudentService {
   // ~ Get => /api/hackit/ctrl/student ~ Get All Student
-  static async getAllStudents(universityNumber?: number) {
+  static async getAllStudents(universityNumber?: number, phoneNumber?: string) {
     const query: any = {};
 
     if (universityNumber) {
       query.universityNumber = universityNumber;
+      query.phoneNumber = phoneNumber;
     }
 
     const students = await Student.find(query)

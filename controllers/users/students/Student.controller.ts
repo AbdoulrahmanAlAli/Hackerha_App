@@ -10,16 +10,22 @@ import {
 class CtrlStudentController {
   // ~ Get => /api/hackit/ctrl/student ~ Get All Student
   getAllStudents = asyncHandler(async (req: Request, res: Response) => {
-    const { universityNumber } = req.query;
+    const { universityNumber, phoneNumber } = req.query;
 
     let universityNumberFilter: number | undefined;
+    let phoneNumberFilter: string | undefined;
 
     if (universityNumber) {
       universityNumberFilter = parseInt(universityNumber as string);
     }
 
+    if (phoneNumber) {
+      phoneNumberFilter = phoneNumber as string;
+    }
+
     const result = await CtrlStudentService.getAllStudents(
-      universityNumberFilter
+      universityNumberFilter,
+      phoneNumberFilter
     );
     res.status(200).json(result);
   });
