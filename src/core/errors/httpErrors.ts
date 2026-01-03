@@ -1,6 +1,10 @@
-import { AppError } from "./AppError";
+export class HttpError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
 
-export const badRequest = (m = "Bad request") => new AppError(m, 400);
-export const unauthorized = (m = "Unauthorized") => new AppError(m, 401);
-export const forbidden = (m = "Forbidden") => new AppError(m, 403);
-export const notFound = (m = "Not found") => new AppError(m, 404);
+export const badRequest = (msg = "Bad request") => new HttpError(400, msg);
+export const unauthorized = (msg = "Unauthorized") => new HttpError(401, msg);
+export const forbidden = (msg = "Forbidden") => new HttpError(403, msg);
+export const notFound = (msg = "Not found") => new HttpError(404, msg);

@@ -1,7 +1,7 @@
 import jwt, { type SignOptions, type Secret } from "jsonwebtoken";
 import { env } from "../../bootstrap/env";
 
-export type JwtPayload = { sub: string; role?: string };
+export type JwtPayload = { id: string; role?: string };
 
 const accessSecret: Secret = env.JWT_ACCESS_SECRET;
 

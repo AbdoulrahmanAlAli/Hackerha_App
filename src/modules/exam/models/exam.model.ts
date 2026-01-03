@@ -1,0 +1,69 @@
+import mongoose, { Schema, Model } from "mongoose";
+import { IExam } from "../types/exam.types";
+import { Group } from "../group/models/group.model";
+
+const DURATION_REGEX = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
+
+const ExamSchema = new Schema<IExam>(
+  {
+    number: { type: Number, required: true, min: 1 },
+
+    courseId: {
+      type: Schema.Types.ObjectId,
+      ref: "Course",
+      required: [true, "معرف الكورس مطلوب"],
+      index: true,
+    },
+
+    title: {
+      type: String,
+      required: [true, "عنوان الامتحان مطلوب"],
+      trim: true,
+      maxlength: [100, "العنوان يجب ألا يتجاوز 100 حرف"],
+    },
+
+    totalMark: {
+      type: Number,
+      required: [true, "العلامة الإجمالية مطلوبة"],
+      min: [0, "العلامة لا يمكن أن تكون سالباً"],
+    },
+
+    duration: {
+      type: String,
+      required: [true, "المدة مطلوبة"],
+      validate: {
+        validator: (v: string) => DURATION_REGEX.test(v),
+        message: "المدة يجب أن تكون بالتنسيق 00:00 أو 00:00:00",
+      },
+    },
+  },
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
+);
+
+// Virtual groups
+ExamSchema.virtual("groups", {
+  ref: "Group", // اسم الموديل الحقيقي (Group)
+  localField: "_id",
+  foreignField: "examId",
+});
+
+// حذف Groups عند حذف Exam
+ExamSchema.pre(
+  "findOneAndDelete",
+  { query: true, document: false },
+  async function () {
+    const exam = await this.model.findOne(this.getFilter()).select("_id");
+    if (!exam) return;
+
+    await Group.deleteMany({ examId: exam._id });
+  }
+);
+
+// Indexes
+ExamSchema.index({ createdAt: -1 });
+
+// مهم: يمنع تكرار رقم الامتحان داخل نفس الكورس
+ExamSchema.index({ courseId: 1, number: 1 }, { unique: true });
+
+export const Exam: Model<IExam> =
+  mongoose.models.Exam || mongoose.model<IExam>("Exam", ExamSchema);

@@ -1,0 +1,81 @@
+import bcrypt from "bcrypt";
+import { Teacher } from "../models/teacher.model";
+
+import {
+  badRequest,
+  notFound,
+  forbidden,
+} from "../../../../core/errors/httpErrors";
+import {
+  CreateTeacherInput,
+  createTeacherSchema,
+  LoginTeacherInput,
+  loginTeacherSchema,
+} from "../schemas/teacher.schema";
+import { zodFirstMessage } from "../../../../core/http/zodMessage";
+import { signAccessToken } from "../../../../shared/security/jwt";
+
+export class AuthTeacherService {
+  // إنشاء معلم (مقترح: للأدمن فقط)
+  static async createNewTeacher(data: CreateTeacherInput) {
+    let parsed: CreateTeacherInput;
+    try {
+      parsed = createTeacherSchema.parse(data);
+    } catch (e) {
+      throw badRequest(zodFirstMessage(e));
+    }
+
+    const [byPhone, byEmail] = await Promise.all([
+      Teacher.findOne({ phoneNumber: parsed.phoneNumber }).select("_id").lean(),
+      Teacher.findOne({ email: parsed.email }).select("_id").lean(),
+    ]);
+
+    if (byPhone) throw badRequest("رقم الهاتف مسجل مسبقاً");
+    if (byEmail) throw badRequest("البريد الإلكتروني مسجل مسبقاً");
+
+    const teacher = await Teacher.create({
+      firstName: parsed.firstName,
+      lastName: parsed.lastName,
+      phoneNumber: parsed.phoneNumber,
+      gender: parsed.gender,
+      birth: parsed.birth,
+      email: parsed.email,
+      password: parsed.password, // سيُشفّر داخل pre-save
+      about: parsed.about ?? "",
+      available: true, // لأن المعلم يُنشأ من النظام
+    });
+
+    return {
+      message: "تم إنشاء الحساب بنجاح",
+      teacherId: teacher.id,
+    };
+  }
+
+  static async loginTeacher(data: LoginTeacherInput) {
+    let parsed: LoginTeacherInput;
+    try {
+      parsed = loginTeacherSchema.parse(data);
+    } catch (e) {
+      throw badRequest(zodFirstMessage(e));
+    }
+
+    // لأن password عندنا select:false
+    const teacher = await Teacher.findOne({ email: parsed.email }).select(
+      "+password"
+    );
+    if (!teacher) throw notFound("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+
+    if (teacher.suspended) {
+      throw forbidden(
+        `حسابك مقيد. السبب: ${teacher.suspensionReason || "غير معروف"}`
+      );
+    }
+
+    const ok = await bcrypt.compare(parsed.password, teacher.password);
+    if (!ok) throw notFound("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+
+    const token = signAccessToken({ id: teacher.id, role: "teacher" });
+
+    return { message: "تم تسجيل الدخول بنجاح", token };
+  }
+}
