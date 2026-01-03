@@ -12,7 +12,7 @@ const SIGNED_IFRAME_TTL_SECONDS = Number(
   process.env.BUNNY_SIGNED_TTL_SECONDS ?? 8
 );
 const VIDEO_PROXY_BASE_URL =
-  process.env.VIDEO_PROXY_BASE_URL || "http://localhost:3000";
+  process.env.VIDEO_PROXY_BASE_URL || "https://hackerhaapp-production.up.railway.app";
 
 export class VideoTokenService {
   // إنشاء توكن (One-Time) — الأفضل أن يُستعمل داخلياً من SessionService
