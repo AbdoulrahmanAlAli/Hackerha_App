@@ -7,8 +7,7 @@ class FileController {
   // Admin: Create file (PDF) + attach to session (push order)
   createFile = asyncHandler(async (req: Request, res: Response) => {
     const result = await FileService.createFile(
-      req.body,
-      req.file as ICloudinaryFile
+      req.body
     );
     res.status(201).json(result);
   });
