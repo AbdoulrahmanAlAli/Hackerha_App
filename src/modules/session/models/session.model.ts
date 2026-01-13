@@ -1,6 +1,7 @@
 import mongoose, { Schema, Model } from "mongoose";
 import { ISession } from "../types/session.types";
 
+// Session Schema
 const SessionSchema = new Schema<ISession>(
   {
     number: {
@@ -62,6 +63,7 @@ const SessionSchema = new Schema<ISession>(
   }
 );
 
+// Virtual: files
 SessionSchema.virtual("files", {
   ref: "SessionFile",
   localField: "_id",
@@ -70,10 +72,8 @@ SessionSchema.virtual("files", {
 
 // Indexes
 SessionSchema.index({ createdAt: -1 });
-
-// مهم: نفس الكورس لا يسمح بتكرار نفس رقم الجلسة
 SessionSchema.index({ courseId: 1, number: 1 }, { unique: true });
 
-// Model export (تفادي مشكلة recompile في dev)
+// Session Model
 export const Session: Model<ISession> =
   mongoose.models.Session || mongoose.model<ISession>("Session", SessionSchema);

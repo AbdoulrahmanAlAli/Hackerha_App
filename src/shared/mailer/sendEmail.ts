@@ -1,33 +1,19 @@
-import { transporter } from "./transporter";
 import type { EmailOptions } from "./mailer.types";
 import { env } from "../../bootstrap/env";
 import { logger } from "../../bootstrap/logger";
+import { transporter } from "./transporter";
 
-export async function sendEmail({
+export const sendEmail = async ({
   to,
   subject,
   text,
   html,
-}: EmailOptions): Promise<void> {
-  console.log(
-    await transporter.sendMail({
-      from: `"Hackerha App" <${env.EMAIL_USER}>`,
-      envelope: {
-        from: env.EMAIL_USER,
-        to,
-      },
-      to,
-      subject,
-      text,
-      html,
-    })
-  );
-
+}: EmailOptions): Promise<void> => {
   try {
     await transporter.sendMail({
-      from: `"Hackerha App" <${env.EMAIL_USER}>`,
+      from: `"Hackerha App" <${process.env.EMAIL_USER}>`,
       envelope: {
-        from: env.EMAIL_USER,
+        from: process.env.EMAIL_USER,
         to,
       },
       to,
@@ -35,10 +21,9 @@ export async function sendEmail({
       text,
       html,
     });
-
-    logger.info(`Email sent -> ${to} | ${subject}`);
+    console.log("Email sent successfully");
   } catch (error) {
-    logger.error("Failed to send email", error);
+    console.error("فشل في إرسال البريد:", error);
     throw new Error("فشل في إرسال البريد الإلكتروني");
   }
-}
+};

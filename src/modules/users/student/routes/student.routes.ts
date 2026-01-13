@@ -101,4 +101,40 @@ router.put(
 
 // router.put("/updateimageprofile/:id", verifyToken, checkRole(["student"]), upload, ...);
 
+// Patch /api/hackit/ctrl/student/favorite/course/:courseId/toggle/:id
+router.patch(
+  "/favorite/course/:courseId/toggle/:id",
+  verifyToken,
+  checkRole(["student"]),
+  requireStudentOwner("id"),
+  studentController.toggleFavoriteCourse
+);
+
+// Patch /api/hackit/ctrl/student/favorite/session/:sessionId/toggle/:id
+router.patch(
+  "/favorite/session/:sessionId/toggle/:id",
+  verifyToken,
+  checkRole(["student"]),
+  requireStudentOwner("id"),
+  studentController.toggleFavoriteSession
+);
+
+// Patch /api/hackit/ctrl/student/course/:courseId/session/:sessionId/user/:id
+router.patch(
+  "/course/:courseId/session/:sessionId/user/:id",
+  verifyToken,
+  checkRole(["student"]),
+  requireStudentOwner("id"),
+  studentController.addCourseAndSessionForStudent
+);
+
+// Patch /api/hackit/ctrl/student/course/:courseId/exam/:examId/user/:id
+router.patch(
+  "/course/:courseId/exam/:examId/user/:id",
+  verifyToken,
+  checkRole(["student"]),
+  requireStudentOwner("id"),
+  studentController.addCourseAndExamForStudent
+);
+
 export default router;

@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { env } from "../../../../bootstrap/env";
 import type { IAdmin, AdminDocument } from "../types/admin.types";
 
+// Admin Schema
 const AdminSchema = new Schema<IAdmin>(
   {
     firstName: {
@@ -49,6 +50,7 @@ const AdminSchema = new Schema<IAdmin>(
   { timestamps: true }
 );
 
+// Hash password
 AdminSchema.pre("save", async function () {
   const admin = this as AdminDocument;
 
@@ -58,6 +60,7 @@ AdminSchema.pre("save", async function () {
   admin.password = await bcrypt.hash(admin.password, saltRounds);
 });
 
+// Remove Password In Json
 AdminSchema.set("toJSON", {
   transform: (_doc, ret) => {
     (ret as { password?: string }).password = undefined;
@@ -65,8 +68,10 @@ AdminSchema.set("toJSON", {
   },
 });
 
+// Indexes
 AdminSchema.index({ createdAt: -1 });
 
+// Admin Model
 export const Admin: Model<IAdmin> = mongoose.model<IAdmin>(
   "Admin",
   AdminSchema

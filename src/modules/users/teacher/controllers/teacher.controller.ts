@@ -50,8 +50,6 @@ class TeacherController {
     }
   );
 
-  // ===== Forgot password flow =====
-
   // POST /api/hackit/ctrl/teacher/sendemailpassword (Public)
   sendResetPasswordOtp = asyncHandler(async (req: Request, res: Response) => {
     const result = await CtrlTeacherService.sendResetPasswordOtp(req.body);

@@ -12,16 +12,17 @@ import {
   updateStudentSchema,
   updateSuspendedStudentSchema,
 } from "../schemas/student.schemas";
-
 import { badRequest, notFound } from "../../../../core/errors/httpErrors";
 import { zodFirstMessage } from "../../../../core/http/zodMessage";
-
-// utils قديمة (انقلها أو عدّل paths)
 import { OTPUtils } from "../../../../shared/otp/otpUtils";
 import { sendEmail } from "../../../../shared/mailer/sendEmail";
 import { resetPasswordHtml } from "../../../../shared/mailer/templates";
 import { IStudent } from "../types/student.types";
 import { parse } from "node:path";
+import { Course } from "../../../course/models/course.model";
+import { Exam } from "../../../exam/models/exam.model";
+import { Session } from "../../../session/models/session.model";
+import mongoose, { Types } from "mongoose";
 
 export class StudentService {
   // ~ Get => /api/hackit/ctrl/student ~ Get All Student
@@ -324,6 +325,162 @@ export class StudentService {
     }
 
     return result;
+  }
+
+  // ~ Patch => /api/hackit/ctrl/student/favorite/course/:courseId/toggle/:id
+  static async toggleFavoriteCourse(studentId: string, courseId: string) {
+    if (
+      !mongoose.isValidObjectId(studentId) ||
+      !mongoose.isValidObjectId(courseId)
+    ) {
+      throw badRequest("معرف غير صالح");
+    }
+
+    const [student, course] = await Promise.all([
+      Student.findById(studentId).select("_id"), // existence check
+      Course.findById(courseId).select("_id"),
+    ]);
+
+    if (!student) throw notFound("الطالب غير موجود");
+    if (!course) throw notFound("الكورس غير موجود");
+
+    // حاول إزالة أولاً
+    const pullRes = await Student.updateOne(
+      { _id: studentId },
+      { $pull: { favoriteCourses: new Types.ObjectId(courseId) } }
+    );
+
+    if ((pullRes.modifiedCount ?? 0) > 0) {
+      return {
+        message: "تمت إزالة الكورس من المفضلة",
+        action: "removed" as const,
+      };
+    }
+
+    // لم يُزل => أضف
+    await Student.updateOne(
+      { _id: studentId },
+      { $addToSet: { favoriteCourses: new Types.ObjectId(courseId) } }
+    );
+
+    return {
+      message: "تمت إضافة الكورس إلى المفضلة",
+      action: "added" as const,
+    };
+  }
+
+  // ~ Patch => /api/hackit/ctrl/student/favorite/session/:sessionId/toggle/:id
+  static async toggleFavoriteSession(studentId: string, sessionId: string) {
+    if (
+      !mongoose.isValidObjectId(studentId) ||
+      !mongoose.isValidObjectId(sessionId)
+    ) {
+      throw badRequest("معرف غير صالح");
+    }
+
+    const [student, session] = await Promise.all([
+      Student.findById(studentId).select("_id"),
+      Session.findById(sessionId).select("_id"),
+    ]);
+
+    if (!student) throw notFound("الطالب غير موجود");
+    if (!session) throw notFound("الجلسة غير موجودة");
+
+    const pullRes = await Student.updateOne(
+      { _id: studentId },
+      { $pull: { favoriteSessions: new Types.ObjectId(sessionId) } }
+    );
+
+    if ((pullRes.modifiedCount ?? 0) > 0) {
+      return {
+        message: "تمت إزالة الجلسة من المفضلة",
+        action: "removed" as const,
+      };
+    }
+
+    await Student.updateOne(
+      { _id: studentId },
+      { $addToSet: { favoriteSessions: new Types.ObjectId(sessionId) } }
+    );
+
+    return {
+      message: "تمت إضافة الجلسة إلى المفضلة",
+      action: "added" as const,
+    };
+  }
+
+  // ~ Patch => /api/hackit/ctrl/student/course/:courseId/session/:sessionId/user/:id
+  static async addCourseAndSessionForStudent(
+    studentId: string,
+    courseId: string,
+    sessionId: string
+  ) {
+    if (![studentId, courseId, sessionId].every(mongoose.isValidObjectId)) {
+      throw badRequest("معرف غير صالح");
+    }
+
+    const [student, course, session] = await Promise.all([
+      Student.findById(studentId).select("_id"),
+      Course.findById(courseId).select("_id"),
+      Session.findById(sessionId).select("courseId"),
+    ]);
+
+    if (!student) throw notFound("الطالب غير موجود");
+    if (!course) throw notFound("الكورس غير موجود");
+    if (!session) throw notFound("الجلسة غير موجودة");
+
+    if (session.courseId.toString() !== courseId) {
+      throw badRequest("الجلسة لا تنتمي للكورس المحدد");
+    }
+
+    await Student.updateOne(
+      { _id: studentId },
+      {
+        $addToSet: {
+          courses: new Types.ObjectId(courseId), // ✅ هنا التعديل
+          sessions: new Types.ObjectId(sessionId),
+        },
+      }
+    );
+
+    return { message: "تم تحديث البيانات بنجاح" };
+  }
+
+  // ~ Patch => /api/hackit/ctrl/student/course/:courseId/exam/:examId/user/:id
+  static async addCourseAndExamForStudent(
+    studentId: string,
+    courseId: string,
+    examId: string
+  ) {
+    if (![studentId, courseId, examId].every(mongoose.isValidObjectId)) {
+      throw badRequest("معرف غير صالح");
+    }
+
+    const [student, course, exam] = await Promise.all([
+      Student.findById(studentId).select("_id"),
+      Course.findById(courseId).select("_id"),
+      Exam.findById(examId).select("courseId"),
+    ]);
+
+    if (!student) throw notFound("الطالب غير موجود");
+    if (!course) throw notFound("الكورس غير موجود");
+    if (!exam) throw notFound("الامتحان غير موجود");
+
+    if (exam.courseId.toString() !== courseId) {
+      throw badRequest("الامتحان لا تنتمي للكورس المحدد");
+    }
+
+    await Student.updateOne(
+      { _id: studentId },
+      {
+        $addToSet: {
+          courses: new Types.ObjectId(courseId), // ✅ هنا التعديل
+          exams: new Types.ObjectId(examId),
+        },
+      }
+    );
+
+    return { message: "تم تحديث البيانات بنجاح" };
   }
 
   // ~ Delete => /api/hackit/ctrl/student/account/:id ~ Delete Student Account

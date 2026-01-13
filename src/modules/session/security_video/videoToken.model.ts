@@ -1,5 +1,6 @@
 import mongoose, { Schema, InferSchemaType, Model } from "mongoose";
 
+// Video Token Schema
 const VideoTokenSchema = new Schema(
   {
     token: { type: String, required: true, unique: true, index: true }, // hex(64)
@@ -29,9 +30,10 @@ const VideoTokenSchema = new Schema(
   { timestamps: true }
 );
 
-// مفيد للتأكد (اختياري): لا تسمح بتوكنين فعالين لنفس session+user خلال لحظة
+// Indexes
 VideoTokenSchema.index({ sessionId: 1, userId: 1, used: 1 });
 
+// Video Token Model
 export type VideoTokenDocument = InferSchemaType<typeof VideoTokenSchema>;
 export const VideoToken: Model<VideoTokenDocument> =
   mongoose.models.VideoToken || mongoose.model("VideoToken", VideoTokenSchema);

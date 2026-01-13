@@ -16,7 +16,7 @@ import { zodFirstMessage } from "../../../../core/http/zodMessage";
 import { signAccessToken } from "../../../../shared/security/jwt";
 
 export class AuthTeacherService {
-  // إنشاء معلم (مقترح: للأدمن فقط)
+  // ~ Post => /api/hackit/ctrl/teacher/register ~ Create New Teacher
   static async createNewTeacher(data: CreateTeacherInput) {
     let parsed: CreateTeacherInput;
     try {
@@ -51,6 +51,7 @@ export class AuthTeacherService {
     };
   }
 
+  // ~ Post => /api/hackit/ctrl/teacher/login ~ Login Teacher
   static async loginTeacher(data: LoginTeacherInput) {
     let parsed: LoginTeacherInput;
     try {

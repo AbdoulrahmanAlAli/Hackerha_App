@@ -37,9 +37,12 @@ import routeExam from "./modules/exam/routes/exam.routes";
 import routeGroup from "./modules/exam/group/routes/group.routes";
 
 // Question Api
-import routeQuestion from './modules/exam/question/routes/question.routes'
+import routeQuestion from "./modules/exam/question/routes/question.routes";
 
-// ============= Coures App =============
+// ============= Notification =============
+
+// Notification Api
+import routeNotification from "./modules/notification/routes/notification.routes";
 
 export function createApp() {
   const app = express();
@@ -86,7 +89,9 @@ export function createApp() {
   // Question routes
   app.use("/api/hackit/ctrl/questionExam", routeQuestion);
 
-  // ============= Coures App =============
+  // ============= Notification =============
+
+  app.use("/api/hackit/ctrl/notification", routeNotification);
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);

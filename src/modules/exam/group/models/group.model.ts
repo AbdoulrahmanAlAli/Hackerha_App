@@ -1,8 +1,7 @@
 import mongoose, { Schema, Model } from "mongoose";
 import { IGroup } from "../types/group.types";
-import { Question } from "../../question/models/question.model";
-// import { Question } from "./question.model"; // عدّل المسار حسب مشروعك
 
+// Group Schema
 const GroupSchema = new Schema<IGroup>(
   {
     examId: {
@@ -38,13 +37,6 @@ GroupSchema.virtual("questions", {
   foreignField: "groupId",
 });
 
-// Cascade delete questions when group deleted
-GroupSchema.pre("findOneAndDelete", async function () {
-  const group = await this.model.findOne(this.getFilter());
-  if (!group) return;
-
-  await Question.deleteMany({ groupId: group._id });
-});
-
+// Group Model
 export const Group: Model<IGroup> =
   mongoose.models.Group || mongoose.model<IGroup>("Group", GroupSchema);

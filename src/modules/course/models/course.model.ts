@@ -2,6 +2,7 @@ import mongoose, { Schema, Model, Types } from "mongoose";
 import { CourseDocument } from "../types/course.types";
 import { Session } from "../../session/models/session.model";
 
+// Course Schema
 const CourseSchema = new Schema<CourseDocument>(
   {
     image: { type: String, required: [true, "صورة الكورس مطلوبة"], trim: true },
@@ -72,17 +73,22 @@ const CourseSchema = new Schema<CourseDocument>(
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
+// virtual: sessions and exams
+//// sessions
 CourseSchema.virtual("sessions", {
   ref: "Session",
   localField: "_id",
   foreignField: "courseId",
 });
+
+//// exams
 CourseSchema.virtual("exams", {
   ref: "Exam",
   localField: "_id",
   foreignField: "courseId",
 });
-
+ 
+//// discountedPrice
 CourseSchema.virtual("discountedPrice").get(function (this: CourseDocument) {
   if (this.discount?.dis && this.discount?.rate) {
     return this.price * (1 - this.discount.rate / 100);
@@ -90,8 +96,10 @@ CourseSchema.virtual("discountedPrice").get(function (this: CourseDocument) {
   return this.price;
 });
 
+// Indexes
 CourseSchema.index({ createdAt: -1 });
 
+// Course Model
 export const Course: Model<CourseDocument> = mongoose.model<CourseDocument>(
   "Course",
   CourseSchema

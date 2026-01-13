@@ -9,22 +9,19 @@ import {
 import { ICloudinaryFile } from "../../../core/types/cloudinary.types";
 import {
   badRequest,
-  forbidden,
   notFound,
 } from "../../../core/errors/httpErrors";
 import { zodFirstMessage } from "../../../core/http/zodMessage";
 import { Teacher } from "../../users/teacher/models/teacher.model";
 import { Student } from "../../users/student/models/student.model";
 import { Session } from "../../session/models/session.model";
-import { File } from "../../session/files/models/file.model";
-import { VideoToken } from "../../session/security_video/videoToken.model";
 import { Exam } from "../../exam/models/exam.model";
 import { Actor } from "../types/course.types";
 import { Question } from "../../exam/question/models/question.model";
 import { Group } from "../../exam/group/models/group.model";
 
 export class CtrlCourseService {
-  // ✅ Admin only
+  // ~ Post => /api/hackit/ctrl/course
   static async createCourse(data: any, file: ICloudinaryFile) {
     console.log(data);
     if (!file) throw badRequest("صورة الكورس مطلوبة");
@@ -58,7 +55,7 @@ export class CtrlCourseService {
     return { message: "تم إنشاء الكورس بنجاح" };
   }
 
-  // ✅ Read: admin/teacher/student
+  // ~ Get => /api/hackit/ctrl/course/:id ~ get single course
   static async getCourseById(courseId: string, actor: Actor) {
     if (!mongoose.isValidObjectId(courseId))
       throw badRequest("معرف الكورس غير صالح");
@@ -150,6 +147,7 @@ export class CtrlCourseService {
     return { ...base, sessionsAndExams, whatsapp: whatsappField };
   }
 
+  // ~ Get => /api/hackit/ctrl/course ~ get all courses
   static async getAllCourses(query: any) {
     let parsed: any;
     try {
@@ -191,7 +189,7 @@ export class CtrlCourseService {
     }));
   }
 
-  // ✅ Admin only
+  // ~ Put => /api/hackit/ctrl/course/:id ~ update course
   static async updateCourse(courseId: string, data: any) {
     if (!mongoose.isValidObjectId(courseId))
       throw badRequest("معرف الكورس غير صالح");
@@ -229,7 +227,7 @@ export class CtrlCourseService {
     return { message: "تم تحديث الكورس بنجاح" };
   }
 
-  // ✅ Admin only (و model سيحذف sessions/exams/comments عبر hook)
+  // ~ Delete => /api/hackit/ctrl/course/:id ~ delete course
   static async deleteCourse(courseId: string) {
     if (!mongoose.isValidObjectId(courseId))
       throw badRequest("معرف الكورس غير صالح");
@@ -266,7 +264,7 @@ export class CtrlCourseService {
     };
   }
 
-  // ✅ Admin only
+  // ~ Put => /api/hackit/ctrl/course/imagecourse/:id ~ update course image
   static async updateCourseImage(file: ICloudinaryFile, courseId: string) {
     if (!mongoose.isValidObjectId(courseId))
       throw badRequest("معرف الكورس غير صالح");

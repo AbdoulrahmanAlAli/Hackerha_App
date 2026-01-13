@@ -5,7 +5,7 @@ import verifyToken from "../../../../core/middlewares/verifyToken";
 
 const router = Router();
 
-// admin only
+// Post /api/hackit/ctrl/teacher/register ~ Create New Teacher
 router.post(
   "/register",
   verifyToken,
@@ -13,7 +13,7 @@ router.post(
   authTeacherController.createNewTeacher
 );
 
-// public
+// Post /api/hackit/ctrl/teacher/login ~ Login Teacher
 router.post("/login", authTeacherController.loginTeacher);
 
 export default router;

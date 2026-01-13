@@ -14,6 +14,7 @@ import { register } from "../../../../shared/mailer/templates";
 import { sendEmail } from "../../../../shared/mailer/sendEmail";
 import { IOtp } from "../types/student.types";
 import { signAccessToken } from "../../../../shared/security/jwt";
+import { logger } from "../../../../bootstrap/logger";
 
 export class AuthStudentService {
   // ~ Post => /api/hackit/ctrl/student/register ~ Create New Student
@@ -25,36 +26,42 @@ export class AuthStudentService {
       throw badRequest(zodFirstMessage(e));
     }
 
-    // حذف الحسابات غير المفعلة لنفس البريد/الرقم (مثل القديم)
-    const existingInactiveByEmail = await Student.findOne({
-      email: parsed.email,
-      available: false,
-    });
-    if (existingInactiveByEmail)
-      await Student.findByIdAndDelete(existingInactiveByEmail._id);
+    const [existingInactive, existingActive] = await Promise.all([
+      Student.deleteMany({
+        $or: [
+          { email: parsed.email, available: false },
+          { phoneNumber: parsed.phoneNumber, available: false },
+        ],
+      }),
 
-    const existingInactiveByPhone = await Student.findOne({
-      phoneNumber: parsed.phoneNumber,
-      available: false,
-    });
-    if (existingInactiveByPhone)
-      await Student.findByIdAndDelete(existingInactiveByPhone._id);
+      Student.findOne({
+        $or: [
+          { phoneNumber: parsed.phoneNumber, available: true },
+          { email: parsed.email, available: true },
+          { universityNumber: parsed.universityNumber, available: true },
+        ],
+      })
+        .select("_id")
+        .lean(),
+    ]);
 
-    // تحقق من التكرار للحسابات المفعلة
-    const [existingByPhone, existingByEmail, existingByUni] = await Promise.all(
-      [
-        Student.findOne({ phoneNumber: parsed.phoneNumber, available: true }),
-        Student.findOne({ email: parsed.email, available: true }),
-        Student.findOne({
-          universityNumber: parsed.universityNumber,
-          available: true,
-        }),
-      ]
-    );
+    if (existingActive) {
+      const existingStudent = await Student.findOne({
+        _id: existingActive._id,
+      })
+        .select("phoneNumber email universityNumber")
+        .lean();
 
-    if (existingByPhone) throw badRequest("رقم الهاتف مسجل مسبقاً");
-    if (existingByEmail) throw badRequest("البريد الإلكتروني مسجل مسبقاً");
-    if (existingByUni) throw badRequest("الرقم الجامعي مسجل مسبقاً");
+      if (existingStudent?.phoneNumber === parsed.phoneNumber) {
+        throw badRequest("رقم الهاتف مسجل مسبقاً");
+      }
+      if (existingStudent?.email === parsed.email) {
+        throw badRequest("البريد الإلكتروني مسجل مسبقاً");
+      }
+      if (existingStudent?.universityNumber === parsed.universityNumber) {
+        throw badRequest("الرقم الجامعي مسجل مسبقاً");
+      }
+    }
 
     const otp = OTPUtils.generateOTP();
     const hashedOtp = await OTPUtils.encryptOTP(otp);
@@ -65,17 +72,17 @@ export class AuthStudentService {
       available: false,
     });
 
-    try {
-      await sendEmail({
-        to: student.email,
-        subject: "رمز التحقق - حساب طالب",
-        text: `رمز التحقق الخاص بك هو: ${otp}`,
-        html: register(otp),
+    sendEmail({
+      to: student.email,
+      subject: "رمز التحقق - حساب طالب",
+      text: `رمز التحقق الخاص بك هو: ${otp}`,
+      html: register(otp),
+    }).catch((error) => {
+      logger.error("Failed to send verification email", {
+        studentId: student._id,
+        error,
       });
-    } catch (emailError) {
-      await Student.findByIdAndDelete(student._id);
-      throw badRequest("فشل في إرسال بريد التحقق، يرجى المحاولة مرة أخرى");
-    }
+    });
 
     return {
       message: "تم إنشاء الحساب بنجاح، يرجى التحقق من بريدك الإلكتروني",

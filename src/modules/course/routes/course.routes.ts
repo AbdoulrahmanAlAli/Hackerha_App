@@ -7,9 +7,7 @@ import { normalizeCourseFormData } from "../../../core/middlewares/normalizeForm
 
 const router: Router = Router();
 
-// ===== Base: /api/hackit/ctrl/course =====
-
-// Create (Admin only)
+// Post /api/hackit/ctrl/course
 router.post(
   "/",
   verifyToken,
@@ -19,10 +17,10 @@ router.post(
   ctrlCourseController.createCourse
 );
 
-// Get all (requires token)
+// Get /api/hackit/ctrl/course
 router.get("/", verifyToken, ctrlCourseController.getAllCourses);
 
-// Update image (Admin only) — لازم قبل /:id
+// Put /api/hackit/ctrl/course/imagecourse/:id
 router.put(
   "/imagecourse/:id",
   verifyToken,
@@ -31,7 +29,7 @@ router.put(
   ctrlCourseController.updateCourseImage
 );
 
-// Remove student from course (Admin only) — لازم قبل /:id
+// Patch /api/hackit/ctrl/course/removeStudent/course/:courseId
 router.patch(
   "/removeStudent/course/:courseId",
   verifyToken,
@@ -39,10 +37,10 @@ router.patch(
   ctrlCourseController.removeStudentFromCourse
 );
 
-// Get course by id (requires token)
+// Get /api/hackit/ctrl/course/:id
 router.get("/:id", verifyToken, ctrlCourseController.getCourseById);
 
-// Update course (Admin only)
+// Put /api/hackit/ctrl/course/:id
 router.put(
   "/:id",
   verifyToken,
@@ -50,7 +48,7 @@ router.put(
   ctrlCourseController.updateCourse
 );
 
-// Delete course (Admin only)
+// Delete /api/hackit/ctrl/course/:id
 router.delete(
   "/:id",
   verifyToken,

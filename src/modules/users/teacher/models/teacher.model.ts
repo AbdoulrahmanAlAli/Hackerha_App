@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { ITeacher } from "../types/teacher.types";
 import { env } from "../../../../bootstrap/env";
 
+// Teacher Schema
 const TeacherSchema = new Schema<ITeacher>(
   {
     profilePhoto: {
@@ -51,7 +52,7 @@ const TeacherSchema = new Schema<ITeacher>(
   { timestamps: true }
 );
 
-// Hash password if changed
+// Hash password
 TeacherSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
 
@@ -59,7 +60,7 @@ TeacherSchema.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, saltRounds);
 });
 
-// Hide sensitive fields in JSON
+// Remove Password And OTP In Json
 TeacherSchema.set("toJSON", {
   transform: (_doc, ret) => {
     const r = ret as { password?: string; otp?: string };
@@ -69,8 +70,10 @@ TeacherSchema.set("toJSON", {
   },
 });
 
+// Indexes
 TeacherSchema.index({ createdAt: -1 });
 
+// Teacher Model
 export const Teacher: Model<ITeacher> = mongoose.model<ITeacher>(
   "Teacher",
   TeacherSchema

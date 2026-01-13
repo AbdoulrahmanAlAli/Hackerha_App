@@ -18,9 +18,8 @@ import {
 import { OTPUtils } from "../../../../shared/otp/otpUtils";
 import { UpdateTeacherInput } from "../types/teacher.types";
 
-
-
 export class CtrlTeacherService {
+  // ~ Get => /api/hackit/ctrl/teacher/profile/:id ~ Get Profile Teacher
   static async getProfileTeacher(id: string) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف غير صالح");
 
@@ -33,6 +32,7 @@ export class CtrlTeacherService {
     return teacher;
   }
 
+  // ~ Get => /api/hackit/ctrl/teacher/all ~ Get All Teachers
   static async getTeachers() {
     const teachers = await Teacher.find()
       .select("-password -otp")
@@ -40,6 +40,7 @@ export class CtrlTeacherService {
     return teachers;
   }
 
+  // ~ Get => /api/hackit/ctrl/teacher/profile/:id ~ Update Profile Teacher
   static async updateProfileTeacher(id: string, data: UpdateTeacherInput) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف غير صالح");
 
@@ -66,6 +67,7 @@ export class CtrlTeacherService {
     return { message: "تم التحديث بنجاح" };
   }
 
+  // ~ Put => /api/hackit/ctrl/teacher/update-important/:id ~ Update Important Details Teacher (admin)
   static async updateImportantTeacherAdmin(id: string, data: any) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف غير صالح");
 
@@ -90,6 +92,7 @@ export class CtrlTeacherService {
     return { message: "تم التحديث بنجاح" };
   }
 
+  // ~ Put => /api/hackit/ctrl/teacher/update-suspended/:id ~ Update Suspended Teacher (admin)
   static async updateSuspendedTeacherAdmin(id: string, data: any) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف غير صالح");
 
@@ -111,8 +114,7 @@ export class CtrlTeacherService {
     return { message: "تم تحديث حالة التقييد بنجاح" };
   }
 
-  // ===== Forgot Password Flow =====
-
+  // ~ Post => /api/hackit/ctrl/teacher/sendemailpassword ~ Send Email For Change Password
   static async sendResetPasswordOtp(data: { email: string }) {
     let parsed: any;
     try {
@@ -140,6 +142,7 @@ export class CtrlTeacherService {
     };
   }
 
+  // ~ Post => /api/hackit/ctrl/teacher/forgetPass/:id ~ Verfiy Otp
   static async verifyResetOtp(id: string, data: { otp: string }) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف غير صالح");
 
@@ -165,6 +168,7 @@ export class CtrlTeacherService {
     return { message: "تم التحقق من الكود" };
   }
 
+  // ~ Put => /api/hackit/ctrl/teacher/changepass ~ Change Password
   static async changePassword(id: string, data: { password: string }) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف غير صالح");
 
@@ -193,6 +197,7 @@ export class CtrlTeacherService {
     return { message: "تم تحديث كلمة السر بنجاح" };
   }
 
+    // ~ Get => /api/hackit/ctrl/teacher/account/:id ~ Delete Account
   static async deleteTeacherAccount(id: string) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف غير صالح");
 

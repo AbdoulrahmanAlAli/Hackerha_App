@@ -4,7 +4,7 @@ import { StudentService } from "../services/student.service";
 import { forbidden } from "../../../../core/errors/httpErrors";
 
 export class StudentController {
-  // GET /api/hackit/ctrl/student?universityNumber=&phoneNumber=
+  // GET /api/hackit/ctrl/student
   getAll = asyncHandler(async (req: Request, res: Response) => {
     const { universityNumber, phoneNumber } = req.query;
 
@@ -135,6 +135,48 @@ export class StudentController {
     );
     res.status(200).json(result);
   });
+
+  // Patch /api/hackit/ctrl/student/favorite/course/:courseId/toggle/:id
+  toggleFavoriteCourse = asyncHandler(async (req: Request, res: Response) => {
+    const result = await StudentService.toggleFavoriteCourse(
+      req.params.id,
+      req.params.courseId
+    );
+    res.status(200).json(result);
+  });
+
+  // Patch /api/hackit/ctrl/student/favorite/session/:sessionId/toggle/:id
+  toggleFavoriteSession = asyncHandler(async (req: Request, res: Response) => {
+    const result = await StudentService.toggleFavoriteSession(
+      req.params.id,
+      req.params.sessionId
+    );
+    res.status(200).json(result);
+  });
+
+  // Patch /api/hackit/ctrl/student/course/:courseId/session/:sessionId/user/:id
+  addCourseAndSessionForStudent = asyncHandler(
+    async (req: Request, res: Response) => {
+      const result = await StudentService.addCourseAndSessionForStudent(
+        req.params.id,
+        req.params.courseId,
+        req.params.sessionId
+      );
+      res.status(200).json(result);
+    }
+  );
+
+  // Patch /api/hackit/ctrl/student/course/:courseId/exam/:examId/user/:id
+  addCourseAndExamForStudent = asyncHandler(
+    async (req: Request, res: Response) => {
+      const result = await StudentService.addCourseAndExamForStudent(
+        req.params.id,
+        req.params.courseId,
+        req.params.examId
+      );
+      res.status(200).json(result);
+    }
+  );
 }
 
 export const studentController = new StudentController();

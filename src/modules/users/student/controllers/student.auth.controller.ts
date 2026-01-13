@@ -9,7 +9,8 @@ export class StudentAuthController {
     res.status(201).json(result);
   });
 
-  // POST /api/hackit/ctrl/student/verifyotp/:id
+  // POST /api/hackit/ctrl/student/verifyotp/:idhttps://www.youtube.com/
+  
   verifyOtp = asyncHandler(async (req: Request, res: Response) => {
     const result = await AuthStudentService.verifyOtp(req.body, req.params.id);
     res.status(200).json(result); // { message, token }

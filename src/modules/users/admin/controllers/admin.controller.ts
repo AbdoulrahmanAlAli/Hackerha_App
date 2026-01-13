@@ -4,13 +4,13 @@ import { AdminService } from "../services/admin.service";
 import asyncHandler from "express-async-handler";
 
 export class AdminController {
-  // ~ Post => /api/hackit/ctrl/admin/create ~ Create New Admin
+  // Post /api/hackit/ctrl/admin/create
   createNewAdmin = asyncHandler(async (req: Request, res: Response) => {
     const result = await AdminService.createNewAdmin(req.body);
     res.status(201).json(result);
   });
 
-  // ~ Get => /api/hackit/ctrl/admin/admin/profile/:id ~ Get Admin Profile
+  // Get /api/hackit/ctrl/admin/admin/profile/:id
   getProfile = asyncHandler(async (req: Request, res: Response) => {
     const user = req.user;
     const targetUserId = req.params.id;
@@ -26,31 +26,31 @@ export class AdminController {
     res.status(200).json(result);
   });
 
-  // ~ Get => /api/hackit/ctrl/admin/:id ~ Get Admin By ID
+  // Get /api/hackit/ctrl/admin/:id
   getAdminById = asyncHandler(async (req: Request, res: Response) => {
     const admin = await AdminService.getAdminById(req.params.id);
     res.status(200).json(admin);
   });
 
-  // ~ Get => /api/hackit/ctrl/admin/ ~ Get All Admins
+  // Get /api/hackit/ctrl/admin/
   getAllAdmins = asyncHandler(async (_req: Request, res: Response) => {
     const admins = await AdminService.getAllAdmins();
     res.status(200).json(admins);
   });
 
-  // ~ Put => /api/hackit/ctrl/admin/:id ~ Update Admin
+  // Put /api/hackit/ctrl/admin/:id
   updateAdmin = asyncHandler(async (req: Request, res: Response) => {
     const result = await AdminService.updateAdmin(req.params.id, req.body);
     res.status(200).json(result);
   });
 
-  // ~ Delete => /api/hackit/ctrl/admin/:id ~ Delete Admin
+  // Delete /api/hackit/ctrl/admin/:id
   deleteAdmin = asyncHandler(async (req: Request, res: Response) => {
     const result = await AdminService.deleteAdmin(req.params.id);
     res.status(200).json(result);
   });
 
-  // ~ Put => /api/hackit/ctrl/admin/:id/change-password ~ Change Password
+  // Put/api/hackit/ctrl/admin/:id/change-password
   changePassword = asyncHandler(async (req: Request, res: Response) => {
     const { currentPassword, newPassword } = req.body ?? {};
 

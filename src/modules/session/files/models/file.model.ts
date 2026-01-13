@@ -1,6 +1,7 @@
 import mongoose, { Schema, Model } from "mongoose";
 import { IFile } from "../types/file.types";
 
+// Files Schema
 const FileSchema = new Schema<IFile>(
   {
     url: {
@@ -45,7 +46,8 @@ const FileSchema = new Schema<IFile>(
   { timestamps: true }
 );
 
-// Indexes (بدون تكرار)
+// Indexes
 FileSchema.index({ createdAt: -1 });
 
+// Files Model
 export const File: Model<IFile> = mongoose.model<IFile>("SessionFile", FileSchema);

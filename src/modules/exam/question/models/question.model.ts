@@ -1,6 +1,7 @@
 import mongoose, { Schema, Model, InferSchemaType } from "mongoose";
 import { IAnswer, IQuestion } from "../types/question.types";
 
+// Answer Schema
 const AnswerSchema = new Schema<IAnswer>(
   {
     title: { type: String, required: true, trim: true },
@@ -9,6 +10,7 @@ const AnswerSchema = new Schema<IAnswer>(
   { _id: true }
 );
 
+// Question Schema
 const QuestionSchema = new Schema<IQuestion>(
   {
     groupId: {
@@ -33,9 +35,9 @@ const QuestionSchema = new Schema<IQuestion>(
   { timestamps: true }
 );
 
+// Indexes
 QuestionSchema.index({ createdAt: -1 });
 
-export type QuestionDocument = InferSchemaType<typeof QuestionSchema>;
-
-export const Question: Model<QuestionDocument> =
+// Group Model
+export const Question: Model<IQuestion> =
   mongoose.models.Question || mongoose.model("Question", QuestionSchema);

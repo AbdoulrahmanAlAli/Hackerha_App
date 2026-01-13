@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { env } from "../../../../bootstrap/env";
 import { IStudent, StudentDocument } from "../types/student.types";
 
+// Student Schema
 const StudentSchema = new Schema<IStudent>(
   {
     profilePhoto: {
@@ -126,7 +127,7 @@ const StudentSchema = new Schema<IStudent>(
   { timestamps: true }
 );
 
-// Hash password (بدون next لتفادي مشاكل typings)
+// Hash password
 StudentSchema.pre("save", async function () {
   const student = this as StudentDocument;
   if (!student.isModified("password")) return;
@@ -135,7 +136,7 @@ StudentSchema.pre("save", async function () {
   student.password = await bcrypt.hash(student.password, saltRounds);
 });
 
-// أخفِ password/otp دائمًا من JSON
+// Remove Password And OTP In Json
 StudentSchema.set("toJSON", {
   transform: (_doc, ret) => {
     const r = ret as { password?: string; otp?: string };
@@ -145,10 +146,15 @@ StudentSchema.set("toJSON", {
   },
 });
 
+// Indexes
 StudentSchema.index({ createdAt: -1 });
 StudentSchema.index({ banks: 1 });
 StudentSchema.index({ contents: 1 });
+StudentSchema.index({ email: 1, available: 1 });
+StudentSchema.index({ phoneNumber: 1, available: 1 });
+StudentSchema.index({ universityNumber: 1, available: 1 });
 
+// Student Model
 export const Student: Model<IStudent> = mongoose.model<IStudent>(
   "Student",
   StudentSchema

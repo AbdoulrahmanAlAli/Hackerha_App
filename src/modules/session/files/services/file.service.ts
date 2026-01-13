@@ -8,9 +8,8 @@ import { Course } from "../../../course/models/course.model";
 import { Session } from "../../models/session.model";
 import { CreateFileInput, UpdateFileInput } from "../types/file.types";
 
-
-
 export class FileService {
+  // ~ Post => /api/hackit/ctrl/file ~ Add File To Session
   static async createFile(data: CreateFileInput) {
     let parsed: CreateFileInput;
     try {
@@ -52,6 +51,7 @@ export class FileService {
     return { message: "تم إنشاء الملف بنجاح", file: populated };
   }
 
+  // ~ Get => /api/hackit/ctrl/file/:id ~ Get Single File
   static async getFileById(id: string) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف الملف غير صالح");
 
@@ -63,6 +63,7 @@ export class FileService {
     return file;
   }
 
+  // ~ Get => /api/hackit/ctrl/file/session/:sessionId ~ Get Files By Session Id
   static async getFilesBySessionId(sessionId: string) {
     if (!mongoose.isValidObjectId(sessionId))
       throw badRequest("معرف الجلسة غير صالح");
@@ -85,6 +86,7 @@ export class FileService {
       .filter(Boolean);
   }
 
+  // ~ Get /api/hackit/ctrl/file/course/:courseId ~ Get Files By Course Id
   static async getFilesByCourseId(courseId: string) {
     if (!mongoose.isValidObjectId(courseId))
       throw badRequest("معرف الكورس غير صالح");
@@ -98,6 +100,7 @@ export class FileService {
     return files;
   }
 
+  // ~ Put => /api/hackit/ctrl/file/:id ~ Update File
   static async updateFile(id: string, data: UpdateFileInput) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف الملف غير صالح");
 
@@ -123,6 +126,7 @@ export class FileService {
     return { message: "تم تحديث الملف بنجاح", file: populated };
   }
 
+  // ~ Delete => /api/hackit/ctrl/file/:id ~ Delete File
   static async deleteFile(id: string) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف الملف غير صالح");
 
@@ -139,6 +143,7 @@ export class FileService {
     return { message: "تم حذف الملف بنجاح" };
   }
 
+  // ~ Delete => /api/hackit/ctrl/file/session/:sessionId/all ~ Delete All Files From Session
   static async deleteFilesBySessionId(sessionId: string) {
     if (!mongoose.isValidObjectId(sessionId))
       throw badRequest("معرف الجلسة غير صالح");

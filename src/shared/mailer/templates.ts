@@ -382,7 +382,7 @@ export const register = (otp: string) => `<!DOCTYPE html>
     <!-- الهيدر -->
     <div class="header">
       <div class="logo-container">
-        <img src="https://i.postimg.cc/MZ7d9pD5/Frame-1261154840.png"
+        <img src="https://res.cloudinary.com/dkltqpci0/image/upload/v1767809843/Frame_1261154840_ht2ahj.png"
              alt="Hackerha Logo"
              class="logo-img">
       </div>
@@ -773,7 +773,7 @@ export const paymentHtml = (
     <!-- الهيدر -->
     <div class="header">
       <div class="logo-container">
-        <img src="https://i.postimg.cc/MZ7d9pD5/Frame-1261154840.png"
+        <img src="https://res.cloudinary.com/dkltqpci0/image/upload/v1767809843/Frame_1261154840_ht2ahj.png"
              alt="Hackerha Logo"
              class="logo-img">
       </div>
@@ -1251,7 +1251,7 @@ export const resetPasswordHtml = (otp: string) =>
     <!-- الهيدر -->
     <div class="header">
       <div class="logo-container">
-        <img src="https://i.postimg.cc/MZ7d9pD5/Frame-1261154840.png"
+        <img src="https://res.cloudinary.com/dkltqpci0/image/upload/v1767809843/Frame_1261154840_ht2ahj.png"
              alt="Hackerha Logo"
              class="logo-img">
       </div>

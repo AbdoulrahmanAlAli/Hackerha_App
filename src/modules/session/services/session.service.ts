@@ -12,7 +12,7 @@ import { Session } from "../models/session.model";
 import { VideoTokenService } from "../security_video/videoToken.service";
 
 export class CtrlSessionService {
-  // ===== Create (Admin) =====
+  // ~ Post => /api/hackit/ctrl/sessions ~ Create Session
   static async createSession(data: CreateSessionInput) {
     let parsed: CreateSessionInput;
     try {
@@ -47,7 +47,7 @@ export class CtrlSessionService {
     return { message: "تم إنشاء الجلسة بنجاح" };
   }
 
-  // ===== Read (Public) =====
+  // ~ Get => /api/hackit/ctrl/sessions/:id ~ Get Single Session
   static async getSessionById(id: string, userId?: string) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف الجلسة غير صالح");
 
@@ -66,6 +66,7 @@ export class CtrlSessionService {
     return sessionObj;
   }
 
+  // ~ Get => /api/hackit/ctrl/sessions/course/:courseId ~ Get Seesions By Coruse Id
   static async getSessionsByCourseId(courseId: string) {
     if (!mongoose.isValidObjectId(courseId))
       throw badRequest("معرف الكورس غير صالح");
@@ -76,7 +77,7 @@ export class CtrlSessionService {
     return Session.find({ courseId }).sort({ number: 1 });
   }
 
-  // ===== Update (Admin) =====
+  // ~ Put => /api/hackit/ctrl/sessions/:id  ~ Update Session
   static async updateSession(id: string, data: UpdateSessionInput) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف الجلسة غير صالح");
 
@@ -124,7 +125,7 @@ export class CtrlSessionService {
     return { message: "تم تحديث الجلسة بنجاح" };
   }
 
-  // ===== Delete (Admin) =====
+  // ~ Delete => /api/hackit/ctrl/sessions/:id  ~ Delete Session
   static async deleteSession(id: string) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف الجلسة غير صالح");
 
@@ -135,7 +136,7 @@ export class CtrlSessionService {
     return { message: "تم حذف الجلسة بنجاح" };
   }
 
-  // ===== Like/Dislike (Student عادة) - نفس القديم (اختياري) =====
+  // ~ Put => /api/hackit/ctrl/sessions/:id/like  ~ Likes Session
   static async likeSession(sessionId: string, studentId: string) {
     if (!mongoose.isValidObjectId(sessionId))
       throw badRequest("معرف الجلسة غير صالح");
@@ -160,6 +161,7 @@ export class CtrlSessionService {
     return { message: "تم الإعجاب بالجلسة بنجاح" };
   }
 
+  // ~ Put => /api/hackit/ctrl/sessions/:id/dislike  ~ DisLike Session
   static async dislikeSession(sessionId: string, studentId: string) {
     if (!mongoose.isValidObjectId(sessionId))
       throw badRequest("معرف الجلسة غير صالح");

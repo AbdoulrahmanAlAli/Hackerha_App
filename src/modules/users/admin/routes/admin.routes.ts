@@ -5,11 +5,13 @@ import checkRole from "../../../../core/middlewares/checkRole";
 
 const router = Router();
 
-// Protected admin routes (require authentication)
+// Post /api/hackit/ctrl/admin/create
 router.post("/create", adminController.createNewAdmin);
 
+// Get /api/hackit/ctrl/admin/admin/profile/:id
 router.get("/profile/:id", verifyToken, adminController.getProfile);
 
+// Get /api/hackit/ctrl/admin/
 router.get(
   "/",
   verifyToken,
@@ -17,8 +19,10 @@ router.get(
   adminController.getAllAdmins
 );
 
+// Get /api/hackit/ctrl/admin/:id
 router.get("/:id", verifyToken, adminController.getAdminById);
 
+// Put /api/hackit/ctrl/admin/:id
 router.put(
   "/:id",
   verifyToken,
@@ -26,6 +30,7 @@ router.put(
   adminController.updateAdmin
 );
 
+// Delete /api/hackit/ctrl/admin/:id
 router.delete(
   "/:id",
   verifyToken,
@@ -33,6 +38,7 @@ router.delete(
   adminController.deleteAdmin
 );
 
+// Put /api/hackit/ctrl/admin/:id/change-password
 router.put(
   "/:id/change-password",
   verifyToken,
