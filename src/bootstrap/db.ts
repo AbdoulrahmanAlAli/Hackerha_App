@@ -5,5 +5,5 @@ import { logger } from "./logger";
 export async function connectDB(): Promise<void> {
   mongoose.set("strictQuery", true);
   await mongoose.connect(env.MONGO_URI);
-  logger.info("MongoDB connected");
+  logger.success("MongoDB connected");
 }

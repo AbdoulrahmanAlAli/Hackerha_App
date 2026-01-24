@@ -2,21 +2,6 @@ import * as admin from "firebase-admin";
 import { env } from "../../bootstrap/env";
 import { logger } from "../../bootstrap/logger";
 
-const requiredEnvVars = [
-  "FIREBASE_PROJECT_ID",
-  "FIREBASE_PRIVATE_KEY_ID",
-  "FIREBASE_PRIVATE_KEY",
-  "FIREBASE_CLIENT_EMAIL",
-  "FIREBASE_CLIENT_ID",
-  "FIREBASE_CLIENT_CERT_URL",
-];
-
-requiredEnvVars.forEach((varName) => {
-  if (!process.env[varName]) {
-    throw new Error(`${varName} is missing in environment variables`);
-  }
-});
-
 const privateKey = env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, "\n");
 
 const serviceAccount = {
@@ -38,7 +23,7 @@ try {
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
-    logger.info("Firebase initialized");
+    logger.success("Firebase initialized");
   }
 } catch (error) {
   logger.error("Failed to initialize Firebase Admin:", error);
