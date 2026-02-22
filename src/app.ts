@@ -44,6 +44,15 @@ import routeQuestion from "./modules/exam/question/routes/question.routes";
 // Notification Api
 import routeNotification from "./modules/notification/routes/notification.routes";
 
+// ============= Version =============
+
+// Version Api
+import routeVersion from "./modules/version/routes/version.routes";
+
+// ============= Payment =============
+
+import routePayment from "./modules/payment/routes/payment.routes";
+
 export function createApp() {
   const app = express();
 
@@ -91,7 +100,17 @@ export function createApp() {
 
   // ============= Notification =============
 
+  // Notification routes
   app.use("/api/hackit/ctrl/notification", routeNotification);
+
+  // ============= Version =============
+
+  // Version routes
+  app.use("/api/hackit/ctrl/version", routeVersion);
+
+  // ============= Payment =============
+
+  app.use("/api/hackit/ctrl/payment", routePayment);
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);

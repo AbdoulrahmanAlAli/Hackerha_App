@@ -115,6 +115,8 @@ export const updateImportantStudentSchema = z.object({
     .optional(),
   universityNumber: z.number({ message: "الرقم الجامعي مطلوب" }).optional(),
   birth: z.coerce.date({ message: "تاريخ الميلاد غير صالح" }).optional(),
+  available: z.boolean().optional(),
+  resetPass: z.boolean().optional(),
   email: z
     .string()
     .min(3, "البريد الإلكتروني يجب أن يكون على الأقل 3 أحرف")

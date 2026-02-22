@@ -33,8 +33,9 @@ export class StudentService {
 
     return Student.find(query)
       .select(
-        "firstName lastName device_id phoneNumber email universityNumber academicYear gender birth profilePhoto available suspended enrolledCourses createdAt"
+        "firstName lastName device_id phoneNumber email universityNumber academicYear gender birth profilePhoto available suspended enrolledCourses createdAt",
       )
+      .populate("enrolledCourses", "name")
       .sort({ createdAt: -1 })
       .lean();
   }
@@ -47,7 +48,7 @@ export class StudentService {
     if (existing.suspended) throw badRequest("حسابك مقيد");
 
     const student = await Student.findById(id).select(
-      "-suspended -available -resetPass -createdAt -updatedAt -__v -favoriteCourses -favoriteSessions -favoriteBank -enrolledCourses -banks -contents"
+      "-suspended -available -resetPass -createdAt -updatedAt -__v -favoriteCourses -favoriteSessions -favoriteBank -enrolledCourses -banks -contents",
     );
 
     if (!student) throw notFound("الطالب غير موجود");
@@ -86,7 +87,7 @@ export class StudentService {
       });
     } catch {
       throw badRequest(
-        "فشل في إرسال بريد إعادة تعيين كلمة المرور، يرجى المحاولة مرة أخرى"
+        "فشل في إرسال بريد إعادة تعيين كلمة المرور، يرجى المحاولة مرة أخرى",
       );
     }
 
@@ -135,7 +136,7 @@ export class StudentService {
 
     const isSamePassword = await bcrypt.compare(
       studentData.password,
-      student.password
+      student.password,
     );
     if (isSamePassword) {
       throw badRequest("كلمة السر الجديدة يجب أن تكون مختلفة عن القديمة");
@@ -152,7 +153,7 @@ export class StudentService {
   // ~ Put => /api/hackit/ctrl/student/updatedetailsprofile/:id ~ Change details of student
   static async updateProfileStudent(
     studentData: UpdateStudentInput,
-    id: string
+    id: string,
   ) {
     let parsed: UpdateStudentInput;
     try {
@@ -180,7 +181,7 @@ export class StudentService {
   // ~ Put => /api/hackit/ctrl/student/UpdateProfileSuspendedStudent/:id
   static async updateProfileSuspendedStudent(
     studentData: { suspended: boolean; suspensionReason: string },
-    id: string
+    id: string,
   ) {
     try {
       updateSuspendedStudentSchema.parse(studentData);
@@ -202,7 +203,7 @@ export class StudentService {
   // ~ Put => /api/hackit/ctrl/student/UpdateProfileImpStudentAdmin/:id
   static async updateProfileImpStudentAdmin(
     studentData: UpdateImportantStudentInput,
-    id: string
+    id: string,
   ) {
     let parsed: UpdateImportantStudentInput;
     try {
@@ -213,10 +214,11 @@ export class StudentService {
 
     const student = await Student.findById(id);
     if (!student) throw badRequest("المستخدم غير موجود");
-    if (!student.available) throw badRequest("الحساب غير مفعل");
-    if (student.suspended) throw badRequest("حسابك مقيد");
 
     if (parsed.firstName) student.firstName = parsed.firstName;
+    if (parsed.available) student.available = parsed.available;
+    if (parsed.resetPass) student.resetPass = parsed.resetPass;
+
     if (parsed.lastName) student.lastName = parsed.lastName;
     if (parsed.phoneNumber) student.phoneNumber = parsed.phoneNumber;
     if (parsed.academicYear) student.academicYear = parsed.academicYear;
@@ -279,7 +281,7 @@ export class StudentService {
 
     if (!phoneNumber && !email && !universityNumber) {
       throw badRequest(
-        "يجب تقديم رقم الهاتف أو البريد الإلكتروني أو الرقم الجامعي للتحقق"
+        "يجب تقديم رقم الهاتف أو البريد الإلكتروني أو الرقم الجامعي للتحقق",
       );
     }
 
@@ -347,7 +349,7 @@ export class StudentService {
     // حاول إزالة أولاً
     const pullRes = await Student.updateOne(
       { _id: studentId },
-      { $pull: { favoriteCourses: new Types.ObjectId(courseId) } }
+      { $pull: { favoriteCourses: new Types.ObjectId(courseId) } },
     );
 
     if ((pullRes.modifiedCount ?? 0) > 0) {
@@ -360,7 +362,7 @@ export class StudentService {
     // لم يُزل => أضف
     await Student.updateOne(
       { _id: studentId },
-      { $addToSet: { favoriteCourses: new Types.ObjectId(courseId) } }
+      { $addToSet: { favoriteCourses: new Types.ObjectId(courseId) } },
     );
 
     return {
@@ -388,7 +390,7 @@ export class StudentService {
 
     const pullRes = await Student.updateOne(
       { _id: studentId },
-      { $pull: { favoriteSessions: new Types.ObjectId(sessionId) } }
+      { $pull: { favoriteSessions: new Types.ObjectId(sessionId) } },
     );
 
     if ((pullRes.modifiedCount ?? 0) > 0) {
@@ -400,7 +402,7 @@ export class StudentService {
 
     await Student.updateOne(
       { _id: studentId },
-      { $addToSet: { favoriteSessions: new Types.ObjectId(sessionId) } }
+      { $addToSet: { favoriteSessions: new Types.ObjectId(sessionId) } },
     );
 
     return {
@@ -413,7 +415,7 @@ export class StudentService {
   static async addCourseAndSessionForStudent(
     studentId: string,
     courseId: string,
-    sessionId: string
+    sessionId: string,
   ) {
     if (![studentId, courseId, sessionId].every(mongoose.isValidObjectId)) {
       throw badRequest("معرف غير صالح");
@@ -440,7 +442,7 @@ export class StudentService {
           courses: new Types.ObjectId(courseId), // ✅ هنا التعديل
           sessions: new Types.ObjectId(sessionId),
         },
-      }
+      },
     );
 
     return { message: "تم تحديث البيانات بنجاح" };
@@ -450,7 +452,7 @@ export class StudentService {
   static async addCourseAndExamForStudent(
     studentId: string,
     courseId: string,
-    examId: string
+    examId: string,
   ) {
     if (![studentId, courseId, examId].every(mongoose.isValidObjectId)) {
       throw badRequest("معرف غير صالح");
@@ -477,7 +479,7 @@ export class StudentService {
           courses: new Types.ObjectId(courseId), // ✅ هنا التعديل
           exams: new Types.ObjectId(examId),
         },
-      }
+      },
     );
 
     return { message: "تم تحديث البيانات بنجاح" };
