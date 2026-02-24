@@ -1,7 +1,7 @@
 import { Router } from "express";
 import verifyToken from "../../../core/middlewares/verifyToken";
-import checkRole from "../../../core/middlewares/checkRole";
 import { ctrlPaymentController } from "../controllers/payment.controller";
+import { requireAdmin } from "../../../core/middlewares/requireRole.middleware";
 
 const router: Router = Router();
 
@@ -9,7 +9,7 @@ const router: Router = Router();
 router.post(
   "/code",
   verifyToken,
-  checkRole(["admin"]),
+  requireAdmin,
   ctrlPaymentController.generatePaymentCode,
 );
 
@@ -20,7 +20,7 @@ router.post("/verify", verifyToken, ctrlPaymentController.verifyPaymentCode);
 router.get(
   "/codes",
   verifyToken,
-  checkRole(["admin"]),
+  requireAdmin,
   ctrlPaymentController.getAllPaymentCodes,
 );
 

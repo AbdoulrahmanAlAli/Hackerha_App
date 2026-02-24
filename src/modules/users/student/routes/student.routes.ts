@@ -10,7 +10,7 @@ import {
 const router = Router();
 
 // GET /api/hackit/ctrl/student  (Admin)
-router.get("/", verifyToken, checkRole(["admin"]), studentController.getAll);
+router.get("/", verifyToken, requireAdmin, studentController.getAll);
 
 // GET /api/hackit/ctrl/student/accountprofilestudent/:id (Student)
 router.get(

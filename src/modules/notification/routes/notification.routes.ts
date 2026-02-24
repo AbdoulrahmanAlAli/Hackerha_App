@@ -1,7 +1,7 @@
 import { Router } from "express";
 import verifyToken from "../../../core/middlewares/verifyToken";
-import checkRole from "../../../core/middlewares/checkRole";
 import { ctrlNotificationController } from "../controllers/notification.controller";
+import { requireAdmin } from "../../../core/middlewares/requireRole.middleware";
 
 const router: Router = Router();
 
@@ -9,7 +9,7 @@ const router: Router = Router();
 router.post(
   "/",
   verifyToken,
-  checkRole(["admin"]),
+  requireAdmin,
   ctrlNotificationController.createNotification
 );
 
@@ -17,7 +17,7 @@ router.post(
 router.get(
   "/",
   verifyToken,
-  checkRole(["admin"]),
+  requireAdmin,
   ctrlNotificationController.getAllNotifications
 );
 
@@ -35,7 +35,7 @@ router.get("/:id", verifyToken, ctrlNotificationController.getNotificationById);
 router.put(
   "/:id",
   verifyToken,
-  checkRole(["admin"]),
+  requireAdmin,
   ctrlNotificationController.updateNotification
 );
 
@@ -43,7 +43,7 @@ router.put(
 router.delete(
   "/:id",
   verifyToken,
-  checkRole(["admin"]),
+  requireAdmin,
   ctrlNotificationController.deleteNotification
 );
 

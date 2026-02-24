@@ -2,6 +2,7 @@ import { Router } from "express";
 import verifyToken from "../../../core/middlewares/verifyToken";
 import checkRole from "../../../core/middlewares/checkRole";
 import { ctrlSessionController } from "../controllers/session.controller";
+import { requireAdmin } from "../../../core/middlewares/requireRole.middleware";
 
 const router = Router();
 
@@ -9,7 +10,7 @@ const router = Router();
 router.post(
   "/",
   verifyToken,
-  checkRole(["admin"]),
+  requireAdmin,
   ctrlSessionController.createSession
 );
 
@@ -17,7 +18,7 @@ router.post(
 router.put(
   "/:id",
   verifyToken,
-  checkRole(["admin"]),
+  requireAdmin,
   ctrlSessionController.updateSession
 );
 
@@ -25,7 +26,7 @@ router.put(
 router.delete(
   "/:id",
   verifyToken,
-  checkRole(["admin"]),
+  requireAdmin,
   ctrlSessionController.deleteSession
 );
 

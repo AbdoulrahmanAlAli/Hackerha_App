@@ -17,19 +17,50 @@ import {
 } from "../schemas/teacher.schema";
 import { OTPUtils } from "../../../../shared/otp/otpUtils";
 import { UpdateTeacherInput } from "../types/teacher.types";
+import { Course } from "../../../course/models/course.model";
+import { Payment } from "../../../payment/models/payment.model";
 
 export class CtrlTeacherService {
   // ~ Get => /api/hackit/ctrl/teacher/profile/:id ~ Get Profile Teacher
   static async getProfileTeacher(id: string) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف غير صالح");
 
-    const teacher = await Teacher.findById(id).select("-password -otp");
+    const teacher = await Teacher.findById(id).select("-password -otp").lean();
+
     if (!teacher) throw notFound("المعلم غير موجود");
 
     if (!teacher.available) throw badRequest("الحساب غير مفعل");
     if (teacher.suspended) throw forbidden("حسابك مقيد");
 
-    return teacher;
+    const courses = await Course.find({ teacher: id })
+      .select("_id name price students")
+      .lean();
+
+    const totalStudents = courses.reduce((sum, course) => {
+      return sum + (course.students?.length || 0);
+    }, 0);
+
+    const courseIds = courses.map((course) => course._id);
+    const payments = await Payment.find({
+      courseId: { $in: courseIds },
+    }).lean();
+
+    const paymentsStats = {
+      totalPayments: payments.length,
+      totalRevenue: payments.reduce((sum, payment) => sum + payment.price, 0),
+      usedPayments: payments.filter((p) => p.used).length,
+      unusedPayments: payments.filter((p) => !p.used).length,
+      expiredPayments: payments.filter(
+        (p) => new Date(p.expiresAt) < new Date(),
+      ).length,
+    };
+
+    return {
+      ...teacher,
+      paymentsStats,
+      courses,
+      totalStudents,
+    };
   }
 
   // ~ Get => /api/hackit/ctrl/teacher/all ~ Get All Teachers
@@ -197,7 +228,7 @@ export class CtrlTeacherService {
     return { message: "تم تحديث كلمة السر بنجاح" };
   }
 
-    // ~ Get => /api/hackit/ctrl/teacher/account/:id ~ Delete Account
+  // ~ Get => /api/hackit/ctrl/teacher/account/:id ~ Delete Account
   static async deleteTeacherAccount(id: string) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف غير صالح");
 

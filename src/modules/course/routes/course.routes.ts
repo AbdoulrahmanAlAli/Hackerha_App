@@ -1,9 +1,9 @@
 import { Router } from "express";
 import verifyToken from "../../../core/middlewares/verifyToken";
-import checkRole from "../../../core/middlewares/checkRole";
 import { upload } from "../../../core/middlewares/upload.middleware";
 import { ctrlCourseController } from "../controllers/course.controller";
 import { normalizeCourseFormData } from "../../../core/middlewares/normalizeFormData";
+import { requireAdmin } from "../../../core/middlewares/requireRole.middleware";
 
 const router: Router = Router();
 
@@ -11,7 +11,7 @@ const router: Router = Router();
 router.post(
   "/",
   verifyToken,
-  checkRole(["admin"]),
+  requireAdmin,
   upload,
   normalizeCourseFormData,
   ctrlCourseController.createCourse
@@ -24,7 +24,7 @@ router.get("/", verifyToken, ctrlCourseController.getAllCourses);
 router.put(
   "/imagecourse/:id",
   verifyToken,
-  checkRole(["admin"]),
+  requireAdmin,
   upload,
   ctrlCourseController.updateCourseImage
 );
@@ -33,7 +33,7 @@ router.put(
 router.patch(
   "/removeStudent/course/:courseId",
   verifyToken,
-  checkRole(["admin"]),
+  requireAdmin,
   ctrlCourseController.removeStudentFromCourse
 );
 
@@ -44,7 +44,7 @@ router.get("/:id", verifyToken, ctrlCourseController.getCourseById);
 router.put(
   "/:id",
   verifyToken,
-  checkRole(["admin"]),
+  requireAdmin,
   ctrlCourseController.updateCourse
 );
 
@@ -52,7 +52,7 @@ router.put(
 router.delete(
   "/:id",
   verifyToken,
-  checkRole(["admin"]),
+  requireAdmin,
   ctrlCourseController.deleteCourse
 );
 

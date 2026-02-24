@@ -64,7 +64,7 @@ export class CtrlCourseService {
       .populate("teacher")
       .populate({ path: "sessions", options: { sort: { number: 1 } } })
       .populate({ path: "exams", options: { sort: { number: 1 } } })
-      .populate("students", "userName profilePhoto")
+      .populate("students", "firstName lastName phoneNumber universityNumber email")
       .lean();
 
     if (!course) throw notFound("الكورس غير موجود");

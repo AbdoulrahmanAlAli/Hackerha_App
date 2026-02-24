@@ -1,21 +1,21 @@
 import { Router } from "express";
 import { examController } from "../controllers/exam.controller";
 import verifyToken from "../../../core/middlewares/verifyToken";
-import checkRole from "../../../core/middlewares/checkRole";
+import { requireAdmin } from "../../../core/middlewares/requireRole.middleware";
 
 const router = Router();
 
 // Create (Admin)
-router.post("/", verifyToken, checkRole(["admin"]), examController.createExam);
+router.post("/", verifyToken, requireAdmin, examController.createExam);
 
 // Read
 router.get("/:id", verifyToken, examController.getExamById);
 router.get("/course/:courseId", verifyToken, examController.getExamsByCourseId);
 
 // Update (Admin)
-router.put("/:id", verifyToken, checkRole(["admin"]), examController.updateExam);
+router.put("/:id", verifyToken, requireAdmin, examController.updateExam);
 
 // Delete (Admin)
-router.delete("/:id", verifyToken, checkRole(["admin"]), examController.deleteExam);
+router.delete("/:id", verifyToken, requireAdmin, examController.deleteExam);
 
 export default router;

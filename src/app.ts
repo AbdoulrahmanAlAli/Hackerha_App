@@ -16,6 +16,9 @@ import studentRoutes from "./modules/users/student/routes/student.routes";
 import teacherAuthRoutes from "./modules/users/teacher/routes/teacher.auth.routes";
 import teacherRoutes from "./modules/users/teacher/routes/teacher.routes";
 
+// Teacher Invoice
+import teacherInvoiceRoutes from "./modules/users/teacher/teacherInvoice/routes/teacherInvoice.routes";
+
 // ============= Coures App =============
 
 // Course Api
@@ -74,6 +77,9 @@ export function createApp() {
   // Teacher routes
   app.use("/api/hackit/ctrl/teacher", teacherAuthRoutes);
   app.use("/api/hackit/ctrl/teacher", teacherRoutes);
+
+  // Teacher Invoice
+  app.use("/api/hackit/ctrl/teacher/Invoice", teacherInvoiceRoutes);
 
   // ============= Coures App =============
 

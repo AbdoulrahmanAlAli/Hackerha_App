@@ -1,8 +1,8 @@
 import { Router } from "express";
 import verifyToken from "../../../../core/middlewares/verifyToken";
-import checkRole from "../../../../core/middlewares/checkRole";
 import { upload } from "../../../../core/middlewares/upload.middleware";
 import { questionController } from "../controllers/question.controller";
+import { requireAdmin } from "../../../../core/middlewares/requireRole.middleware";
 
 
 const router: Router = Router();
@@ -12,7 +12,7 @@ router
   .route("/")
   .post(
     verifyToken,
-    checkRole(["admin"]),
+    requireAdmin,
     upload,
     questionController.createQuestion
   );
@@ -28,19 +28,19 @@ router
 // Update question (Admin)
 router
   .route("/:id")
-  .put(verifyToken, checkRole(["admin"]), questionController.updateQuestion);
+  .put(verifyToken, requireAdmin, questionController.updateQuestion);
 
 // ✅ NEW: Update answers only (Admin)
 router
   .route("/:id/answers")
-  .patch(verifyToken, checkRole(["admin"]), questionController.updateAnswers);
+  .patch(verifyToken, requireAdmin, questionController.updateAnswers);
 
 // Update image (Admin)
 router
   .route("/:id/image")
   .put(
     verifyToken,
-    checkRole(["admin"]),
+    requireAdmin,
     upload,
     questionController.updateQuestionImage
   );
@@ -48,14 +48,14 @@ router
 // Delete question (Admin)
 router
   .route("/:id")
-  .delete(verifyToken, checkRole(["admin"]), questionController.deleteQuestion);
+  .delete(verifyToken, requireAdmin, questionController.deleteQuestion);
 
 // Delete questions by group (Admin)
 router
   .route("/group/:groupId")
   .delete(
     verifyToken,
-    checkRole(["admin"]),
+    requireAdmin,
     questionController.deleteQuestionsByGroupId
   );
 
@@ -64,7 +64,7 @@ router
   .route("/:id/image")
   .delete(
     verifyToken,
-    checkRole(["admin"]),
+    requireAdmin,
     questionController.deleteQuestionImage
   );
 

@@ -2,8 +2,8 @@ import { Router } from "express";
 
 import { fileController } from "../controllers/file.controller";
 import verifyToken from "../../../../core/middlewares/verifyToken";
-import checkRole from "../../../../core/middlewares/checkRole";
 import { upload } from "../../../../core/middlewares/upload.middleware";
+import { requireAdmin } from "../../../../core/middlewares/requireRole.middleware";
 
 const router: Router = Router();
 
@@ -23,7 +23,7 @@ router.route("/:id").get(verifyToken, fileController.getFileById);
 // Post /api/hackit/ctrl/file
 router.route("/").post(
   verifyToken,
-  checkRole(["admin"]),
+  requireAdmin,
   upload, // expects field name: attachedFile
   fileController.createFile
 );
@@ -31,19 +31,19 @@ router.route("/").post(
 // Put /api/hackit/ctrl/file/:id
 router
   .route("/:id")
-  .put(verifyToken, checkRole(["admin"]), fileController.updateFile);
+  .put(verifyToken, requireAdmin, fileController.updateFile);
 
 // Delete /api/hackit/ctrl/file/:id
 router
   .route("/:id")
-  .delete(verifyToken, checkRole(["admin"]), fileController.deleteFile);
+  .delete(verifyToken, requireAdmin, fileController.deleteFile);
 
 // Delete /api/hackit/ctrl/file/session/:sessionId/all
 router
   .route("/session/:sessionId/all")
   .delete(
     verifyToken,
-    checkRole(["admin"]),
+    requireAdmin,
     fileController.deleteFilesBySessionId
   );
 

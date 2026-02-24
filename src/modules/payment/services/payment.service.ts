@@ -192,7 +192,7 @@ export class CtrlPaymentService {
 
     const codes = await Payment.find(filter)
       .populate("courseId", "name image price")
-      .populate("studentId", "userName email")
+      .populate("studentId", "firstName lastName email")
       .sort({ createdAt: -1 })
       .lean();
 
