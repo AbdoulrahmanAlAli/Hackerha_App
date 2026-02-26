@@ -174,7 +174,7 @@ export class CtrlCourseService {
 
     const courses = await Course.find(filter)
       .sort({ createdAt: -1 })
-      .select("-__v -whatsapp")
+      .select("-__v -whatsapp -students")
       .populate("teacher")
       .lean();
 
