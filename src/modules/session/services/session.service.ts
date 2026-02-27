@@ -56,14 +56,11 @@ export class CtrlSessionService {
 
     const sessionObj = session.toObject() as any;
 
-    sessionObj.likes = sessionObj.likes?.length || 0;
-    sessionObj.disLikes = sessionObj.disLikes?.length || 0;
-
     // One-time video token proxy (نفس منطق القديم)
     sessionObj.video = await VideoTokenService.createVideoToken(
       id,
       session.video,
-      userId,
+      userId
     );
 
     return sessionObj;
@@ -77,16 +74,7 @@ export class CtrlSessionService {
     const course = await Course.findById(courseId);
     if (!course) throw notFound("الكورس غير موجود");
 
-    const sessions = await Session.find({ courseId }).sort({ number: 1 });
-
-    return sessions.map((session) => {
-      const sessionObj = session.toObject();
-      return {
-        ...sessionObj,
-        likes: sessionObj.likes?.length || 0,
-        disLikes: sessionObj.disLikes?.length || 0,
-      };
-    });
+    return Session.find({ courseId }).sort({ number: 1 });
   }
 
   // ~ Put => /api/hackit/ctrl/sessions/:id  ~ Update Session

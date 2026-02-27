@@ -53,16 +53,16 @@ export class CtrlPaymentService {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24);
 
-    await sendEmail({
-      to: student.email,
-      subject: `كود دفع كورس ${course.name}`,
-      html: paymentHtml(
-        rawCode,
-        course.name,
-        student.firstName + " " + student.lastName,
-        student.universityNumber,
-      ),
-    });
+    // await sendEmail({
+    //   to: student.email,
+    //   subject: `كود دفع كورس ${course.name}`,
+    //   html: paymentHtml(
+    //     rawCode,
+    //     course.name,
+    //     student.firstName + " " + student.lastName,
+    //     student.universityNumber,
+    //   ),
+    // });
 
     const payment = await Payment.create({
       code: rawCode,

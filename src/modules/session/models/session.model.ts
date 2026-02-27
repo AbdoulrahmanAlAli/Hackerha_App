@@ -72,7 +72,7 @@ SessionSchema.virtual("files", {
 
 // Indexes
 SessionSchema.index({ createdAt: -1 });
-SessionSchema.index({ courseId: 1, number: 1 }, { unique: true });
+SessionSchema.index({ courseId: 1, number: 1 });
 
 // Session Model
 export const Session: Model<ISession> =

@@ -2,6 +2,7 @@ import { env } from "./bootstrap/env";
 import { connectDB } from "./bootstrap/db";
 import { createApp } from "./app";
 import { logger } from "./bootstrap/logger";
+import { removeUniqueIndexFromSessionsAndExams } from "./core/errors/removeUniqueIndex";
 
 async function bootstrap() {
   await connectDB();

@@ -51,7 +51,7 @@ ExamSchema.virtual("groups", {
 
 // Indexes
 ExamSchema.index({ createdAt: -1 });
-ExamSchema.index({ courseId: 1, number: 1 }, { unique: true });
+ExamSchema.index({ courseId: 1, number: 1 });
 
 // Exam Model
 export const Exam: Model<IExam> =
