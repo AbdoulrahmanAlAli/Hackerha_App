@@ -59,6 +59,14 @@ import routeVersion from "./modules/version/routes/version.routes";
 
 import routePayment from "./modules/payment/routes/payment.routes";
 
+// ============= Ads =============
+
+import routeAds from "./modules/ads/routes/ads.routes";
+
+// ============= Social =============
+
+import routeSocial from "./modules/social/routes/social.routes";
+
 export function createApp() {
   const app = express();
 
@@ -122,7 +130,18 @@ export function createApp() {
 
   // ============= Payment =============
 
+  // Payment routes
   app.use("/api/hackit/ctrl/payment", routePayment);
+
+  // ============= Ads =============
+
+  // Ads routes
+  app.use("/api/hackit/ctrl/ads", routeAds);
+
+  // ============= Social =============
+
+  // Social routes
+  app.use("/api/hackit/ctrl/social", routeSocial);
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);
