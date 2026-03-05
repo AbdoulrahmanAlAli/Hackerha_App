@@ -23,30 +23,19 @@ export class ExamService {
       throw badRequest(zodFirstMessage(e));
     }
 
-    // Verify course exists
-    const course = await Course.findById(parsed.courseId).select("_id");
+    const course = await Course.findById(data.courseId);
     if (!course) throw notFound("الكورس غير موجود");
 
-    // منع تكرار الرقم داخل نفس الكورس (Exam)
-    const sameExamNumber = await Exam.exists({
-      courseId: parsed.courseId,
-      number: parsed.number,
-    });
-    if (sameExamNumber) throw badRequest("الرقم موجود بالفعل");
-
-    // منع تعارض الرقم مع Session داخل نفس الكورس
-    const sameSessionNumber = await Session.exists({
-      courseId: parsed.courseId,
-      number: parsed.number,
-    });
-    if (sameSessionNumber) throw badRequest("الرقم موجود بالفعل");
+    const [lastSession, lastExam] = await Promise.all([
+      Session.findOne({ courseId: data.courseId }).sort({ number: -1 }),
+      Exam.findOne({ courseId: data.courseId }).sort({ number: -1 }),
+    ]);
+    const maxNumber = Math.max(lastSession?.number || 0, lastExam?.number || 0);
+    const newNumber = maxNumber + 1;
 
     const exam = await Exam.create({
-      number: parsed.number,
-      courseId: parsed.courseId,
-      title: parsed.title,
-      totalMark: parsed.totalMark,
-      duration: parsed.duration,
+      ...data,
+      number: newNumber,
     });
 
     return { id: exam.id, message: "تم إنشاء الامتحان بنجاح" };
@@ -88,33 +77,6 @@ export class ExamService {
     const exam = await Exam.findById(examId);
     if (!exam) throw notFound("الاختبار غير موجود");
 
-    const nextCourseId = (parsed.courseId ?? exam.courseId).toString();
-    const nextNumber = parsed.number ?? exam.number;
-
-    // إذا تغيّر الرقم أو تغيّر الكورس: لازم نتحقق من التعارض
-    const numberChanged =
-      parsed.number !== undefined && parsed.number !== exam.number;
-    const courseChanged =
-      parsed.courseId !== undefined &&
-      parsed.courseId.toString() !== exam.courseId.toString();
-
-    if (numberChanged || courseChanged) {
-      const sameExamNumber = await Exam.exists({
-        courseId: nextCourseId,
-        number: nextNumber,
-        _id: { $ne: examId },
-      });
-      if (sameExamNumber) throw badRequest("الرقم مستخدم بالفعل في امتحان آخر");
-
-      const sameSessionNumber = await Session.exists({
-        courseId: nextCourseId,
-        number: nextNumber,
-      });
-      if (sameSessionNumber) throw badRequest("الرقم مستخدم بالفعل في جلسة");
-    }
-
-    // تحديث حقول بسيطة
-    if (parsed.number !== undefined) exam.number = parsed.number;
     if (parsed.courseId !== undefined) exam.courseId = parsed.courseId as any;
     if (parsed.title !== undefined) exam.title = parsed.title;
     if (parsed.totalMark !== undefined) exam.totalMark = parsed.totalMark;

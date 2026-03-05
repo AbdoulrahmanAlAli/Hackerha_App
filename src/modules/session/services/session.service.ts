@@ -10,6 +10,7 @@ import { zodFirstMessage } from "../../../core/http/zodMessage";
 import { Course } from "../../course/models/course.model";
 import { Session } from "../models/session.model";
 import { VideoTokenService } from "../security_video/videoToken.service";
+import { Exam } from "../../exam/models/exam.model";
 
 export class CtrlSessionService {
   // ~ Post => /api/hackit/ctrl/sessions ~ Create Session
@@ -24,25 +25,26 @@ export class CtrlSessionService {
     if (!mongoose.isValidObjectId(parsed.courseId))
       throw badRequest("معرف الكورس غير صالح");
 
-    const course = await Course.findById(parsed.courseId);
+    const course = await Course.findById(data.courseId);
     if (!course) throw notFound("الكورس غير موجود");
 
-    // ✅ إصلاح خطأ القديم: كان يستخدم find() ثم يتحقق !sessionHave (وهذا دائمًا false)
     const existingByName = await Session.findOne({
-      courseId: parsed.courseId,
-      name: parsed.name,
+      courseId: data.courseId,
+      name: data.name,
     });
-    if (existingByName) throw badRequest("الجلسة موجودة بالفعل");
+    if (existingByName) throw badRequest("جلسة بنفس الاسم موجودة بالفعل");
 
-    // رقم الجلسة يجب أن يكون فريد داخل نفس الكورس + لا يتعارض مع exam.number
-    const [sessionWithSameNumber] = await Promise.all([
-      Session.findOne({ courseId: parsed.courseId, number: parsed.number }),
+    const [lastSession, lastExam] = await Promise.all([
+      Session.findOne({ courseId: data.courseId }).sort({ number: -1 }),
+      Exam.findOne({ courseId: data.courseId }).sort({ number: -1 }),
     ]);
+    const maxNumber = Math.max(lastSession?.number || 0, lastExam?.number || 0);
+    const newNumber = maxNumber + 1;
 
-    if (sessionWithSameNumber) throw badRequest("الرقم موجود بالفعل");
-
-    const created = await Session.create(parsed);
-    if (!created) throw badRequest("فشل إنشاء الجلسة");
+    const created = await Session.create({
+      ...data,
+      number: newNumber,
+    });
 
     return { message: "تم إنشاء الجلسة بنجاح" };
   }
@@ -60,7 +62,7 @@ export class CtrlSessionService {
     sessionObj.video = await VideoTokenService.createVideoToken(
       id,
       session.video,
-      userId
+      userId,
     );
 
     return sessionObj;
@@ -96,23 +98,6 @@ export class CtrlSessionService {
     if (!targetCourseId || !mongoose.isValidObjectId(targetCourseId))
       throw badRequest("معرف الكورس غير صالح");
 
-    // إذا تم تغيير رقم الجلسة: نضمن عدم التعارض داخل نفس الكورس ومع exams
-    // if (parsed.number !== undefined && parsed.number !== session.number) {
-    //   const [otherSession, examWithSameNumber] = await Promise.all([
-    //     Session.findOne({
-    //       _id: { $ne: session._id },
-    //       courseId: targetCourseId,
-    //       number: parsed.number,
-    //     }),
-    //     Exam.findOne({ courseId: targetCourseId, number: parsed.number }),
-    //   ]);
-
-    //   if (otherSession) throw badRequest("الرقم مستخدم بالفعل في جلسة أخرى");
-    //   if (examWithSameNumber) throw badRequest("الرقم مستخدم بالفعل في امتحان");
-    // }
-
-    // تحديث الحقول (ببساطة)
-    if (parsed.number !== undefined) session.number = parsed.number;
     if (parsed.courseId !== undefined)
       session.courseId = parsed.courseId as any;
     if (parsed.video !== undefined) session.video = parsed.video;

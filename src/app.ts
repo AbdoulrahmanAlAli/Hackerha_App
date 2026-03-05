@@ -42,6 +42,9 @@ import routeGroup from "./modules/exam/group/routes/group.routes";
 // Question Api
 import routeQuestion from "./modules/exam/question/routes/question.routes";
 
+// Reorder Api
+import reorderRouter from "./shared/reorder/routes/reorder.routes";
+
 // ============= Notification =============
 
 // Notification Api
@@ -103,6 +106,9 @@ export function createApp() {
 
   // Question routes
   app.use("/api/hackit/ctrl/questionExam", routeQuestion);
+
+  // Reorder routes
+  app.use("/api/hackit/ctrl/reorder", reorderRouter);
 
   // ============= Notification =============
 
