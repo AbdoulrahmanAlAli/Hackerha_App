@@ -39,8 +39,11 @@ import routeExam from "./modules/exam/routes/exam.routes";
 // Group Api
 import routeGroup from "./modules/exam/group/routes/group.routes";
 
-// Question Api
-import routeQuestion from "./modules/exam/question/routes/question.routes";
+// Group Questions Api
+import routeGroupQuestion from "./modules/exam/group/question/routes/question.routes";
+
+// Single Questions Api
+import routeSingleQuestion from "./modules/exam/single-question/routes/question.routes"
 
 // Reorder Api
 import reorderRouter from "./shared/reorder/routes/reorder.routes";
@@ -112,8 +115,11 @@ export function createApp() {
   // Group routes
   app.use("/api/hackit/ctrl/groupExam", routeGroup);
 
-  // Question routes
-  app.use("/api/hackit/ctrl/questionExam", routeQuestion);
+  // Group Questions routes
+  app.use("/api/hackit/ctrl/questionExam", routeGroupQuestion);
+
+  // Single Questions routes
+  app.use("/api/hackit/ctrl/singleQuestionExam", routeSingleQuestion);
 
   // Reorder routes
   app.use("/api/hackit/ctrl/reorder", reorderRouter);

@@ -4,8 +4,7 @@ export type Gender = "ذكر" | "انثى";
 
 export interface ITeacher {
   profilePhoto: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
   phoneNumber: string;
   gender: Gender;
   birth: Date;
@@ -29,14 +28,14 @@ export interface ITeacher {
 export type UpdateTeacherInput = Partial<
   Pick<
     ITeacher,
-    "firstName" | "lastName" | "phoneNumber" | "profilePhoto" | "about"
+    "fullName" | "phoneNumber" | "profilePhoto" | "about"
   >
 >;
 
 export type UpdateTeacherImportantInput = Partial<
   Pick<
     ITeacher,
-    "firstName" | "lastName" | "phoneNumber" | "gender" | "birth" | "email"
+    "fullName" | "phoneNumber" | "gender" | "email"
   >
 >;
 

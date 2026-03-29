@@ -12,6 +12,8 @@ export const academicYears = [
 
 export const semesters = ["الفصل الأول", "الفصل الثاني"] as const;
 
+export const University_branch = ["دمشق", "حلب"] as const
+
 // ===== Helpers =====
 export const objectId = z
   .string()
@@ -77,6 +79,8 @@ export const createCourseSchema = z
 
     teacher: objectId,
 
+    universityBranch: z.enum(University_branch, { message: "يجب أن يكون حلب أو دمشق" }),
+
     year: z.enum(academicYears, {
       message: "يجب ان يكون من السنة الاولى الى السنة الخامسة",
     }),
@@ -134,6 +138,8 @@ export const updateCourseSchema = z
     whatsapp: z.string().nullable().optional(),
 
     fakeCount: z.number().optional(),
+
+    universityBranch: z.enum(University_branch, { message: "يجب أن يكون حلب أو دمشق" }).optional(),
 
     year: z
       .enum(academicYears, {

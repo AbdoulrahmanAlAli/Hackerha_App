@@ -17,7 +17,7 @@ import { Student } from "../../users/student/models/student.model";
 import { Session } from "../../session/models/session.model";
 import { Exam } from "../../exam/models/exam.model";
 import { Actor } from "../types/course.types";
-import { Question } from "../../exam/question/models/question.model";
+import { Question } from "../../exam/group/question/models/question.model";
 import { Group } from "../../exam/group/models/group.model";
 
 export class CtrlCourseService {

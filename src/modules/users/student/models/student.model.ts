@@ -12,17 +12,11 @@ const StudentSchema = new Schema<IStudent>(
         "https://i.postimg.cc/JzCB3CDX/Profile-Picture-Container-(2).pngg",
       required: true,
     },
-    firstName: {
+    fullName: {
       type: String,
       required: [true, "الاسم مطلوب"],
       trim: true,
       maxlength: [100, "الاسم يجب ألا يتجاوز 100 حرف"],
-    },
-    lastName: {
-      type: String,
-      required: [true, "الاسم الاحير مطلوب"],
-      trim: true,
-      maxlength: [100, "الاسم الاحير يجب ألا يتجاوز 100 حرف"],
     },
     phoneNumber: {
       type: String,
@@ -47,6 +41,14 @@ const StudentSchema = new Schema<IStudent>(
       type: Number,
       required: [true, "الرقم الجامعي مطلوب"],
     },
+    universityBranch: {
+      type: String,
+      enum: {
+        values: ["دمشق", "حلب"],
+        message: "يجب أن يكون حلب أو دمشق"
+      },
+      required: [true, 'الفرع الجامعي مطلوب']
+    },
     gender: {
       type: String,
       enum: {
@@ -54,10 +56,6 @@ const StudentSchema = new Schema<IStudent>(
         message: "يحب أن يكون ذكر أو انثى",
       },
       required: [true, "نوع الجنس مطلوب"],
-    },
-    birth: {
-      type: Date,
-      required: [true, "تاريخ الميلاد مطلوب"],
     },
     email: {
       type: String,

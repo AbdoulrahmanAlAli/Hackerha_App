@@ -11,6 +11,8 @@ export const courseYears = [
 
 export const courseSemesters = ["الفصل الأول", "الفصل الثاني"] as const;
 
+export type University_Branch = "دمشق" | "حلب";
+
 export type CourseType = (typeof courseTypes)[number];
 export type CourseYear = (typeof courseYears)[number];
 export type CourseSemester = (typeof courseSemesters)[number];
@@ -24,6 +26,7 @@ export interface ICourse extends Document {
   image: string;
   name: string;
   teacher: Types.ObjectId;
+  universityBranch:University_Branch;
 
   description: string;
   price: number;
@@ -65,6 +68,7 @@ export type CourseDocument = ICourse & mongoose.Document;
 export type CreateCourseInput = {
   image: string;
   name: string;
+  universityBranch:University_Branch;
   teacher: string; // ObjectId string
   description: string;
   price: number;

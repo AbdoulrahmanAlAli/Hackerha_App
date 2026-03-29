@@ -9,7 +9,7 @@ import {
   updateGroupSchema,
 } from "../schemas/group.schema";
 import { Exam } from "../../models/exam.model";
-import { Question } from "../../question/models/question.model";
+import { Question } from "../question/models/question.model";
 
 export class GroupService {
   static async createGroup(data: unknown) {
@@ -46,7 +46,7 @@ export class GroupService {
     if (!mongoose.isValidObjectId(examId))
       throw badRequest("معرف الامتحان غير صالح");
 
-    const groups = await Group.find({ examId }).populate("examId", "title");
+    const groups = await Group.find({ examId }).populate("examId", "title").populate("questions");
 
     if (groups.length === 0) throw notFound("لا توجد مجموعات لهذا الامتحان");
 

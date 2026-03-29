@@ -105,7 +105,7 @@ export class AuthStudentService {
     const isValidOtp = await OTPUtils.verifyOTP(otpData.otp, student.otp);
     if (!isValidOtp) throw badRequest("رمز التحقق غير صحيح");
 
-    const token = signAccessToken({ id: studentId, role: "student" });
+    const token = signAccessToken({ id: studentId, role: "student", university: student.universityBranch });
 
     student.available = true;
     student.otp = "";
@@ -143,13 +143,17 @@ export class AuthStudentService {
       );
     }
 
+    if(student.suspended){
+      throw badRequest(`${student.suspensionReason}`)
+    }
+
     // إذا كان reset للجهاز مفعّل
     if (student.device_id_reset) {
       student.device_id = parsed.device_id;
       student.device_id_reset = false;
       await student.save();
 
-      const token = signAccessToken({ id: student.id, role: "student" });
+      const token = signAccessToken({ id: student.id, role: "student", university: student.universityBranch });
       return {
         message: "تم تسجيل الدخول بنجاح وتم تحديث معرف الجهاز",
         token,
@@ -160,7 +164,7 @@ export class AuthStudentService {
     // إذا جهاز مختلف -> قيّد الحساب
     if (student.device_id !== parsed.device_id) {
       student.suspended = true;
-      student.suspensionReason = "تسجيل الدخول من غير حساب";
+      student.suspensionReason = "تم تسجيل الدخول من غير جهاز, يرجى التواصل مع الدعم";
       await student.save();
 
       throw badRequest(
@@ -168,7 +172,7 @@ export class AuthStudentService {
       );
     }
 
-    const token = signAccessToken({ id: student.id, role: "student" });
+    const token = signAccessToken({ id: student.id, role: "student", university: student.universityBranch });
     return { message: "تم تسجيل الدخول بنجاح", token };
   }
 

@@ -18,6 +18,14 @@ const CourseSchema = new Schema<CourseDocument>(
       required: [true, "المعلم مطلوب"],
       ref: "Teacher",
     },
+    universityBranch: {
+      type: String,
+      enum: [
+        "حلب",
+        "دمشق",
+      ],
+      required: [true, "الجامعة مطلوبة"],
+    },
     description: {
       type: String,
       required: [true, "وصف الكورس مطلوب"],

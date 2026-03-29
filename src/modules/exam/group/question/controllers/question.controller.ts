@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { QuestionService } from "../services/question.service";
-import { ICloudinaryFile } from "../../../../core/types/cloudinary.types";
+import { ICloudinaryFile } from "../../../../../core/types/cloudinary.types";
 
 
 class QuestionController {

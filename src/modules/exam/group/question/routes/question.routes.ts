@@ -1,8 +1,8 @@
 import { Router } from "express";
-import verifyToken from "../../../../core/middlewares/verifyToken";
-import { upload } from "../../../../core/middlewares/upload.middleware";
+import verifyToken from "../../../../../core/middlewares/verifyToken";
+import { upload } from "../../../../../core/middlewares/upload.middleware";
 import { questionController } from "../controllers/question.controller";
-import { requireAdmin } from "../../../../core/middlewares/requireRole.middleware";
+import { requireAdmin } from "../../../../../core/middlewares/requireRole.middleware";
 
 
 const router: Router = Router();

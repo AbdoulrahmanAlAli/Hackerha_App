@@ -12,7 +12,7 @@ import {
 import { badRequest, notFound } from "../../../core/errors/httpErrors";
 import { zodFirstMessage } from "../../../core/http/zodMessage";
 import { Group } from "../group/models/group.model";
-import { Question } from "../question/models/question.model";
+import { Question } from "../group/question/models/question.model";
 
 export class ExamService {
   static async createExam(data: CreateExamInput) {

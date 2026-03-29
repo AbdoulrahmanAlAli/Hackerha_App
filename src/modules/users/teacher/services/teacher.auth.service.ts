@@ -34,8 +34,7 @@ export class AuthTeacherService {
     if (byEmail) throw badRequest("البريد الإلكتروني مسجل مسبقاً");
 
     const teacher = await Teacher.create({
-      firstName: parsed.firstName,
-      lastName: parsed.lastName,
+      fullName: parsed.fullName,
       phoneNumber: parsed.phoneNumber,
       gender: parsed.gender,
       birth: parsed.birth,
@@ -75,7 +74,7 @@ export class AuthTeacherService {
     const ok = await bcrypt.compare(parsed.password, teacher.password);
     if (!ok) throw notFound("البريد الإلكتروني أو كلمة المرور غير صحيحة");
 
-    const token = signAccessToken({ id: teacher.id, role: "teacher" });
+    const token = signAccessToken({ id: teacher.id, role: "teacher", university: "الكل" });
 
     return { message: "تم تسجيل الدخول بنجاح", token };
   }

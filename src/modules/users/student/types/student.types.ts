@@ -9,15 +9,16 @@ export type AcademicYear =
 
 export type Gender = "ذكر" | "انثى";
 
+export type University_Branch = "دمشق" | "حلب";
+
 export interface IStudent {
   profilePhoto: string;
-  firstName: string;
-  lastName: string;
+  fullName: string;
   phoneNumber: string;
   academicYear: AcademicYear;
   universityNumber: number;
+  universityBranch:University_Branch;
   gender: Gender;
-  birth: Date;
   email: string;
   password: string;
   otp: string;

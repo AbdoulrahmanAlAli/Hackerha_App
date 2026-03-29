@@ -49,6 +49,14 @@ ExamSchema.virtual("groups", {
   foreignField: "examId",
 });
 
+// Virtual: groups
+ExamSchema.virtual("questions", {
+  ref: "SingleQuestion",
+  localField: "_id",
+  foreignField: "examId",
+});
+
+
 // Indexes
 ExamSchema.index({ createdAt: -1 });
 ExamSchema.index({ courseId: 1, number: 1 });

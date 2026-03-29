@@ -33,7 +33,7 @@ export class StudentService {
 
     return Student.find(query)
       .select(
-        "firstName lastName device_id phoneNumber email universityNumber academicYear gender birth profilePhoto available suspended enrolledCourses createdAt",
+        "firstName lastName device_id phoneNumber email universityNumber universityBranch academicYear gender profilePhoto available suspended enrolledCourses createdAt",
       )
       .populate("enrolledCourses", "name")
       .sort({ createdAt: -1 })
@@ -167,8 +167,7 @@ export class StudentService {
     if (!student.available) throw badRequest("الحساب غير مفعل");
     if (student.suspended) throw badRequest("حسابك مقيد");
 
-    if (parsed.firstName !== undefined) student.firstName = parsed.firstName;
-    if (parsed.lastName !== undefined) student.lastName = parsed.lastName;
+    if (parsed.fullName !== undefined) student.fullName = parsed.fullName;
     if (parsed.phoneNumber !== undefined)
       student.phoneNumber = parsed.phoneNumber;
     if (parsed.academicYear !== undefined)
@@ -215,16 +214,15 @@ export class StudentService {
     const student = await Student.findById(id);
     if (!student) throw badRequest("المستخدم غير موجود");
 
-    if (parsed.firstName) student.firstName = parsed.firstName;
+    if (parsed.fullName) student.fullName = parsed.fullName;
     if (parsed.available) student.available = parsed.available;
     if (parsed.resetPass) student.resetPass = parsed.resetPass;
-
-    if (parsed.lastName) student.lastName = parsed.lastName;
     if (parsed.phoneNumber) student.phoneNumber = parsed.phoneNumber;
     if (parsed.academicYear) student.academicYear = parsed.academicYear;
     if (parsed.universityNumber)
       student.universityNumber = parsed.universityNumber;
-    if (parsed.birth) student.birth = parsed.birth;
+     if (parsed.universityBranch)
+      student.universityBranch = parsed.universityBranch;
     if (parsed.email) student.email = parsed.email;
     if (parsed.device_id) student.device_id = parsed.device_id;
 

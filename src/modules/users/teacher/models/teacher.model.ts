@@ -12,8 +12,7 @@ const TeacherSchema = new Schema<ITeacher>(
         "https://i.postimg.cc/JzCB3CDX/Profile-Picture-Container-(2).png",
       required: true,
     },
-    firstName: { type: String, required: true, trim: true, maxlength: 100 },
-    lastName: { type: String, required: true, trim: true, maxlength: 100 },
+    fullName: { type: String, required: true, trim: true, maxlength: 100 },
 
     phoneNumber: {
       type: String,

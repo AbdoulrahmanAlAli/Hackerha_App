@@ -10,19 +10,17 @@ const academicYears = [
 
 const genders = ["ذكر", "انثى"] as const;
 
+const University_branch = ["دمشق", "حلب"] as const
+
 export const otpSchema = z.object({
   otp: z.string().min(1, "لا يمكن أن يكون فارغاً"),
 });
 
 export const createStudentSchema = z.object({
-  firstName: z
+  fullName: z
     .string()
     .min(1, "الاسم مطلوب")
     .max(100, "الاسم يجب ألا يتجاوز 100 حرف"),
-  lastName: z
-    .string()
-    .min(1, "الاسم الاحير مطلوب")
-    .max(100, "الاسم الاحير يجب ألا يتجاوز 100 حرف"),
   phoneNumber: z.string().min(1, "الرقم مطلوب"),
 
   gender: z.enum(genders, { message: "يحب أن يكون ذكر أو انثى" }),
@@ -31,8 +29,7 @@ export const createStudentSchema = z.object({
   }),
 
   universityNumber: z.number({ message: "الرقم الجامعي مطلوب" }),
-  birth: z.coerce.date({ message: "تاريخ الميلاد غير صالح" }),
-
+  universityBranch: z.enum(University_branch, { message: "يجب أن يكون حلب أو دمشق" }),
   email: z
     .string()
     .min(3, "البريد الإلكتروني يجب أن يكون على الأقل 3 أحرف")
@@ -76,15 +73,10 @@ export const passwordSchema = z.object({
 // Update Student (في القديم first/last required)
 export const updateStudentSchema = z
   .object({
-    firstName: z
+    fullName: z
       .string()
       .min(1, "الاسم مطلوب")
       .max(100, "الاسم يجب ألا يتجاوز 100 حرف")
-      .optional(),
-    lastName: z
-      .string()
-      .min(1, "الاسم الاحير مطلوب")
-      .max(100, "الاسم الاحير يجب ألا يتجاوز 100 حرف")
       .optional(),
     phoneNumber: z.string().min(1, "الرقم مطلوب").optional(),
     academicYear: z
@@ -97,16 +89,12 @@ export const updateStudentSchema = z
 
 // Update Important Student (في القديم كله optional)
 export const updateImportantStudentSchema = z.object({
-  firstName: z
+  fullName: z
     .string()
     .min(1, "الاسم مطلوب")
     .max(100, "الاسم يجب ألا يتجاوز 100 حرف")
     .optional(),
-  lastName: z
-    .string()
-    .min(1, "الاسم الاحير مطلوب")
-    .max(100, "الاسم الاحير يجب ألا يتجاوز 100 حرف")
-    .optional(),
+
   phoneNumber: z.string().min(1, "الرقم مطلوب").optional(),
   academicYear: z
     .enum(academicYears, {
@@ -114,7 +102,7 @@ export const updateImportantStudentSchema = z.object({
     })
     .optional(),
   universityNumber: z.number({ message: "الرقم الجامعي مطلوب" }).optional(),
-  birth: z.coerce.date({ message: "تاريخ الميلاد غير صالح" }).optional(),
+  universityBranch: z.enum(University_branch, { message: "يجب أن يكون حلب أو دمشق" }).optional(),
   available: z.boolean().optional(),
   resetPass: z.boolean().optional(),
   email: z
