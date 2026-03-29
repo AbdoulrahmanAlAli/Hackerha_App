@@ -1,13 +1,12 @@
 import type { HydratedDocument, Types } from "mongoose";
 
-export type Gender = "ذكر" | "انثى";
+export type Gender = "ذكر" | "أنثى";
 
 export interface ITeacher {
   profilePhoto: string;
   fullName: string;
   phoneNumber: string;
   gender: Gender;
-  birth: Date;
   email: string;
   password: string;
 

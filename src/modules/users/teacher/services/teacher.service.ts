@@ -114,7 +114,6 @@ export class CtrlTeacherService {
     if (parsed.firstName) teacher.fullName = parsed.fullName;
     if (parsed.phoneNumber) teacher.phoneNumber = parsed.phoneNumber;
     if (parsed.gender) teacher.gender = parsed.gender;
-    if (parsed.birth) teacher.birth = parsed.birth;
     if (parsed.email) teacher.email = parsed.email;
 
     await teacher.save();

@@ -15,8 +15,7 @@ export const semesters = ["الفصل الأول", "الفصل الثاني"] as
 export const createTeacherSchema = z.object({
   fullName: z.string().min(1, "الاسم مطلوب").max(100, "الاسم يجب ألا يتجاوز 100 حرف"),
   phoneNumber: z.string().regex(phoneRegex, "رقم الهاتف غير صالح! يجب أن يبدأ بـ 09 ويتكون من 10 أرقام."),
-  gender: z.enum(["ذكر", "انثى"], { message: "يحب أن يكون ذكر أو انثى" }),
-  birth: z.coerce.date({ message: "تاريخ الميلاد غير صالح" }),
+  gender: z.enum(["ذكر", "انثى"], { message: "يحب أن يكون ذكر أو أنثى" }),
   email: z.string().email("البريد الإلكتروني غير صالح").min(3).max(100),
   about: z.string().trim().optional().default(""),
   password: z.string().min(8, "كلمة السر يجب أن تكون على الأقل 8 أحرف"),
@@ -38,7 +37,6 @@ export const updateTeacherImportantSchema = z.object({
   fullname: z.string().max(100).optional(),
   phoneNumber: z.string().regex(phoneRegex, "رقم الهاتف غير صالح! يجب أن يبدأ بـ 09 ويتكون من 10 أرقام.").optional(),
   gender: z.enum(["ذكر", "انثى"]).optional(),
-  birth: z.coerce.date().optional(),
   email: z.string().email("البريد الإلكتروني غير صالح").min(3).max(100).optional(),
 });
 

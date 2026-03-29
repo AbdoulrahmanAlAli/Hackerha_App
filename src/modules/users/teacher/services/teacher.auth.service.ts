@@ -14,10 +14,11 @@ import {
 } from "../schemas/teacher.schema";
 import { zodFirstMessage } from "../../../../core/http/zodMessage";
 import { signAccessToken } from "../../../../shared/security/jwt";
+import { ICloudinaryFile } from "../../../../core/types/cloudinary.types";
 
 export class AuthTeacherService {
   // ~ Post => /api/hackit/ctrl/teacher/register ~ Create New Teacher
-  static async createNewTeacher(data: CreateTeacherInput) {
+  static async createNewTeacher(data: CreateTeacherInput, file?: ICloudinaryFile) {
     let parsed: CreateTeacherInput;
     try {
       parsed = createTeacherSchema.parse(data);
@@ -33,11 +34,12 @@ export class AuthTeacherService {
     if (byPhone) throw badRequest("رقم الهاتف مسجل مسبقاً");
     if (byEmail) throw badRequest("البريد الإلكتروني مسجل مسبقاً");
 
+
     const teacher = await Teacher.create({
+      profilePhoto: file?.path ? file.path : "https://i.postimg.cc/JzCB3CDX/Profile-Picture-Container-(2).png",
       fullName: parsed.fullName,
       phoneNumber: parsed.phoneNumber,
       gender: parsed.gender,
-      birth: parsed.birth,
       email: parsed.email,
       password: parsed.password, // سيُشفّر داخل pre-save
       about: parsed.about ?? "",

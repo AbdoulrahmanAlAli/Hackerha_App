@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAdmin } from "../../../../core/middlewares/requireRole.middleware";
 import { authTeacherController } from "../controllers/teacher.auth.controller"; // عدّل
 import verifyToken from "../../../../core/middlewares/verifyToken";
+import { upload } from "../../../../core/middlewares/upload.middleware";
 
 const router = Router();
 
@@ -10,6 +11,7 @@ router.post(
   "/register",
   verifyToken,
   requireAdmin,
+  upload,
   authTeacherController.createNewTeacher
 );
 
