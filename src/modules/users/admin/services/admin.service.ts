@@ -47,7 +47,7 @@ export class AdminService {
 
     const admin = await Admin.create(parsed);
 
-    const token = signAccessToken({ id: admin.id, role: "admin" });
+    const token = signAccessToken({ id: admin.id, role: "admin", university: "الكل" });
 
     return {
       message: "تم إنشاء الحساب بنجاح",
