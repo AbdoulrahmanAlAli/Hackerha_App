@@ -44,6 +44,8 @@ export const updateExamSchema = z.object({
     .string()
     .regex(durationRegex, "المدة يجب أن تكون بالتنسيق 00:00 أو 00:00:00")
     .optional(),
+
+  available: z.boolean().optional(),
 });
 
 export type CreateExamInput = z.infer<typeof createExamSchema>;

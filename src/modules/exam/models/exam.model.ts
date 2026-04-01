@@ -38,6 +38,7 @@ const ExamSchema = new Schema<IExam>(
         message: "المدة يجب أن تكون بالتنسيق 00:00 أو 00:00:00",
       },
     },
+    available: { type: Boolean, default: false },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

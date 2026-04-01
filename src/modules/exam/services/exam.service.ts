@@ -77,12 +77,11 @@ export class ExamService {
     const exam = await Exam.findById(examId);
     if (!exam) throw notFound("الاختبار غير موجود");
 
-    if (parsed.courseId !== undefined) exam.courseId = parsed.courseId as any;
-    if (parsed.title !== undefined) exam.title = parsed.title;
-    if (parsed.totalMark !== undefined) exam.totalMark = parsed.totalMark;
-    if (parsed.duration !== undefined) exam.duration = parsed.duration;
-
-    await exam.save();
+    const updated = await Exam.findByIdAndUpdate(examId, parsed, {
+      new: true,
+      runValidators: true,
+    }).select("-__v");
+    if (!updated) throw notFound("فشل تحديث الامتحان");
 
     return { message: "تم تحديث الامتحان بنجاح" };
   }

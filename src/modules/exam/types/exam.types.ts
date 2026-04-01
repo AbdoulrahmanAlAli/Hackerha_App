@@ -7,6 +7,8 @@ export interface IExam extends Document {
   title: string;
   totalMark: number;
 
+  available: boolean;
+  
   // "00:00" أو "00:00:00"
   duration: string;
 
