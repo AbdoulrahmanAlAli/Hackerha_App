@@ -19,8 +19,16 @@ const numRequired = (msg: string) =>
     z.number({ message: msg })
   );
 
+const examNumber = z.preprocess(
+    toNumber,
+    z
+      .number({ error: "رقم الامتحان مطلوب" })
+      .int("رقم الامتحان يجب أن يكون رقمًا صحيحًا")
+      .min(1, "رقم الامتحان يجب أن يكون 1 أو أكثر")
+);
+  
 export const createExamSchema = z.object({
-  number: numRequired("رقم الامتحان مطلوب"),
+  number: examNumber.optional(),
   courseId: objectId,
   title: z
     .string()

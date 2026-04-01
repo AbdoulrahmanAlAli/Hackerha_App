@@ -32,7 +32,7 @@ const nonEmptyString = (msg: string) =>
 // note optional max 500
 // duration required min 1
 export const createSessionSchema = z.object({
-  number: sessionNumber,
+  number: sessionNumber.optional(),
   courseId: objectId, // كان string في joi، لكن الأفضل يتحقق أنه ObjectId
   video: nonEmptyString("رابط الفيديو مطلوب"),
   name: nonEmptyString("اسم الجلسة مطلوب").max(100, "الاسم يجب ألا يتجاوز 100 حرف"),
