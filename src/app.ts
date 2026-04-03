@@ -70,6 +70,10 @@ import routeAds from "./modules/ads/routes/ads.routes";
 
 import routeSocial from "./modules/social/routes/social.routes";
 
+// ============= Setting =============
+
+import routeSetting from "./modules/setting/routes/setting.route";
+
 export function createApp() {
   const app = express();
 
@@ -148,6 +152,11 @@ export function createApp() {
 
   // Social routes
   app.use("/api/hackit/ctrl/social", routeSocial);
+
+  // ============= Social =============
+
+  // Setting routes
+  app.use("/api/hackit/ctrl/setting", routeSetting);
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);

@@ -48,7 +48,7 @@ export class StudentService {
     if (existing.suspended) throw badRequest("حسابك مقيد");
 
     const student = await Student.findById(id).select(
-      "-suspended -available -resetPass -createdAt -updatedAt -__v -favoriteCourses -favoriteSessions -favoriteBank -enrolledCourses -banks -contents",
+      "-suspended -available -resetPass -createdAt -updatedAt -__v -favoriteCourses -favoriteSessions -favoriteBank -enrolledCourses -banks",
     );
 
     if (!student) throw notFound("الطالب غير موجود");

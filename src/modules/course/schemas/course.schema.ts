@@ -12,7 +12,7 @@ export const academicYears = [
 
 export const semesters = ["الفصل الأول", "الفصل الثاني"] as const;
 
-export const University_branch = ["دمشق", "حلب"] as const
+export const University_branch = ["دمشق", "حلب"] as const;
 
 // ===== Helpers =====
 export const objectId = z
@@ -20,7 +20,22 @@ export const objectId = z
   .min(1, "مطلوب")
   .regex(/^[0-9a-fA-F]{24}$/, "معرف غير صالح");
 
-// discount (Create)
+export const objectIdArray = z.preprocess((v) => {
+  if (Array.isArray(v)) return v;
+
+  if (typeof v === "string") {
+    try {
+      const parsed = JSON.parse(v);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      return [v];
+    }
+  }
+
+  return v;
+}, z.array(objectId).min(1, "يجب اختيار أستاذ واحد على الأقل")); 
+
+// ===== discount (Create) =====
 const discountCreateSchema = z
   .object({
     dis: z.boolean(),
@@ -40,7 +55,7 @@ const discountCreateSchema = z
     }
   });
 
-// discount (Update)
+// ===== discount (Update) =====
 const discountUpdateSchema = z
   .object({
     dis: z.boolean().optional(),
@@ -51,7 +66,6 @@ const discountUpdateSchema = z
       .optional(),
   })
   .superRefine((v, ctx) => {
-    // إذا المستخدم فعّل التخفيض أثناء التحديث لازم يرسل rate
     if (v.dis === true && v.rate === undefined) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -74,12 +88,13 @@ export const createCourseSchema = z
       .min(1, "وصف الكورس مطلوب")
       .max(500, "الوصف يجب ألا يتجاوز 500 حرف"),
 
-    // بعد normalize لازم تكون number فعلي
     price: z.number().min(0, "السعر لا يمكن أن يكون سالبًا"),
 
-    teacher: objectId,
+    teachers: objectIdArray,
 
-    universityBranch: z.enum(University_branch, { message: "يجب أن يكون حلب أو دمشق" }),
+    universityBranch: z.enum(University_branch, {
+      message: "يجب أن يكون حلب أو دمشق",
+    }),
 
     year: z.enum(academicYears, {
       message: "يجب ان يكون من السنة الاولى الى السنة الخامسة",
@@ -106,7 +121,6 @@ export const createCourseSchema = z
     discount: discountCreateSchema,
   })
   .superRefine((data, ctx) => {
-    // لو free=true السعر لازم يصير 0 (أو نسمح ونصفره بالـ service)
     if (data.free === true && data.price !== 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -139,7 +153,9 @@ export const updateCourseSchema = z
 
     fakeCount: z.number().optional(),
 
-    universityBranch: z.enum(University_branch, { message: "يجب أن يكون حلب أو دمشق" }).optional(),
+    universityBranch: z
+      .enum(University_branch, { message: "يجب أن يكون حلب أو دمشق" })
+      .optional(),
 
     year: z
       .enum(academicYears, {
@@ -148,12 +164,18 @@ export const updateCourseSchema = z
       .optional(),
 
     semester: z
-      .enum(semesters, { message: "يجب ان يكون الفصل الأول او الفصل الثاني" })
+      .enum(semesters, {
+        message: "يجب ان يكون الفصل الأول او الفصل الثاني",
+      })
       .optional(),
 
     type: z
-      .enum(courseTypes, { message: "يجب ان يكون نظري او عملي أو شاملة" })
+      .enum(courseTypes, {
+        message: "يجب ان يكون نظري او عملي أو شاملة",
+      })
       .optional(),
+
+    teachers: objectIdArray.optional(),
 
     discount: discountUpdateSchema.optional(),
 
@@ -169,7 +191,6 @@ export const updateCourseSchema = z
     maintenance: z.boolean().optional(),
   })
   .superRefine((v, ctx) => {
-    // إذا صار مدفوع وسعره 0 ممنوع
     if (v.free === false && v.price === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -178,7 +199,6 @@ export const updateCourseSchema = z
       });
     }
 
-    // لو free=true والسعر موجود ولا يساوي 0
     if (v.free === true && v.price !== undefined && v.price !== 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

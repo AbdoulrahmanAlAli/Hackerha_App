@@ -19,11 +19,11 @@ import { Exam } from "../../exam/models/exam.model";
 import { Actor } from "../types/course.types";
 import { Question } from "../../exam/group/question/models/question.model";
 import { Group } from "../../exam/group/models/group.model";
+import { SingleQuestion } from "../../exam/single-question/models/question.model";
 
 export class CtrlCourseService {
   // ~ Post => /api/hackit/ctrl/course
   static async createCourse(data: any, file: ICloudinaryFile) {
-    console.log(data);
     if (!file) throw badRequest("صورة الكورس مطلوبة");
 
     let parsed: any;
@@ -33,27 +33,41 @@ export class CtrlCourseService {
       throw badRequest(zodFirstMessage(e));
     }
 
-    const teacher = await Teacher.findById(parsed.teacher);
-    if (!teacher) throw notFound("المعلم غير موجود");
+    const teachers = await Teacher.find({
+      _id: { $in: parsed.teachers },
+    })
+      .select("_id")
+      .lean();
 
-    const exists = await Course.findOne({ name: parsed.name });
-    if (exists) throw badRequest("الكورس موجود بالفعل");
+    if (teachers.length !== parsed.teachers.length) {
+      throw notFound("واحد أو أكثر من الأساتذة غير موجود");
+    }
 
-    if (parsed.free === true) parsed.price = 0;
+    if (parsed.free === true) {
+      parsed.price = 0;
+    }
 
     const discount = {
       dis: parsed.discount.dis,
       rate: parsed.discount.dis ? parsed.discount.rate ?? 0 : 0,
     };
 
-    await Course.create({
-      ...parsed,
-      discount,
-      image: file.path,
-    });
+    try {
+      await Course.create({
+        ...parsed,
+        discount,
+        image: file.path,
+      });
+    } catch (error: any) {
+      if (error?.code === 11000) {
+        throw badRequest("الكورس موجود بالفعل");
+      }
+      throw error;
+    }
 
     return { message: "تم إنشاء الكورس بنجاح" };
   }
+
 
   // ~ Get => /api/hackit/ctrl/course/:id ~ get single course
   static async getCourseById(courseId: string, actor: Actor) {
@@ -175,7 +189,7 @@ export class CtrlCourseService {
     const courses = await Course.find(filter)
       .sort({ createdAt: -1 })
       .select("-__v -whatsapp -students")
-      .populate("teacher")
+      .populate("teachers")
       .lean();
 
     return courses.map((c: any) => ({
@@ -190,9 +204,15 @@ export class CtrlCourseService {
   }
 
   // ~ Put => /api/hackit/ctrl/course/:id ~ update course
-  static async updateCourse(courseId: string, data: any) {
-    if (!mongoose.isValidObjectId(courseId))
+    static async updateCourse(courseId: string, data: any, file?: ICloudinaryFile) {
+    if (!mongoose.isValidObjectId(courseId)) {
       throw badRequest("معرف الكورس غير صالح");
+    }
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      throw notFound("الكورس غير موجود");
+    }
 
     let parsed: any;
     try {
@@ -201,31 +221,53 @@ export class CtrlCourseService {
       throw badRequest(zodFirstMessage(e));
     }
 
-    const course = await Course.findById(courseId);
-    if (!course) throw notFound("الكورس غير موجود");
+    // إذا تم إرسال teachers بالتحديث
+    if (parsed.teachers) {
+      const teachers = await Teacher.find({
+        _id: { $in: parsed.teachers },
+      }).select("_id");
 
-    if (parsed.free === true) parsed.price = 0;
-    if (parsed.free === false && parsed.price === 0)
-      throw badRequest("لا يمكن أن يكون الكورس مدفوعاً وسعره صفر");
+      if (teachers.length !== parsed.teachers.length) {
+        throw notFound("واحد أو أكثر من الأساتذة غير موجود");
+      }
+    }
 
+    // مجاني => السعر صفر
+    if (parsed.free === true) {
+      parsed.price = 0;
+    }
+
+    // تجهيز discount بشكل متوافق مع البيانات القديمة والحالية
     if (parsed.discount) {
       parsed.discount = {
-        dis: parsed.discount.dis ?? course.discount.dis,
+        dis: parsed.discount.dis ?? course.discount?.dis ?? false,
         rate:
-          parsed.discount.dis ?? course.discount.dis
-            ? parsed.discount.rate ?? course.discount.rate ?? 0
+          (parsed.discount.dis ?? course.discount?.dis) === true
+            ? parsed.discount.rate ?? course.discount?.rate ?? 0
             : 0,
       };
     }
 
-    const updated = await Course.findByIdAndUpdate(courseId, parsed, {
+    const updateData: any = {
+      ...parsed,
+    };
+
+    if (file?.path) {
+      updateData.image = file.path;
+    }
+
+    const updated = await Course.findByIdAndUpdate(courseId, updateData, {
       new: true,
       runValidators: true,
-    }).select("-__v");
-    if (!updated) throw notFound("فشل تحديث الكورس");
+    }).populate("teachers", "name image");
+
+    if (!updated) {
+      throw notFound("فشل تحديث الكورس");
+    }
 
     return { message: "تم تحديث الكورس بنجاح" };
   }
+
 
   // ~ Delete => /api/hackit/ctrl/course/:id ~ delete course
   static async deleteCourse(courseId: string) {
@@ -246,6 +288,9 @@ export class CtrlCourseService {
         .select("_id")
         .lean();
       const groupIds = groups.map((g) => g._id);
+
+      // 4) احذف SingleQuestions المرتبطة بالامتحانات
+      await SingleQuestion.deleteMany({ examId: { $in: examIds } });
 
       // 4) احذف الأسئلة ثم المجموعات ثم الامتحانات
       if (groupIds.length) {

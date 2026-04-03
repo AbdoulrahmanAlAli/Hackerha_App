@@ -1,6 +1,7 @@
 import mongoose, { Document, Types } from "mongoose";
 
 export const courseTypes = ["نظري", "عملي", "شاملة"] as const;
+
 export const courseYears = [
   "السنة الأولى",
   "السنة الثانية",
@@ -19,14 +20,17 @@ export type CourseSemester = (typeof courseSemesters)[number];
 
 export interface ICourseDiscount {
   dis: boolean;
-  rate?: number; // required when dis=true (validated in Zod)
+  rate?: number;
 }
 
 export interface ICourse extends Document {
   image: string;
   name: string;
-  teacher: Types.ObjectId;
-  universityBranch:University_Branch;
+
+  // صار مجموعة أساتذة بدل أستاذ واحد
+  teachers: Types.ObjectId[];
+
+  universityBranch: University_Branch;
 
   description: string;
   price: number;
@@ -50,10 +54,9 @@ export interface ICourse extends Document {
   free: boolean;
 
   students: Types.ObjectId[];
-
   fakeCount: number;
 
-  // virtuals (populated)
+  // virtuals
   sessions?: Types.ObjectId[];
   exams?: Types.ObjectId[];
   comments?: Types.ObjectId[];
@@ -64,12 +67,11 @@ export interface ICourse extends Document {
 
 export type CourseDocument = ICourse & mongoose.Document;
 
-// inputs for services
 export type CreateCourseInput = {
   image: string;
   name: string;
-  universityBranch:University_Branch;
-  teacher: string; // ObjectId string
+  teachers: string[];
+  universityBranch: University_Branch;
   description: string;
   price: number;
   note?: string;
@@ -90,8 +92,6 @@ export type UpdateCourseInput = Partial<CreateCourseInput> & {
   rating?: number;
 };
 
-// Actor for Get Single Course
 export type Actor =
   | { role: "student"; id: string }
   | { role: "admin" | "teacher"; id?: string };
-

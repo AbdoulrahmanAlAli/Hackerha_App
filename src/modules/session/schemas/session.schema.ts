@@ -24,13 +24,6 @@ const nonEmptyString = (msg: string) =>
   z.string().min(1, msg);
 
 // ===== Create Session =====
-// Joi القديم:
-// number required
-// courseId required
-// video required
-// name required max 100
-// note optional max 500
-// duration required min 1
 export const createSessionSchema = z.object({
   number: sessionNumber.optional(),
   courseId: objectId, // كان string في joi، لكن الأفضل يتحقق أنه ObjectId

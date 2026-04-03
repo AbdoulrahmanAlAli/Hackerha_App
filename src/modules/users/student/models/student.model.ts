@@ -117,7 +117,6 @@ const StudentSchema = new Schema<IStudent>(
     ],
 
     banks: [{ type: Schema.Types.ObjectId, ref: "Bank", default: [] }],
-    contents: [{ type: Schema.Types.ObjectId, ref: "Content", default: [] }],
     courses: [{ type: Schema.Types.ObjectId, ref: "Course", default: [] }],
     sessions: [{ type: Schema.Types.ObjectId, ref: "Session", default: [] }],
     exams: [{ type: Schema.Types.ObjectId, ref: "Session", default: [] }],

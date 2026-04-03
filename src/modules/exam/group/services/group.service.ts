@@ -88,6 +88,8 @@ export class GroupService {
     if (!mongoose.isValidObjectId(id))
       throw badRequest("معرف المجموعة غير صالح");
 
+    await Question.deleteMany({ groupId: id });
+
     // هذا يشغل pre("findOneAndDelete") داخل GroupModel لحذف الأسئلة
     const deleted = await Group.findOneAndDelete({ _id: id });
     if (!deleted) throw notFound("المجموعة غير موجودة");

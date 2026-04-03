@@ -11,6 +11,7 @@ import { Course } from "../../course/models/course.model";
 import { Session } from "../models/session.model";
 import { VideoTokenService } from "../security_video/videoToken.service";
 import { Exam } from "../../exam/models/exam.model";
+import { File } from "../files/models/file.model";
 
 export class CtrlSessionService {
   // ~ Post => /api/hackit/ctrl/sessions ~ Create Session
@@ -113,6 +114,8 @@ export class CtrlSessionService {
   // ~ Delete => /api/hackit/ctrl/sessions/:id  ~ Delete Session
   static async deleteSession(id: string) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف الجلسة غير صالح");
+
+    await File.deleteMany({ sessionId: id })
 
     const session = await Session.findById(id);
     if (!session) throw notFound("الجلسة غير موجودة");
