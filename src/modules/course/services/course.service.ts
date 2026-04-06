@@ -75,7 +75,7 @@ export class CtrlCourseService {
       throw badRequest("معرف الكورس غير صالح");
 
     const course = await Course.findById(courseId)
-      .populate("teacher")
+      .populate("teachers")
       .populate({ path: "sessions", options: { sort: { number: 1 } } })
       .populate({ path: "exams", options: { sort: { number: 1 } } })
       .populate("students", "firstName lastName phoneNumber universityNumber email")
