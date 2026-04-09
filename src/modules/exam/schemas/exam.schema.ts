@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const durationRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
+export const durationRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
 
 const objectId = z
   .string()
@@ -40,7 +40,7 @@ export const createExamSchema = z.object({
   duration: z
     .string()
     .min(1, "المدة مطلوبة")
-    .regex(durationRegex, "المدة يجب أن تكون بالتنسيق 00:00 أو 00:00:00"),
+    .regex(durationRegex, "المدة يجب أن تكون بالتنسيق 00:00"),
 });
 
 export const updateExamSchema = z.object({
@@ -50,7 +50,7 @@ export const updateExamSchema = z.object({
   totalMark: z.preprocess(toNumber, z.number().min(0)).optional(),
   duration: z
     .string()
-    .regex(durationRegex, "المدة يجب أن تكون بالتنسيق 00:00 أو 00:00:00")
+    .regex(durationRegex, "المدة يجب أن تكون بالتنسيق 00:00")
     .optional(),
 
   available: z.boolean().optional(),
