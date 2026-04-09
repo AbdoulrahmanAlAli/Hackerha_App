@@ -1,0 +1,52 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: hackit_app_prod
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      PORT: 1000
+      MONGO_URI: mongodb://root:${MONGO_ROOT_PASSWORD}@mongo:27017/hackit_db?authSource=admin
+    depends_on:
+      - mongo
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:1000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mongo:
+    image: mongo:7
+    container_name: hackit_mongo_prod
+    command: ["--auth"]
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    volumes:
+      - mongo_data_prod:/data/db
+
+  caddy:
+    image: caddy:2
+    container_name: hackit_caddy_prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data_prod:/data
+      - caddy_config_prod:/config
+    depends_on:
+      - app
+
+volumes:
+  mongo_data_prod:
+  caddy_data_prod:
+  caddy_config_prod:

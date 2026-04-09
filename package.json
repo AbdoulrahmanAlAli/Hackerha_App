@@ -2,7 +2,7 @@
   "name": "Hack_It_App_Backend",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/server.ts",
+  "main": "dist/server.js",
   "scripts": {
     "dev": "pnpm exec nodemon",
     "build": "tsc -p tsconfig.json",

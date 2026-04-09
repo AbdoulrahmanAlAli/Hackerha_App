@@ -1,0 +1,67 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: hackit_app_dev
+    working_dir: /app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: development
+      PORT: 1000
+      MONGO_URI: mongodb://root:example@mongo:27017/hackit_db?authSource=admin
+      CHOKIDAR_USEPOLLING: "true"
+    ports:
+      - "1000:1000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:7
+    container_name: hackit_mongo_dev
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data_dev:/data/db
+
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: hackit_mongo_express_dev
+    restart: unless-stopped
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/?authSource=admin
+      ME_CONFIG_BASICAUTH: "false"
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongo
+
+  caddy:
+    image: caddy:2
+    container_name: hackit_caddy_dev
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile.dev:/etc/caddy/Caddyfile
+      - caddy_data_dev:/data
+      - caddy_config_dev:/config
+    depends_on:
+      - app
+
+volumes:
+  mongo_data_dev:
+  caddy_data_dev:
+  caddy_config_dev:
