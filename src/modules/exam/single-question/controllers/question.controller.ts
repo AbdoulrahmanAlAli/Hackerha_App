@@ -73,10 +73,27 @@ class QuestionController {
 
   // controllers/question.controller.ts
   deleteMultipleQuestions = asyncHandler(async (req: Request, res: Response) => {
-    const { ids } = req.body; // Expecting { ids: ["id1", "id2", "id3"] }
+    console.log("Request body:", req.body); // للتأكد من وصول البيانات
+    console.log("IDs:", req.body.ids);
     
+    const { ids } = req.body;
     const result = await SingleQuestionService.deleteMultipleQuestions(ids);
     res.status(200).json(result);
+  });
+
+  // إعادة ترتيب الأسئلة حسب ترتيب الـ IDs في المصفوفة
+  reorderQuestions = asyncHandler(async (req: Request, res: Response) => {
+    const { examId } = req.params;
+    const { questionIds } = req.body;
+    
+    // استدعاء خدمة إعادة الترتيب
+    const result = await SingleQuestionService.reorderQuestionsByArray(examId, questionIds);
+    
+    // إرجاع النتيجة
+    res.status(200).json({
+      success: true,
+      data: result
+    });
   });
 }
 

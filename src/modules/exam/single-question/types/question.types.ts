@@ -9,6 +9,7 @@ export interface IAnswer {
 
 export interface ISingleQuestion {
   examId: Types.ObjectId;
+  number: number;
   title?: string;
   subTitle?: string;
   image?: string;

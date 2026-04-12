@@ -14,9 +14,24 @@ const directionSchema = z.enum(["ltr", "rtl"], {
   message: "الاتجاه يجب أن يكون إما ltr أو rtl",
 });
 
+const toNumber = (v: unknown) => {
+  if (typeof v === "number") return v;
+  if (typeof v === "string" && v.trim() !== "") return Number(v);
+  return v;
+};
+
+const examNumber = z.preprocess(
+    toNumber,
+    z
+      .number({ error: "رقم الامتحان مطلوب" })
+      .int("رقم الامتحان يجب أن يكون رقمًا صحيحًا")
+      .min(1, "رقم الامتحان يجب أن يكون 1 أو أكثر")
+);
+  
 // create
 export const createSingleQuestionSchema = z.object({
   examId: objectId,
+  number: examNumber.optional(),
   title: z.string().optional().default(""),
   subTitle: z.string().optional().default(""),
   image: z.string().url("يجب أن يكون رابط الصورة صحيحًا").optional(),

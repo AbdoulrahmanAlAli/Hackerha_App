@@ -4,33 +4,43 @@ import { upload } from "../../../../core/middlewares/upload.middleware";
 import { questionController } from "../controllers/question.controller";
 import { requireAdmin } from "../../../../core/middlewares/requireRole.middleware";
 
-
 const router: Router = Router();
 
-// Create question (Admin)
+// ===== SPECIFIC ROUTES (must come first) =====
+
+// Delete multiple questions (Admin)
 router
-  .route("/")
-  .post(
+  .route("/multi-delete")
+  .delete(
     verifyToken,
     requireAdmin,
-    upload,
-    questionController.createQuestion
+    questionController.deleteMultipleQuestions
   );
-
-// Get question by id (Auth)
-router.route("/:id").get(verifyToken, questionController.getQuestionById);
 
 // Get questions by examId (Auth)
 router
   .route("/exam/:examId")
   .get(verifyToken, questionController.getQuestionsByExamId);
 
-// Update question (Admin)
-router
-  .route("/:id")
-  .put(verifyToken, requireAdmin, questionController.updateQuestion);
+// Delete questions by examId (Admin)
+router  
+  .route("/exam/:examId")
+  .delete(
+    verifyToken,
+    requireAdmin,
+    questionController.deleteQuestionsByexamId
+  );
 
-// ✅ NEW: Update answers only (Admin)
+// Reorder questions (Admin)
+router
+  .route("/reorder/:examId")
+  .put(
+    verifyToken,
+    requireAdmin,
+    questionController.reorderQuestions
+  );
+
+// Update answers only (Admin)
 router
   .route("/:id/answers")
   .patch(verifyToken, requireAdmin, questionController.updateAnswers);
@@ -45,20 +55,6 @@ router
     questionController.updateQuestionImage
   );
 
-// Delete question (Admin)
-router
-  .route("/:id")
-  .delete(verifyToken, requireAdmin, questionController.deleteQuestion);
-
-// Delete questions by group (Admin)
-router  
-  .route("/exam/:examId")
-  .delete(
-    verifyToken,
-    requireAdmin,
-    questionController.deleteQuestionsByexamId
-  );
-
 // Delete question image (Admin)
 router
   .route("/:id/image")
@@ -68,14 +64,27 @@ router
     questionController.deleteQuestionImage
   );
 
-  // routes/question.routes.ts
-  // Delete multiple questions (Admin)
+// Create question (Admin)
 router
-  .route("/multi-delete")
-  .delete(
+  .route("/")
+  .post(
     verifyToken,
     requireAdmin,
-    questionController.deleteMultipleQuestions
+    upload,
+    questionController.createQuestion
   );
+
+// Get question by id (Auth)
+router.route("/:id").get(verifyToken, questionController.getQuestionById);
+
+// Update question (Admin)
+router
+  .route("/:id")
+  .put(verifyToken, requireAdmin, questionController.updateQuestion);
+
+// Delete question (Admin)
+router
+  .route("/:id")
+  .delete(verifyToken, requireAdmin, questionController.deleteQuestion);
 
 export default router;

@@ -52,8 +52,11 @@ export class ExamService {
   static async getExamsByCourseId(courseId: string) {
     if (!mongoose.isValidObjectId(courseId)) throw badRequest("معرف غير صالح");
 
+
+    
     // وجود الكورس (اختياري لكن مفيد)
-    const course = await Course.findById(courseId).select("_id");
+    const course = await Course.findById(courseId).select("_id")
+    console.log(course)
     if (!course) throw notFound("الكورس غير موجود");
 
     const exams = await Exam.find({ courseId })

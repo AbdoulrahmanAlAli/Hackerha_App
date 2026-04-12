@@ -19,6 +19,7 @@ const SingleQuestionSchema = new Schema<ISingleQuestion>(
       required: true,
       index: true,
     },
+    number: { type: Number, default: 0 },
     title: { type: String, trim: true, default: "" },
     subTitle: { type: String, trim: true, default: "" },
     image: { type: String, trim: true, default: "" },

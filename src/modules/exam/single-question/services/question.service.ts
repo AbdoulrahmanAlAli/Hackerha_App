@@ -16,7 +16,7 @@ import { Exam } from "../../models/exam.model";
 export class SingleQuestionService {
   // ===== helpers =====
   private static assertObjectId(id: string, msg: string) {
-    if (!mongoose.isValidObjectId(id)) throw badRequest(msg);
+    if (!mongoose.Types.ObjectId.isValid(id)) throw badRequest(msg);
   }
 
   private static ensureHasCorrectAnswer(answers: { correct: boolean }[]) {
@@ -35,17 +35,23 @@ export class SingleQuestionService {
     }
 
     const examId = parsed.examId as string;
-    this.assertObjectId(examId, "معرف السؤال غير صالح");
+    this.assertObjectId(examId, "معرف الامتحان غير صالح");
 
     const exam = await Exam.findById(examId);
-    if (!exam) throw notFound("السؤال غير موجودة");
+    if (!exam) throw notFound("الامتحان غير موجود");
 
-    // شرط إجابة صحيحة واحدة (كان موجود عندك في service القديم)
+    // شرط إجابة صحيحة واحدة
     this.ensureHasCorrectAnswer(parsed.answers);
 
-    const image = file?.path;
+    // جلب أكبر رقم سؤال في هذا الامتحان
+    const lastQuestion = await SingleQuestion.findOne({ examId: exam.id })
+      .sort({ number: -1 })
+      .select('number');
+    
+    const maxNumber = lastQuestion?.number || 0;
+    const newNumber = maxNumber + 1;
 
-    console.log('here')
+    const image = file?.path;
 
     const created = await SingleQuestion.create({
       examId,
@@ -56,9 +62,10 @@ export class SingleQuestionService {
       mark: parsed.mark,
       note: parsed.note ?? "",
       direction: parsed.direction ?? "rtl",
+      number: newNumber, // ✅ يتم إضافة الرقم تلقائياً
     });
 
-
+    console.log(created)
     await created.populate("examId", "mainTitle");
 
     return { id: created.id, message: "تم إنشاء السؤال بنجاح" };
@@ -79,7 +86,7 @@ export class SingleQuestionService {
   static async getSingleQuestionsByExamId(examId: string) {
     this.assertObjectId(examId, "معرف المجموعة غير صالح");
 
-    const all = await SingleQuestion.find({ examId });
+    const all = await SingleQuestion.find({ examId }).sort({ number: 1, createdAt: 1 });;
 
     return all;
   }
@@ -164,33 +171,35 @@ export class SingleQuestionService {
     return { message: "تم حذف صورة السؤال بنجاح" };
   }
 
-  static async deleteMultipleQuestions(ids: string[]) {
-    // Validate all IDs
-    if (!ids || !Array.isArray(ids) || ids.length === 0) {
-      throw badRequest("يجب توفير مصفوفة من معرفات الأسئلة");
-    }
-      console.log(ids)
-
-    // Check each ID is valid
-    for (const id of ids) {
-      this.assertObjectId(id, "معرف السؤال غير صالح");
-    }
-
-    // Delete all questions
-    const result = await SingleQuestion.deleteMany({ 
-      _id: { $in: ids } 
-    });
-
-    if (result.deletedCount === 0) {
-      throw notFound("لم يتم العثور على الأسئلة المحددة");
-    }
-
-    return { 
-      message: "تم حذف الأسئلة بنجاح", 
-      deletedCount: result.deletedCount,
-      totalRequested: ids.length
-    };
+ static async deleteMultipleQuestions(ids: string[]) {
+  if (!ids || !Array.isArray(ids) || ids.length === 0) {
+    throw badRequest("يجب توفير مصفوفة من معرفات الأسئلة");
   }
+
+  // تنظيف الـ IDs من أي مسافات أو أحرف خاصة
+  const cleanIds = ids.map(id => id.trim());
+  
+  // التحقق من صحة كل ID
+  for (const id of cleanIds) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw badRequest(`معرف السؤال غير صالح: ${id}`);
+    }
+  }
+
+  const result = await SingleQuestion.deleteMany({ 
+    _id: { $in: cleanIds } 
+  });
+
+  if (result.deletedCount === 0) {
+    throw notFound("لم يتم العثور على الأسئلة المحددة");
+  }
+
+  return { 
+    message: "تم حذف الأسئلة بنجاح", 
+    deletedCount: result.deletedCount,
+    totalRequested: cleanIds.length
+  };
+}
 
 
   // PATCH /SingleQuestions/:id/answers
@@ -216,5 +225,53 @@ export class SingleQuestionService {
     await question.save();
 
     return { message: "تم تحديث الإجابات بنجاح" };
+  }
+
+  static async reorderQuestionsByArray(examId: string, questionIds: string[]) {
+     // التحقق من وجود questionIds
+    if (!questionIds || !Array.isArray(questionIds)) {
+      throw badRequest("يجب توفير مصفوفة من معرفات الأسئلة");
+    }
+
+    // تحقق من صحة الـ examId
+    this.assertObjectId(examId, "معرف الامتحان غير صالح");
+    
+    // تحقق من وجود الامتحان
+    const exam = await Exam.findById(examId);
+    if (!exam) throw notFound("الامتحان غير موجود");
+    
+    // تحقق من صحة الـ IDs
+    if (!Array.isArray(questionIds) || questionIds.length === 0) {
+      throw badRequest("يجب توفير مصفوفة من معرفات الأسئلة");
+    }
+    
+    // تحقق من صحة كل ID
+    for (const id of questionIds) {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw badRequest(`معرف السؤال غير صالح: ${id}`);
+      }
+    }
+    
+    // تحقق من أن جميع الأسئلة موجودة وتتبع نفس الامتحان
+    const questions = await SingleQuestion.find({
+      _id: { $in: questionIds },
+      examId: examId
+    });
+    
+    if (questions.length !== questionIds.length) {
+      throw badRequest("بعض الأسئلة غير موجودة أو لا تتبع هذا الامتحان");
+    }
+    
+    // تحديث الأرقام حسب موقع ID في المصفوفة
+    const updatePromises = questionIds.map((id, index) => 
+      SingleQuestion.findByIdAndUpdate(id, { number: index + 1 }) // الأرقام تبدأ من 1
+    );
+    
+    await Promise.all(updatePromises);
+    
+    return { 
+      message: "تم إعادة ترتيب الأسئلة بنجاح",
+      updatedCount: questionIds.length
+    };
   }
 }
