@@ -51,7 +51,7 @@ router
   .delete(verifyToken, requireAdmin, questionController.deleteQuestion);
 
 // Delete questions by group (Admin)
-router
+router  
   .route("/exam/:examId")
   .delete(
     verifyToken,
@@ -66,6 +66,16 @@ router
     verifyToken,
     requireAdmin,
     questionController.deleteQuestionImage
+  );
+
+  // routes/question.routes.ts
+  // Delete multiple questions (Admin)
+router
+  .route("/multi-delete")
+  .delete(
+    verifyToken,
+    requireAdmin,
+    questionController.deleteMultipleQuestions
   );
 
 export default router;

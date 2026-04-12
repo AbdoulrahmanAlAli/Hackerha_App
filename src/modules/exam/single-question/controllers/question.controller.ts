@@ -70,6 +70,14 @@ class QuestionController {
     const result = await SingleQuestionService.deleteSingleQuestionImage(req.params.id);
     res.status(200).json(result);
   });
+
+  // controllers/question.controller.ts
+  deleteMultipleQuestions = asyncHandler(async (req: Request, res: Response) => {
+    const { ids } = req.body; // Expecting { ids: ["id1", "id2", "id3"] }
+    
+    const result = await SingleQuestionService.deleteMultipleQuestions(ids);
+    res.status(200).json(result);
+  });
 }
 
 export const questionController = new QuestionController();

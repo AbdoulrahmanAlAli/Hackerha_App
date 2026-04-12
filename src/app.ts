@@ -36,12 +36,6 @@ import routeFiles from "./modules/session/files/routes/file.routes";
 // Exam Api
 import routeExam from "./modules/exam/routes/exam.routes";
 
-// Group Api
-import routeGroup from "./modules/exam/group/routes/group.routes";
-
-// Group Questions Api
-import routeGroupQuestion from "./modules/exam/group/question/routes/question.routes";
-
 // Single Questions Api
 import routeSingleQuestion from "./modules/exam/single-question/routes/question.routes"
 
@@ -115,12 +109,6 @@ export function createApp() {
 
   // Exam routes
   app.use("/api/hackit/ctrl/exam", routeExam);
-
-  // Group routes
-  app.use("/api/hackit/ctrl/groupExam", routeGroup);
-
-  // Group Questions routes
-  app.use("/api/hackit/ctrl/questionExam", routeGroupQuestion);
 
   // Single Questions routes
   app.use("/api/hackit/ctrl/singleQuestionExam", routeSingleQuestion);

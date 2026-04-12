@@ -1,6 +1,5 @@
 import mongoose, { Schema, Model } from "mongoose";
 import { IExam } from "../types/exam.types";
-import { Group } from "../group/models/group.model";
 
 // Duration Regex
 const DURATION_REGEX = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
@@ -42,13 +41,6 @@ const ExamSchema = new Schema<IExam>(
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
-
-// Virtual: groups
-ExamSchema.virtual("groups", {
-  ref: "Group",
-  localField: "_id",
-  foreignField: "examId",
-});
 
 // Virtual: groups
 ExamSchema.virtual("questions", {

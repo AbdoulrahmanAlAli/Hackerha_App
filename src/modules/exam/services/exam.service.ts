@@ -11,8 +11,6 @@ import {
 } from "../schemas/exam.schema";
 import { badRequest, notFound } from "../../../core/errors/httpErrors";
 import { zodFirstMessage } from "../../../core/http/zodMessage";
-import { Group } from "../group/models/group.model";
-import { Question } from "../group/question/models/question.model";
 import { SingleQuestion } from "../single-question/models/question.model";
 
 export class ExamService {
@@ -96,22 +94,8 @@ static async deleteExam(examId: string) {
     throw notFound("الاختبار غير موجود");
   }
 
-  // 1) اجلب groupIds
-  const groups = await Group.find({ examId: exam._id })
-    .select("_id")
-    .lean();
-  const groupIds = groups.map((g) => g._id);
-
   // 2) احذف SingleQuestions المرتبطة بالامتحان
   await SingleQuestion.deleteMany({ examId: exam._id });
-
-  // 3) احذف Questions المرتبطة بالمجموعات
-  if (groupIds.length) {
-    await Question.deleteMany({ groupId: { $in: groupIds } });
-  }
-
-  // 4) احذف المجموعات
-  await Group.deleteMany({ examId: exam._id });
 
   // 5) احذف الامتحان نفسه
   await Exam.findByIdAndDelete(examId);

@@ -164,7 +164,35 @@ export class SingleQuestionService {
     return { message: "تم حذف صورة السؤال بنجاح" };
   }
 
-  // ===== New: Answers endpoint =====
+  static async deleteMultipleQuestions(ids: string[]) {
+    // Validate all IDs
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      throw badRequest("يجب توفير مصفوفة من معرفات الأسئلة");
+    }
+      console.log(ids)
+
+    // Check each ID is valid
+    for (const id of ids) {
+      this.assertObjectId(id, "معرف السؤال غير صالح");
+    }
+
+    // Delete all questions
+    const result = await SingleQuestion.deleteMany({ 
+      _id: { $in: ids } 
+    });
+
+    if (result.deletedCount === 0) {
+      throw notFound("لم يتم العثور على الأسئلة المحددة");
+    }
+
+    return { 
+      message: "تم حذف الأسئلة بنجاح", 
+      deletedCount: result.deletedCount,
+      totalRequested: ids.length
+    };
+  }
+
+
   // PATCH /SingleQuestions/:id/answers
   static async updateAnswers(id: string, data: ISingleQuestion) {
     this.assertObjectId(id, "معرف السؤال غير صالح");

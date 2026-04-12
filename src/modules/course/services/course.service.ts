@@ -17,8 +17,6 @@ import { Student } from "../../users/student/models/student.model";
 import { Session } from "../../session/models/session.model";
 import { Exam } from "../../exam/models/exam.model";
 import { Actor } from "../types/course.types";
-import { Question } from "../../exam/group/question/models/question.model";
-import { Group } from "../../exam/group/models/group.model";
 import { SingleQuestion } from "../../exam/single-question/models/question.model";
 
 export class CtrlCourseService {
@@ -283,20 +281,8 @@ export class CtrlCourseService {
     const examIds = exams.map((e) => e._id);
 
     if (examIds.length) {
-      // 3) اجلب group IDs لكل الامتحانات
-      const groups = await Group.find({ examId: { $in: examIds } })
-        .select("_id")
-        .lean();
-      const groupIds = groups.map((g) => g._id);
-
       // 4) احذف SingleQuestions المرتبطة بالامتحانات
       await SingleQuestion.deleteMany({ examId: { $in: examIds } });
-
-      // 4) احذف الأسئلة ثم المجموعات ثم الامتحانات
-      if (groupIds.length) {
-        await Question.deleteMany({ groupId: { $in: groupIds } });
-        await Group.deleteMany({ _id: { $in: groupIds } });
-      }
 
       await Exam.deleteMany({ _id: { $in: examIds } });
     }

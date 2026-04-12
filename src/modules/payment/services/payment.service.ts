@@ -201,7 +201,7 @@ export class CtrlPaymentService {
 
   // ~ GET => Student payment codes
   static async getStudentPaymentCodes(universityNumber: number) {
-    return Payment.find({
+    await Payment.find({
       universityNumber,
       expiresAt: { $gt: new Date() },
     })
