@@ -204,7 +204,7 @@ export class CtrlPaymentService {
     return await Payment.find({
       universityNumber
     })
-      .populate("courseId", "name")
+      .populate("courseId", "name year semester")
       .sort({ createdAt: -1 })
       .lean();
   }
