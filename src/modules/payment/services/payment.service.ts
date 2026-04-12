@@ -202,8 +202,7 @@ export class CtrlPaymentService {
   // ~ GET => Student payment codes
   static async getStudentPaymentCodes(universityNumber: number) {
     return await Payment.find({
-      universityNumber,
-      expiresAt: { $gt: new Date() },
+      universityNumber
     })
       .populate("courseId")
       .sort({ createdAt: -1 })
