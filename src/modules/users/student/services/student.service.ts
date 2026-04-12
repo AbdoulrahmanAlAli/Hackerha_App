@@ -33,7 +33,7 @@ export class StudentService {
 
     return Student.find(query)
       .select(
-        "firstName lastName device_id phoneNumber email universityNumber universityBranch academicYear gender profilePhoto available suspended enrolledCourses createdAt",
+        "firstName lastName device_id phoneNumber email device_id_reset universityNumber universityBranch academicYear gender profilePhoto available suspended enrolledCourses createdAt",
       )
       .populate("enrolledCourses", "name")
       .sort({ createdAt: -1 })
