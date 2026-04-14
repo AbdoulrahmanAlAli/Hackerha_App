@@ -217,6 +217,7 @@ export class StudentService {
     // إنشاء كائن التحديث فقط للحقول الموجودة
     const updateData: any = {};
     if (parsed.fullName !== undefined) updateData.fullName = parsed.fullName;
+    if (parsed.gender !== undefined) updateData.gender = parsed.gender;
     if (parsed.available !== undefined) updateData.available = parsed.available;
     if (parsed.resetPass !== undefined) updateData.resetPass = parsed.resetPass;
     if (parsed.phoneNumber !== undefined) updateData.phoneNumber = parsed.phoneNumber;

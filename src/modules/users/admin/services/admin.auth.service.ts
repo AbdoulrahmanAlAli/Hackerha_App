@@ -37,7 +37,7 @@ export class AuthAdminService {
 
     const token = signAccessToken({
       id: admin.id,
-      role: "admin",
+      role: admin.role,
       university: "الكل"
     });
 

@@ -1,17 +1,13 @@
 import { z } from "zod";
 
 const phoneRegex = /^09[0-9]{8}$/;
+const adminRoles = ["admin", "dataEntry", "superAdmin"] as const;
 
 export const createAdminSchema = z.object({
-  firstName: z
+  fullName: z
     .string()
     .min(1, "الاسم مطلوب")
     .max(100, "الاسم يجب ألا يتجاوز 100 حرف"),
-
-  lastName: z
-    .string()
-    .min(1, "الاسم الاحير مطلوب")
-    .max(100, "الاسم الاحير يجب ألا يتجاوز 100 حرف"),
 
   phoneNumber: z
     .string()
@@ -30,19 +26,20 @@ export const createAdminSchema = z.object({
     .string()
     .min(8, "كلمة السر يجب أن تكون على الأقل 8 أحرف")
     .min(1, "كلمة السر مطلوبة"),
+
+   role: z
+    .enum(adminRoles, {
+      message: "الدور غير صالح: يجب أن يكون مدير، مشرف متميز، أو مدخل بيانات",
+    })
+    .default("dataEntry"),
 });
 
 export const updateAdminSchema = z
   .object({
-    firstName: z
+    fullName: z
       .string()
       .min(1, "الاسم مطلوب")
       .max(100, "الاسم يجب ألا يتجاوز 100 حرف")
-      .optional(),
-    lastName: z
-      .string()
-      .min(1, "الاسم الاحير مطلوب")
-      .max(100, "الاسم الاحير يجب ألا يتجاوز 100 حرف")
       .optional(),
     phoneNumber: z
       .string()
@@ -55,6 +52,11 @@ export const updateAdminSchema = z
     password: z
       .string()
       .min(8, "كلمة السر يجب أن تكون على الأقل 8 أحرف")
+      .optional(),
+    role: z
+      .enum(adminRoles, {
+        message: "الدور غير صالح: يجب أن يكون مدير، مشرف متميز، أو مدخل بيانات",
+      })
       .optional(),
   })
   .refine((obj) => Object.keys(obj).length > 0, {

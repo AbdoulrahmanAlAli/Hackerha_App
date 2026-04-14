@@ -70,7 +70,7 @@ export class CtrlPaymentService {
       price: parsed.price,
       courseId: parsed.courseId,
       studentId: student._id,
-      adminName: admin.firstName + " " + admin.lastName,
+      adminName: admin.fullName + " " + admin.fullName,
       studentNumber: student.phoneNumber,
       expiresAt,
     });

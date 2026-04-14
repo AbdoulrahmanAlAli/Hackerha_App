@@ -36,8 +36,7 @@ export class AdminService {
         Admin.findOne({ phoneNumber: parsed.phoneNumber }),
         Admin.findOne({ email: parsed.email }),
         Admin.findOne({
-          firstName: parsed.firstName,
-          lastName: parsed.lastName,
+          fullName: parsed.fullName
         }),
       ]);
 
@@ -47,15 +46,14 @@ export class AdminService {
 
     const admin = await Admin.create(parsed);
 
-    const token = signAccessToken({ id: admin.id, role: "admin", university: "الكل" });
+    const token = signAccessToken({ id: admin.id, role: admin.role, university: "الكل" });
 
     return {
       message: "تم إنشاء الحساب بنجاح",
       token,
       admin: {
         id: admin.id,
-        firstName: admin.firstName,
-        lastName: admin.lastName,
+        fullName: admin.fullName,
         email: admin.email,
         phoneNumber: admin.phoneNumber,
       },
@@ -105,18 +103,16 @@ export class AdminService {
     }
 
     // Duplicate username (firstName + lastName) فقط إذا الاثنين موجودين
-    if (parsed.firstName && parsed.lastName) {
+    if (parsed.fullName) {
       const existingUsername = await Admin.findOne({
-        firstName: parsed.firstName,
-        lastName: parsed.lastName,
+        fullName: parsed.fullName,
         _id: { $ne: id },
       });
       if (existingUsername) throw badRequest("اسم المستخدم موجود مسبقاً");
     }
 
     // تحديث الحقول الموجودة فقط
-    if (parsed.firstName) admin.firstName = parsed.firstName;
-    if (parsed.lastName) admin.lastName = parsed.lastName;
+    if (parsed.fullName) admin.fullName = parsed.fullName;
     if (parsed.email) admin.email = parsed.email;
     if (parsed.phoneNumber) admin.phoneNumber = parsed.phoneNumber;
 

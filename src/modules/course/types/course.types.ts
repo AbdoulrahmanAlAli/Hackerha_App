@@ -91,7 +91,3 @@ export type UpdateCourseInput = Partial<CreateCourseInput> & {
   fakeCount?: number;
   rating?: number;
 };
-
-export type Actor =
-  | { role: "student"; id: string }
-  | { role: "admin" | "teacher"; id?: string };

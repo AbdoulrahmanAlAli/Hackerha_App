@@ -96,6 +96,7 @@ export const updateImportantStudentSchema = z.object({
     .optional(),
 
   phoneNumber: z.string().min(1, "الرقم مطلوب").optional(),
+  gender: z.enum(genders, { message: "يحب أن يكون ذكر أو انثى" }).optional(),
   academicYear: z
     .enum(academicYears, {
       message: "يجب ان يكون من السنة الاولى الى السنة الخامسة",

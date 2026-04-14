@@ -16,7 +16,6 @@ import { Teacher } from "../../users/teacher/models/teacher.model";
 import { Student } from "../../users/student/models/student.model";
 import { Session } from "../../session/models/session.model";
 import { Exam } from "../../exam/models/exam.model";
-import { Actor } from "../types/course.types";
 import { SingleQuestion } from "../../exam/single-question/models/question.model";
 
 export class CtrlCourseService {
@@ -68,7 +67,7 @@ export class CtrlCourseService {
 
 
   // ~ Get => /api/hackit/ctrl/course/:id ~ get single course
-  static async getCourseById(courseId: string, actor: Actor) {
+  static async getCourseById(courseId: string, actor: any) {
     if (!mongoose.isValidObjectId(courseId))
       throw badRequest("معرف الكورس غير صالح");
 
@@ -80,6 +79,10 @@ export class CtrlCourseService {
       .lean();
 
     if (!course) throw notFound("الكورس غير موجود");
+
+     if (actor && actor.universityBranch && course.universityBranch !== actor.universityBranch) {
+      throw badRequest("لا يمكنك الوصول إلى هذا الكورس من فرعك");
+    }
 
     const sessions = (course as any).sessions ?? [];
     const exams = (course as any).exams ?? [];
@@ -160,7 +163,7 @@ export class CtrlCourseService {
   }
 
   // ~ Get => /api/hackit/ctrl/course ~ get all courses
-  static async getAllCourses(query: any) {
+  static async getAllCourses(query: any, actor: any) {
     let parsed: any;
     try {
       parsed = getCoursesQuerySchema.parse(query);
@@ -171,6 +174,10 @@ export class CtrlCourseService {
     const { name, type, hasDiscount, year, semester, createdLessThanDays } =
       parsed;
     const filter: any = {};
+
+    if (actor && actor.universityBranch) {
+      filter.universityBranch = actor.universityBranch;
+    }
 
     if (name) filter.name = { $regex: name, $options: "i" };
     if (type) filter.type = type;

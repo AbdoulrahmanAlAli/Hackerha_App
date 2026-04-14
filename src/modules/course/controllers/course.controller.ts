@@ -32,14 +32,13 @@ class CtrlCourseController {
 
   // GET /api/hackit/ctrl/course
   getAllCourses = asyncHandler(async (req: Request, res: Response) => {
-    let parsed: any;
-    try {
-      parsed = getCoursesQuerySchema.parse(req.query);
-    } catch (e) {
-      throw badRequest(zodFirstMessage(e));
+    const user = (req as AuthenticatedRequest).user;
+    if (!user) {
+      throw notFound("لا يوجد مستخدم");
     }
-
-    const courses = await CtrlCourseService.getAllCourses(parsed);
+    
+    const courses = await CtrlCourseService.getAllCourses(req.query, user);
+    
     res.status(200).json(courses);
   });
 

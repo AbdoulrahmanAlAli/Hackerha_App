@@ -6,17 +6,11 @@ import type { IAdmin, AdminDocument } from "../types/admin.types";
 // Admin Schema
 const AdminSchema = new Schema<IAdmin>(
   {
-    firstName: {
+    fullName: {
       type: String,
       required: [true, "الاسم مطلوب"],
       trim: true,
       maxlength: [100, "الاسم يجب ألا يتجاوز 100 حرف"],
-    },
-    lastName: {
-      type: String,
-      required: [true, "الاسم الاحير مطلوب"],
-      trim: true,
-      maxlength: [100, "الاسم الاحير يجب ألا يتجاوز 100 حرف"],
     },
     phoneNumber: {
       type: String,
@@ -45,6 +39,15 @@ const AdminSchema = new Schema<IAdmin>(
       trim: true,
       minlength: [8, "كلمة السر يجب أن تكون على الأقل 8 أحرف"],
       select: false,
+    },
+    role: {
+      type: String,
+      enum: {
+        values: ["admin", "superAdmin", "dataEntry"],
+        message: "الدور غير صالح: يجب أن يكون مدير، مشرف متميز، أو مدخل بيانات",
+      },
+      default: "dataEntry",
+      required: true,
     },
   },
   { timestamps: true }
