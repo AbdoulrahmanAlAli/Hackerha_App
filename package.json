@@ -15,7 +15,9 @@
     "docker:prod:restart": "docker compose -f docker-compose.prod.yml restart",
 
     "docker:dev:down": "docker compose -f docker-compose.dev.yml down",
-    "docker:prod:down": "docker compose -f docker-compose.prod.yml down"
+    "docker:prod:down": "docker compose -f docker-compose.prod.yml down",
+
+    "docker:logs": "docker logs -f hackit_app_dev"
   },
   "keywords": [],
   "author": "",

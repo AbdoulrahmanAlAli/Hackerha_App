@@ -65,10 +65,41 @@ export class CtrlTeacherService {
 
   // ~ Get => /api/hackit/ctrl/teacher/all ~ Get All Teachers
   static async getTeachers() {
+    // جلب جميع المدرسين
     const teachers = await Teacher.find()
       .select("-password -otp")
-      .sort({ createdAt: -1 });
-    return teachers;
+      .sort({ createdAt: -1 })
+      .lean(); // استخدام lean() للحصول على كائنات JavaScript عادية لتعديلها
+
+    // جلب جميع الكورسات مع الحقول المطلوبة فقط
+    const courses = await Course.find(
+      { teachers: { $in: teachers.map(t => t._id) }, available: true },
+      { name: 1, teachers: 1, year: 1, _id: 0 }
+    ).lean();
+
+    // إضافة البيانات لكل مدرس
+    const teachersWithCoursesInfo = teachers.map(teacher => {
+      // فلترة الكورسات الخاصة بهذا المدرس
+      const teacherCourses = courses.filter(course => 
+        course.teachers.some(teacherId => 
+          teacherId.toString() === teacher._id.toString()
+        )
+      );
+
+      // استخراج أسماء الكورسات فقط
+      const courseNames = teacherCourses.map(course => course.name);
+
+      // استخراج السنوات بدون تكرار
+      const years = [...new Set(teacherCourses.map(course => course.year))];
+
+      return {
+        ...teacher,
+        coursesNames: courseNames,      // قائمة بأسماء الكورسات
+        years: years              // قائمة بالسنوات بدون تكرار
+      };
+    });
+
+    return teachersWithCoursesInfo;
   }
 
   // ~ Get => /api/hackit/ctrl/teacher/profile/:id ~ Update Profile Teacher
