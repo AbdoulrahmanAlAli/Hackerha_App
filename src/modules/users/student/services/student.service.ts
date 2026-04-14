@@ -203,32 +203,37 @@ export class StudentService {
   static async updateProfileImpStudentAdmin(
     studentData: UpdateImportantStudentInput,
     id: string,
-  ) {
+) {
     let parsed: UpdateImportantStudentInput;
     try {
-      parsed = updateImportantStudentSchema.parse(studentData);
+        parsed = updateImportantStudentSchema.parse(studentData);
     } catch (e) {
-      throw badRequest(zodFirstMessage(e));
+        throw badRequest(zodFirstMessage(e));
     }
 
     const student = await Student.findById(id);
     if (!student) throw badRequest("المستخدم غير موجود");
 
-    if (parsed.fullName) student.fullName = parsed.fullName;
-    if (parsed.available) student.available = parsed.available;
-    if (parsed.resetPass) student.resetPass = parsed.resetPass;
-    if (parsed.phoneNumber) student.phoneNumber = parsed.phoneNumber;
-    if (parsed.academicYear) student.academicYear = parsed.academicYear;
-    if (parsed.universityNumber)
-      student.universityNumber = parsed.universityNumber;
-     if (parsed.universityBranch)
-      student.universityBranch = parsed.universityBranch;
-    if (parsed.email) student.email = parsed.email;
-    if (parsed.device_id) student.device_id = parsed.device_id;
+    // إنشاء كائن التحديث فقط للحقول الموجودة
+    const updateData: any = {};
+    if (parsed.fullName !== undefined) updateData.fullName = parsed.fullName;
+    if (parsed.available !== undefined) updateData.available = parsed.available;
+    if (parsed.resetPass !== undefined) updateData.resetPass = parsed.resetPass;
+    if (parsed.phoneNumber !== undefined) updateData.phoneNumber = parsed.phoneNumber;
+    if (parsed.academicYear !== undefined) updateData.academicYear = parsed.academicYear;
+    if (parsed.universityNumber !== undefined) updateData.universityNumber = parsed.universityNumber;
+    if (parsed.universityBranch !== undefined) updateData.universityBranch = parsed.universityBranch;
+    if (parsed.email !== undefined) updateData.email = parsed.email;
+    if (parsed.device_id !== undefined) updateData.device_id = parsed.device_id;
 
-    await student.save();
+    // استخدام updateOne بدلاً من save()
+    await Student.updateOne(
+        { _id: id },
+        { $set: updateData }
+    );
+
     return { message: "تم التحديث بنجاح" };
-  }
+}
 
   // ~ Put => /api/hackit/ctrl/student/update-fcm-token/:id
   static async updateFcmToken(studentData: Partial<IStudent>, id: string) {
