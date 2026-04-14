@@ -51,6 +51,7 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./Caddyfile.dev:/etc/caddy/Caddyfile
       - caddy_data_dev:/data
