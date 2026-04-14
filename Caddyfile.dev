@@ -1,3 +1,4 @@
-:80 {
+hackerha.cloud, www.hackerha.cloud {
+	encode gzip zstd
 	reverse_proxy app:1000
 }
