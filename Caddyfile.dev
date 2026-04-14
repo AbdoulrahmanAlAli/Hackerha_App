@@ -1,4 +1,8 @@
 hackerha.cloud, www.hackerha.cloud {
 	encode gzip zstd
+
+	@blocked path /.env /.env.* /admin
+	respond @blocked 404
+
 	reverse_proxy app:1000
 }
