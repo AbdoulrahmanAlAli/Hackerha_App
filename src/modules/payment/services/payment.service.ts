@@ -92,6 +92,11 @@ export class CtrlPaymentService {
     const student = await Student.findById(studentId);
     if (!student) throw notFound("الطالب غير موجود");
 
+    console.log({
+      student: student.universityNumber,
+      uni: universityNumber
+    })
+
     if (student.universityNumber !== universityNumber)
       throw badRequest("الرقم الجامعي غير مطابق");
 
