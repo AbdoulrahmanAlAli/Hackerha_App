@@ -25,7 +25,7 @@ const TeacherSchema = new Schema<ITeacher>(
       index: true,
     },
 
-    gender: { type: String, enum: ["ذكر", "انثى"], required: true },
+    gender: { type: String, enum: ["ذكر", "أنثى"], required: true },
 
     email: {
       type: String,
