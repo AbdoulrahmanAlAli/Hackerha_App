@@ -80,8 +80,10 @@ export class CtrlCourseService {
 
     if (!course) throw notFound("الكورس غير موجود");
 
-     if (actor && actor.universityBranch && course.universityBranch !== actor.universityBranch) {
+    if(actor.role !== "admin") {
+       if (actor && actor.universityBranch && course.universityBranch !== actor.universityBranch) {
       throw badRequest("لا يمكنك الوصول إلى هذا الكورس من فرعك");
+      }
     }
 
     const sessions = (course as any).sessions ?? [];
@@ -175,8 +177,10 @@ export class CtrlCourseService {
       parsed;
     const filter: any = {};
 
-    if (actor && actor.universityBranch) {
-      filter.universityBranch = actor.universityBranch;
+    if(actor.role !== "admin") {
+        if (actor && actor.universityBranch) {
+        filter.universityBranch = actor.universityBranch;
+      }
     }
 
     if (name) filter.name = { $regex: name, $options: "i" };

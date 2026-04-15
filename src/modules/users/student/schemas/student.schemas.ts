@@ -113,6 +113,7 @@ export const updateImportantStudentSchema = z.object({
     .email("البريد الإلكتروني غير صالح")
     .optional(),
   device_id: z.string().min(1, "device_Id is required").optional(),
+  device_id_reset: z.boolean({ message: "device_id_reset مطلوب" }).optional(),
 });
 
 export const updateSuspendedStudentSchema = z.object({

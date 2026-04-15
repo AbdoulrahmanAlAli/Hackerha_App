@@ -226,6 +226,7 @@ export class StudentService {
     if (parsed.universityBranch !== undefined) updateData.universityBranch = parsed.universityBranch;
     if (parsed.email !== undefined) updateData.email = parsed.email;
     if (parsed.device_id !== undefined) updateData.device_id = parsed.device_id;
+    if (parsed.device_id_reset !== undefined) updateData.device_id_reset = parsed.device_id_reset;
 
     // استخدام updateOne بدلاً من save()
     await Student.updateOne(
