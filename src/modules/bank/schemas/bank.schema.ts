@@ -18,6 +18,12 @@ const numRequired = (msg: string) =>
     z.number({ message: msg })
   );
 
+const pdfUrlSchema = z
+  .string()
+  .min(1, "ملف PDF مطلوب")
+  .url("رابط الملف غير صالح")
+  .regex(/\.pdf$/i, "الملف يجب أن يكون بصيغة PDF");
+
 // Schema إنشاء بنك جديد
 export const createBankSchema = z.object({
   title: z
@@ -31,6 +37,7 @@ export const createBankSchema = z.object({
     .string()
     .min(1, "المدة مطلوبة")
     .regex(durationRegex, "المدة يجب أن تكون بالتنسيق 00:00 أو 00:00:00"),
+    pdfUrl: pdfUrlSchema
 });
 
 // Schema تحديث بنك
@@ -49,7 +56,7 @@ export const updateBankSchema = z.object({
     .string()
     .regex(durationRegex, "المدة يجب أن تكون بالتنسيق 00:00 أو 00:00:00")
     .optional(),
-
+  pdfUrl: z.string().url().regex(/\.pdf$/i).optional(),
   available: z.boolean().optional(),
 });
 

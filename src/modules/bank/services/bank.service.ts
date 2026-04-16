@@ -93,36 +93,24 @@ export class BankService {
     };
   }
 
-//   // حذف بنك
-//   static async deleteBank(bankId: string) {
-//     // التحقق من صحة المعرف
-//     if (!mongoose.isValidObjectId(bankId)) {
-//       throw badRequest("معرف غير صالح");
-//     }
+  // حذف بنك
+  static async deleteBank(bankId: string) {
+    // التحقق من صحة المعرف
+    if (!mongoose.isValidObjectId(bankId)) {
+      throw badRequest("معرف غير صالح");
+    }
 
-//     // التأكد من وجود البنك
-//     const bank = await Bank.findById(bankId).select("_id");
-//     if (!bank) {
-//       throw notFound("البنك غير موجود");
-//     }
+    // التأكد من وجود البنك
+    const bank = await Bank.findById(bankId).select("_id");
+    if (!bank) {
+      throw notFound("البنك غير موجود");
+    }
 
-//     // 1) جلب المجموعات المرتبطة بالبنك
-//     const groups = await Group.find({ bankId: bank._id }).select("_id").lean();
-//     const groupIds = groups.map((g) => g._id);
+    // 4) حذف البنك نفسه
+    await Bank.findByIdAndDelete(bankId);
 
-//     // 2) حذف الأسئلة المرتبطة بهذه المجموعات
-//     if (groupIds.length) {
-//       await Question.deleteMany({ groupId: { $in: groupIds } });
-//     }
-
-//     // 3) حذف المجموعات المرتبطة بالبنك
-//     await Group.deleteMany({ bankId: bank._id });
-
-//     // 4) حذف البنك نفسه
-//     await Bank.findByIdAndDelete(bankId);
-
-//     return {
-//       message: "تم حذف البنك بنجاح",
-//     };
-//   }
+    return {
+      message: "تم حذف البنك بنجاح",
+    };
+  }
 }

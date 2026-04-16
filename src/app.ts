@@ -42,6 +42,14 @@ import routeSingleQuestion from "./modules/exam/single-question/routes/question.
 // Reorder Api
 import reorderRouter from "./shared/reorder/routes/reorder.routes";
 
+// ============= Bank =============
+
+// Bank Api
+import routeBank from "./modules/bank/routes/bank.routes";
+
+// Single Questions Api
+import routeSingleQuestionBank from "./modules/bank/single-question/routes/question.routes"
+
 // ============= Notification =============
 
 // Notification Api
@@ -116,6 +124,13 @@ export function createApp() {
   // Reorder routes
   app.use("/api/hackit/ctrl/reorder", reorderRouter);
 
+  // ============= Bank =============
+  // Bank routes
+  app.use("/api/hackit/ctrl/bank", routeBank);
+
+  // Single Questions Bank routes
+  app.use("/api/hackit/ctrl/singleQuestionBank", routeSingleQuestionBank);
+
   // ============= Notification =============
 
   // Notification routes
@@ -141,7 +156,7 @@ export function createApp() {
   // Social routes
   app.use("/api/hackit/ctrl/social", routeSocial);
 
-  // ============= Social =============
+  // ============= Setting =============
 
   // Setting routes
   app.use("/api/hackit/ctrl/setting", routeSetting);

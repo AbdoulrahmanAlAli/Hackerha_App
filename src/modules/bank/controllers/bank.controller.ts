@@ -28,10 +28,10 @@ class BankController {
   });
 
   // حذف بنك
-//   deleteBank = asyncHandler(async (req: Request, res: Response) => {
-//     const result = await BankService.deleteBank(req.params.id);
-//     res.status(200).json(result);
-//   });
+  deleteBank = asyncHandler(async (req: Request, res: Response) => {
+    const result = await BankService.deleteBank(req.params.id);
+    res.status(200).json(result);
+  });
 }
 
 export const bankController = new BankController();

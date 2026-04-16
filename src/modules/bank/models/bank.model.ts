@@ -4,6 +4,9 @@ import { IBank } from "../types/bank.types";
 // Regex للتحقق من صيغة المدة
 const DURATION_REGEX = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
 
+// PDF URL Regex (optional, can be handled by validator)
+const PDF_URL_REGEX = /\.pdf$/i;
+
 // Schema الخاص بالـ Bank
 const BankSchema = new Schema<IBank>(
   {
@@ -37,6 +40,15 @@ const BankSchema = new Schema<IBank>(
       type: Boolean,
       default: false,
     },
+
+    pdfUrl: {
+      type: String,
+      required: [true, "ملف PDF مطلوب"],
+      validate: {
+        validator: (v: string) => PDF_URL_REGEX.test(v),
+        message: "الملف يجب أن يكون بصيغة PDF",
+      },
+    },
   },
   {
     // timestamps يضيف createdAt و updatedAt تلقائياً
@@ -47,20 +59,6 @@ const BankSchema = new Schema<IBank>(
     toObject: { virtuals: true },
   }
 );
-
-// Virtual لجلب المجموعات المرتبطة بالبنك
-// BankSchema.virtual("groups", {
-//   ref: "Group",
-//   localField: "_id",
-//   foreignField: "bankId",
-// });
-
-// Virtual لجلب الأسئلة المرتبطة بالبنك
-// BankSchema.virtual("questions", {
-//   ref: "SingleQuestion",
-//   localField: "_id",
-//   foreignField: "bankId",
-// });
 
 // Index للفرز حسب الأحدث
 BankSchema.index({ createdAt: -1 });

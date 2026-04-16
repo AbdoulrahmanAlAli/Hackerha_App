@@ -18,6 +18,6 @@ router.get("/:id", verifyToken, bankController.getBankById);
 router.put("/:id", verifyToken, requireAdmin, bankController.updateBank);
 
 // حذف بنك - فقط Admin
-// router.delete("/:id", verifyToken, requireAdmin, bankController.deleteBank);
+router.delete("/:id", verifyToken, requireAdmin, bankController.deleteBank);
 
 export default router;
