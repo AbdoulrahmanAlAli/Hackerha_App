@@ -3,6 +3,7 @@ import { Admin } from "../models/admin.model";
 import type { IAdmin } from "../types/admin.types";
 import {
   createAdminSchema,
+  getAdminsQuerySchema,
   updateAdminSchema,
   type CreateAdminInput,
   type UpdateAdminInput,
@@ -68,10 +69,23 @@ export class AdminService {
   }
 
   // ~ Get => /api/hackit/ctrl/admin/ ~ Get All Admins
-  static async getAllAdmins() {
-    return Admin.find().sort({ createdAt: -1 });
-  }
+  static async getAllAdmins(query?: any) {
+    let parsed: any;
+    try {
+      parsed = getAdminsQuerySchema.parse(query || {});
+    } catch (e) {
+      throw badRequest(zodFirstMessage(e));
+    }
 
+    const { role } = parsed;
+    const filter: any = {};
+
+    // Apply role filter if provided
+    if (role) filter.role = role;
+
+    return Admin.find(filter).sort({ createdAt: -1 }).select("-__v");
+  }
+  
   // ~ Put => /api/hackit/ctrl/admin/:id ~ Update Admin
   static async updateAdmin(id: string, adminData: Partial<IAdmin>) {
     let parsed: UpdateAdminInput;

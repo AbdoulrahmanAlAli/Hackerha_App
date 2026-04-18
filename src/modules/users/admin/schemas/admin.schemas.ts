@@ -72,6 +72,15 @@ export const loginAdminSchema = z.object({
   password: z.string().min(1, "كلمة السر مطلوبة"),
 });
 
+// Add to your existing admin schema file
+export const getAdminsQuerySchema = z.object({
+  role: z
+    .enum(adminRoles, {
+      message: "الدور غير صالح: يجب أن يكون مدير، مشرف متميز، أو مدخل بيانات",
+    })
+    .optional(),
+});
+
 // (اختياري) Types جاهزة للاستخدام في controller/service
 export type CreateAdminInput = z.infer<typeof createAdminSchema>;
 export type UpdateAdminInput = z.infer<typeof updateAdminSchema>;

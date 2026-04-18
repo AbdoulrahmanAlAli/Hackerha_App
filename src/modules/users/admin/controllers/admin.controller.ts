@@ -33,8 +33,8 @@ export class AdminController {
   });
 
   // Get /api/hackit/ctrl/admin/
-  getAllAdmins = asyncHandler(async (_req: Request, res: Response) => {
-    const admins = await AdminService.getAllAdmins();
+  getAllAdmins = asyncHandler(async (req: Request, res: Response) => {
+    const admins = await AdminService.getAllAdmins(req.query);
     res.status(200).json(admins);
   });
 

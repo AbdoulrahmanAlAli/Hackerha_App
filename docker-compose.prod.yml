@@ -11,7 +11,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 1000
-      MONGO_URI: mongodb://root:${MONGO_ROOT_PASSWORD}@mongo:27017/hackit_db?authSource=admin
+      MONGO_URI: mongodb://root:${MONGO_ROOT_PASSWORD}@mongo:27017/backend_db?authSource=admin
     depends_on:
       - mongo
 
