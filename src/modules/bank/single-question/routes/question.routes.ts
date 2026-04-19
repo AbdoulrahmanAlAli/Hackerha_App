@@ -3,6 +3,7 @@ import verifyToken from "../../../../core/middlewares/verifyToken";
 import { upload } from "../../../../core/middlewares/upload.middleware";
 import { questionController } from "../controllers/question.controller";
 import { requireAdmin } from "../../../../core/middlewares/requireRole.middleware";
+import { normalizeFormData } from "../../../../core/middlewares/normalizeFormData";
 
 const router: Router = Router();
 
@@ -17,14 +18,14 @@ router
     questionController.deleteMultipleQuestions
   );
 
-// Get questions by examId (Auth)
+// Get questions by bankId (Auth)
 router
-  .route("/exam/:bankId")
+  .route("/bank/:bankId")
   .get(verifyToken, questionController.getQuestionsByBankId);
 
-// Delete questions by examId (Admin)
+// Delete questions by bankId (Admin)
 router  
-  .route("/exam/:bankId")
+  .route("/bank/:bankId")
   .delete(
     verifyToken,
     requireAdmin,
@@ -71,6 +72,7 @@ router
     verifyToken,
     requireAdmin,
     upload,
+    normalizeFormData,
     questionController.createQuestion
   );
 

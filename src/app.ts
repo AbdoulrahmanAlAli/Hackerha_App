@@ -75,11 +75,16 @@ import routeSocial from "./modules/social/routes/social.routes";
 // ============= Setting =============
 
 import routeSetting from "./modules/setting/routes/setting.route";
+import multer from "multer";
 
 export function createApp() {
   const app = express();
 
   app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+
+  // 4. Performance middleware
+  app.use(performanceMiddleware);
 
   app.get("/health", (_req, res) => res.json({ ok: true }));
 

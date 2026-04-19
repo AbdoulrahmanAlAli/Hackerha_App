@@ -44,7 +44,7 @@ export class SingleQuestionService {
     this.ensureHasCorrectAnswer(parsed.answers);
 
     // جلب أكبر رقم سؤال في هذا الامتحان
-    const lastQuestion = await SingleQuestionBank.findOne({ examId: bank.id })
+    const lastQuestion = await SingleQuestionBank.findOne({ bankId: bank.id })
       .sort({ number: -1 })
       .select('number');
     
@@ -65,8 +65,7 @@ export class SingleQuestionService {
       number: newNumber, // ✅ يتم إضافة الرقم تلقائياً
     });
 
-    console.log(created)
-    await created.populate("examId", "mainTitle");
+    await created.populate("bankId", "mainTitle");
 
     return { id: created.id, message: "تم إنشاء السؤال بنجاح" };
   }
@@ -102,8 +101,8 @@ export class SingleQuestionService {
     }
 
     if (parsed.bankId) {
-      this.assertObjectId(parsed.examId, "معرف السؤال غير صالح");
-      const bank = await Bank.findById(parsed.examId);
+      this.assertObjectId(parsed.bankId, "معرف السؤال غير صالح");
+      const bank = await Bank.findById(parsed.bankId);
       if (!bank) throw notFound("السؤال غير موجودة");
     }
 
@@ -227,17 +226,17 @@ export class SingleQuestionService {
     return { message: "تم تحديث الإجابات بنجاح" };
   }
 
-  static async reorderQuestionsByArray(examId: string, questionIds: string[]) {
+  static async reorderQuestionsByArray(bankId: string, questionIds: string[]) {
      // التحقق من وجود questionIds
     if (!questionIds || !Array.isArray(questionIds)) {
       throw badRequest("يجب توفير مصفوفة من معرفات الأسئلة");
     }
 
-    // تحقق من صحة الـ examId
-    this.assertObjectId(examId, "معرف الامتحان غير صالح");
+    // تحقق من صحة الـ bankId
+    this.assertObjectId(bankId, "معرف الامتحان غير صالح");
     
     // تحقق من وجود الامتحان
-    const bank = await Bank.findById(examId);
+    const bank = await Bank.findById(bankId);
     if (!bank) throw notFound("الامتحان غير موجود");
     
     // تحقق من صحة الـ IDs
@@ -255,7 +254,7 @@ export class SingleQuestionService {
     // تحقق من أن جميع الأسئلة موجودة وتتبع نفس الامتحان
     const questions = await SingleQuestionBank.find({
       _id: { $in: questionIds },
-      examId: examId
+      bankId: bankId
     });
     
     if (questions.length !== questionIds.length) {

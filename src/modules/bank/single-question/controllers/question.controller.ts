@@ -20,10 +20,10 @@ class QuestionController {
     res.status(200).json(question);
   });
 
-  // ~ GET => /api/.../question/exam/:examId
+  // ~ GET => /api/.../question/bank/:bankId
   getQuestionsByBankId = asyncHandler(async (req: Request, res: Response) => {
     const questions = await SingleQuestionService.getSingleQuestionsByBankId(
-      req.params.examId
+      req.params.bankId
     );
     res.status(200).json(questions);
   });
@@ -55,11 +55,11 @@ class QuestionController {
     res.status(200).json(result);
   });
 
-  // ~ DELETE => /api/.../question/exam/:examId
+  // ~ DELETE => /api/.../question/bank/:bankId
   deleteQuestionsBybankId = asyncHandler(
     async (req: Request, res: Response) => {
       const result = await SingleQuestionService.deleteSingleQuestionsBybankId(
-        req.params.examId
+        req.params.bankId
       );
       res.status(200).json(result);
     }
@@ -83,11 +83,11 @@ class QuestionController {
 
   // إعادة ترتيب الأسئلة حسب ترتيب الـ IDs في المصفوفة
   reorderQuestions = asyncHandler(async (req: Request, res: Response) => {
-    const { examId } = req.params;
+    const { bankId } = req.params;
     const { questionIds } = req.body;
     
     // استدعاء خدمة إعادة الترتيب
-    const result = await SingleQuestionService.reorderQuestionsByArray(examId, questionIds);
+    const result = await SingleQuestionService.reorderQuestionsByArray(bankId, questionIds);
     
     // إرجاع النتيجة
     res.status(200).json({

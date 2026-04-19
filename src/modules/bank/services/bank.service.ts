@@ -24,7 +24,10 @@ export class BankService {
     }
 
     // إنشاء البنك في قاعدة البيانات
-    const bank = await Bank.create(parsed);
+    const bank = await Bank.create({
+      ...parsed,
+      available: false,
+    });
 
     return {
       id: bank.id,

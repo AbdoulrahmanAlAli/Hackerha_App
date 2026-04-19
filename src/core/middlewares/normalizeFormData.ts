@@ -53,3 +53,34 @@ export const normalizeCourseFormData = (
   req.body = b;
   next();
 };
+
+export const normalizeFormData = (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  const b: any = req.body || {};
+
+  // JSON strings → object/array
+  for (const key of Object.keys(b)) {
+    if (typeof b[key] === "string") {
+      const v = b[key].trim();
+      if (
+        (v.startsWith("{") && v.endsWith("}")) ||
+        (v.startsWith("[") && v.endsWith("]"))
+      ) {
+        try {
+          b[key] = JSON.parse(v);
+        } catch {}
+      }
+    }
+  }
+
+  // تحويل القيم
+  for (const key of Object.keys(b)) {
+    b[key] = toBool(toNum(b[key]));
+  }
+
+  req.body = b;
+  next();
+};

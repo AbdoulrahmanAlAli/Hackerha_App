@@ -47,6 +47,9 @@ importers:
       zod:
         specifier: ^4.3.2
         version: 4.3.2
+      zod-form-data:
+        specifier: ^3.0.1
+        version: 3.0.1(zod@4.3.2)
     devDependencies:
       '@types/bcrypt':
         specifier: ^6.0.0
@@ -491,6 +494,9 @@ packages:
 
   '@protobufjs/utf8@1.1.0':
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
+
+  '@rvf/set-get@7.0.1':
+    resolution: {integrity: sha512-GkTSn9K1GrTYoTUqlUs36k6nJnzjQaFBTTEIqUYmzBcsGsoJM8xG7EAx2WLHWAA4QzFjcwWUSHQ3vM3Fbw50Tg==}
 
   '@smithy/abort-controller@4.2.7':
     resolution: {integrity: sha512-rzMY6CaKx2qxrbYbqjXWS0plqEy7LOdKHS0bg4ixJ6aoGDPNUcLWk/FRNuCILh7GKLG9TFUXYYeQQldMBBwuyw==}
@@ -1836,6 +1842,11 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
+  zod-form-data@3.0.1:
+    resolution: {integrity: sha512-uwSrDzpLDoXeAxePjPHrjjMelE5pk5zL5JcwLFISvqidGjtPl7hcheH584xGcS76c9IRHq6tqdGkf+A4eKO6Cw==}
+    peerDependencies:
+      zod: '>= 3.25.0'
+
   zod@4.3.2:
     resolution: {integrity: sha512-b8L8yn4rIVfiXyHAmnr52/ZEpDumlT0bmxiq3Ws1ybrinhflGpt12Hvv54kYnEsGPRs6o/Ka3/ppA2OWY21IVg==}
 
@@ -2485,6 +2496,8 @@ snapshots:
 
   '@protobufjs/utf8@1.1.0':
     optional: true
+
+  '@rvf/set-get@7.0.1': {}
 
   '@smithy/abort-controller@4.2.7':
     dependencies:
@@ -4086,5 +4099,10 @@ snapshots:
 
   yocto-queue@0.1.0:
     optional: true
+
+  zod-form-data@3.0.1(zod@4.3.2):
+    dependencies:
+      '@rvf/set-get': 7.0.1
+      zod: 4.3.2
 
   zod@4.3.2: {}

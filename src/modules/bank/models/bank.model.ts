@@ -44,10 +44,6 @@ const BankSchema = new Schema<IBank>(
     pdfUrl: {
       type: String,
       required: [true, "ملف PDF مطلوب"],
-      validate: {
-        validator: (v: string) => PDF_URL_REGEX.test(v),
-        message: "الملف يجب أن يكون بصيغة PDF",
-      },
     },
   },
   {

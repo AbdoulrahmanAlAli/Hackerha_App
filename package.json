@@ -7,17 +7,14 @@
     "dev": "pnpm exec nodemon",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
-
     "docker:dev": "docker compose -f docker-compose.dev.yml up -d --build",
     "docker:prod": "docker compose -f docker-compose.prod.yml up -d --build",
-
     "docker:dev:restart": "docker compose -f docker-compose.dev.yml restart",
     "docker:prod:restart": "docker compose -f docker-compose.prod.yml restart",
-
     "docker:dev:down": "docker compose -f docker-compose.dev.yml down",
     "docker:prod:down": "docker compose -f docker-compose.prod.yml down",
-
-    "docker:logs": "docker logs -f hackit_app_dev"
+    "docker:dev:logs": "docker logs -f hackit_app_dev",
+    "docker:prod:logs": "docker logs -f hackit_app_prod"
   },
   "keywords": [],
   "author": "",
@@ -36,7 +33,8 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^7.0.12",
-    "zod": "^4.3.2"
+    "zod": "^4.3.2",
+    "zod-form-data": "^3.0.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

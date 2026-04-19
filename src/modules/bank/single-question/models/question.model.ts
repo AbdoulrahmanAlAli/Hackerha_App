@@ -15,7 +15,7 @@ const SingleQuestionBankSchema = new Schema<ISingleQuestionBank>(
   {
     bankId: {
       type: Schema.Types.ObjectId,
-      ref: "Exam",
+      ref: "Bank",
       required: true,
       index: true,
     },
