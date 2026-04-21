@@ -38,6 +38,8 @@ export const updateTeacherImportantSchema = z.object({
   phoneNumber: z.string().regex(phoneRegex, "رقم الهاتف غير صالح! يجب أن يبدأ بـ 09 ويتكون من 10 أرقام.").optional(),
   gender: z.enum(["ذكر", "أنثى"]).optional(),
   email: z.string().email("البريد الإلكتروني غير صالح").min(3).max(100).optional(),
+    about: z.string().trim().optional(),
+
 });
 
 export const updateTeacherSuspendedSchema = z.object({
