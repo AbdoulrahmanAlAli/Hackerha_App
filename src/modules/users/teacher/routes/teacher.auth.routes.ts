@@ -3,6 +3,7 @@ import { requireAdmin } from "../../../../core/middlewares/requireRole.middlewar
 import { authTeacherController } from "../controllers/teacher.auth.controller"; // عدّل
 import verifyToken from "../../../../core/middlewares/verifyToken";
 import { upload } from "../../../../core/middlewares/upload.middleware";
+import { normalizeTeacherFormData } from "../../../../core/middlewares/normalizeFormData";
 
 const router = Router();
 
@@ -12,6 +13,7 @@ router.post(
   verifyToken,
   requireAdmin,
   upload,
+  normalizeTeacherFormData,
   authTeacherController.createNewTeacher
 );
 

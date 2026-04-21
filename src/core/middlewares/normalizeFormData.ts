@@ -84,3 +84,17 @@ export const normalizeFormData = (
   req.body = b;
   next();
 };
+
+export const normalizeTeacherFormData = (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  const b: any = req.body || {};
+
+  b.percentage = toNum(b.percentage);
+
+
+  req.body = b;
+  next();
+};

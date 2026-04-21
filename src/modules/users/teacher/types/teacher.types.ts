@@ -20,6 +20,8 @@ export interface ITeacher {
   suspensionReason: string;
   suspensionEnd: Date | null;
 
+  percentage: number; 
+
   createdAt?: Date;
   updatedAt?: Date;
 }

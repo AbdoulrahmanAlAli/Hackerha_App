@@ -43,6 +43,7 @@ export class AuthTeacherService {
       email: parsed.email,
       password: parsed.password, // سيُشفّر داخل pre-save
       about: parsed.about ?? "",
+      percentage: parsed.percentage,
       available: true, // لأن المعلم يُنشأ من النظام
     });
 

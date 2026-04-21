@@ -19,6 +19,7 @@ export const createTeacherSchema = z.object({
   email: z.string().email("البريد الإلكتروني غير صالح").min(3).max(100),
   about: z.string().trim().optional().default(""),
   password: z.string().min(8, "كلمة السر يجب أن تكون على الأقل 8 أحرف"),
+  percentage: z.number().min(0, "النسبة يجب أن تكون 0 أو أكثر").max(100, "النسبة يجب أن تكون 100 أو أقل"),
 });
 
 export const loginTeacherSchema = z.object({
@@ -38,8 +39,8 @@ export const updateTeacherImportantSchema = z.object({
   phoneNumber: z.string().regex(phoneRegex, "رقم الهاتف غير صالح! يجب أن يبدأ بـ 09 ويتكون من 10 أرقام.").optional(),
   gender: z.enum(["ذكر", "أنثى"]).optional(),
   email: z.string().email("البريد الإلكتروني غير صالح").min(3).max(100).optional(),
-    about: z.string().trim().optional(),
-
+  about: z.string().trim().optional(),
+  percentage: z.number().min(0, "النسبة يجب أن تكون 0 أو أكثر").max(100, "النسبة يجب أن تكون 100 أو أقل").optional(),
 });
 
 export const updateTeacherSuspendedSchema = z.object({

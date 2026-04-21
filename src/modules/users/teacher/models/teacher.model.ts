@@ -46,6 +46,16 @@ const TeacherSchema = new Schema<ITeacher>(
     resetPass: { type: Boolean, default: false },
     suspensionReason: { type: String, default: "" },
     suspensionEnd: { type: Date, default: null },
+
+    percentage: { 
+      type: Number, 
+      min: 0, 
+      max: 100,
+      validate: {
+        validator: (v: number) => v >= 0 && v <= 100,
+        message: "النسبة يجب أن تكون بين 0 و 100",
+      }
+    },
   },
   { timestamps: true }
 );
