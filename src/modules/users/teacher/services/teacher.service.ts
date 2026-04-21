@@ -45,9 +45,16 @@ export class CtrlTeacherService {
       courseId: { $in: courseIds },
     }).lean();
 
+    const totalRevenue = payments.reduce((sum, payment) => sum + payment.price, 0);
+  
+    // حساب نسبة الأستاذ من إجمالي الإيرادات
+    const teacherPercentage = teacher.percentage || 0;
+    const teacherEarnings = (totalRevenue * teacherPercentage) / 100;
+
     const paymentsStats = {
       totalPayments: payments.length,
       totalRevenue: payments.reduce((sum, payment) => sum + payment.price, 0),
+      teacherEarnings: teacherEarnings,
       usedPayments: payments.filter((p) => p.used).length,
       unusedPayments: payments.filter((p) => !p.used).length,
       expiredPayments: payments.filter(
