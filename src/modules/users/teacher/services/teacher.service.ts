@@ -146,6 +146,7 @@ export class CtrlTeacherService {
     if (parsed.phoneNumber) teacher.phoneNumber = parsed.phoneNumber;
     if (parsed.gender) teacher.gender = parsed.gender;
     if (parsed.email) teacher.email = parsed.email;
+    if (parsed.about !== undefined) teacher.about = parsed.about;
 
     await teacher.save();
     return { message: "تم التحديث بنجاح" };
