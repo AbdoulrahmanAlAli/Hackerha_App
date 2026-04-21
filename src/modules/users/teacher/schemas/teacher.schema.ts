@@ -34,7 +34,7 @@ export const updateTeacherSchema = z.object({
 });
 
 export const updateTeacherImportantSchema = z.object({
-  fullname: z.string().max(100).optional(),
+  fullName: z.string().max(100).optional(),
   phoneNumber: z.string().regex(phoneRegex, "رقم الهاتف غير صالح! يجب أن يبدأ بـ 09 ويتكون من 10 أرقام.").optional(),
   gender: z.enum(["ذكر", "أنثى"]).optional(),
   email: z.string().email("البريد الإلكتروني غير صالح").min(3).max(100).optional(),

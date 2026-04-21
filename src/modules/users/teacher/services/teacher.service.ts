@@ -119,7 +119,7 @@ export class CtrlTeacherService {
     if (teacher.suspended) throw forbidden("حسابك مقيد");
 
     // تحديث بسيط بدون تعقيد types
-    if (parsed.firstName) teacher.fullName = parsed.fullName;
+    if (parsed.fullName) teacher.fullName = parsed.fullName;
     if (parsed.phoneNumber) teacher.phoneNumber = parsed.phoneNumber;
     if (parsed.about !== undefined) teacher.about = parsed.about;
     if (parsed.profilePhoto) teacher.profilePhoto = parsed.profilePhoto;
@@ -142,7 +142,7 @@ export class CtrlTeacherService {
     const teacher = await Teacher.findById(id);
     if (!teacher) throw notFound("المعلم غير موجود");
 
-    if (parsed.firstName) teacher.fullName = parsed.fullName;
+    if (parsed.fullName) teacher.fullName = parsed.fullName;
     if (parsed.phoneNumber) teacher.phoneNumber = parsed.phoneNumber;
     if (parsed.gender) teacher.gender = parsed.gender;
     if (parsed.email) teacher.email = parsed.email;
