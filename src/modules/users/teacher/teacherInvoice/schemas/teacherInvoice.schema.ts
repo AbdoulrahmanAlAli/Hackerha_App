@@ -10,7 +10,6 @@ export const objectId = z
 export const createTeacherInvoiceSchema = z.object({
   teacherId: objectId,
   priceTaken: z.number().min(0, "المبلغ المأخوذ لا يمكن أن يكون سالباً"),
-  total: z.number().min(0, "الإجمالي لا يمكن أن يكون سالباً"),
   notes: z.string().optional(),
 });
 

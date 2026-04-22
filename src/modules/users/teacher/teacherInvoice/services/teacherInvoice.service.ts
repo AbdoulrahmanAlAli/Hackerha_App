@@ -7,6 +7,8 @@ import {
 } from "../schemas/teacherInvoice.schema";
 import { badRequest, notFound } from "../../../../../core/errors/httpErrors";
 import { zodFirstMessage } from "../../../../../core/http/zodMessage";
+import { Course } from "../../../../course/models/course.model";
+import { Payment } from "../../../../payment/models/payment.model";
 
 export class CtrlTeacherInvoiceService {
   // ~ POST => Create invoice
@@ -21,11 +23,52 @@ export class CtrlTeacherInvoiceService {
     const teacher = await Teacher.findById(parsed.teacherId);
     if (!teacher) throw notFound("الأستاذ غير موجود");
 
-    const invoice = await TeacherInvoice.create(parsed);
+    // جلب جميع الكورسات الخاصة بالأستاذ
+    const courses = await Course.find({ teacher: teacher._id }).select("_id");
+    const courseIds = courses.map(course => course._id);
+    
+    // جلب جميع المدفوعات للكورسات
+    const payments = await Payment.find({
+      courseId: { $in: courseIds },
+    }).lean();
+    
+    // حساب إجمالي الإيرادات
+    const totalRevenue = payments.reduce((sum, payment) => sum + payment.price, 0);
+    
+    // حساب أرباح الأستاذ المستحقة بناءً على نسبته
+    const teacherPercentage = teacher.percentage || 0;
+    const teacherEarnings = (totalRevenue * teacherPercentage) / 100;
+    
+    // جلب جميع الفواتير السابقة للأستاذ
+    const previousInvoices = await TeacherInvoice.find({ 
+      teacherId: teacher._id 
+    }).lean();
+    
+    // حساب المبلغ المقدم سابقاً (مجموع priceTaken)
+    const totalPriceTaken = previousInvoices.reduce((sum, inv) => sum + inv.priceTaken, 0);
+    
+    // حساب المبلغ المتبقي للأستاذ
+    const remainingEarnings = teacherEarnings - totalPriceTaken;
+    
+    // التحقق من أن هناك مبلغ متبقي للأستاذ
+    if (remainingEarnings <= 0) {
+      throw badRequest(`لا يوجد مبلغ متبقي للأستاذ. المبلغ المستحق: ${teacherEarnings}, المبلغ المأخوذ: ${totalPriceTaken}`);
+    }
+    
+    // التحقق من أن priceTaken لا يتجاوز remainingEarnings
+    if (parsed.priceTaken > remainingEarnings) {
+      throw badRequest(`المبلغ المطلوب (${parsed.priceTaken}) يتجاوز المبلغ المتبقي للأستاذ (${remainingEarnings})`);
+    }
+    
+    // إنشاء الفاتورة مع تعيين total = remainingEarnings (المبلغ المتبقي قبل السحب)
+    const invoice = await TeacherInvoice.create({
+      ...parsed,
+      total: remainingEarnings, // المبلغ المتبقي للأستاذ قبل هذه الفاتورة
+    });
 
     return {
       message: "تم إنشاء الفاتورة بنجاح",
-      invoice,
+      invoice
     };
   }
 

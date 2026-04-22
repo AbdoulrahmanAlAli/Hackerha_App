@@ -19,6 +19,7 @@ import { OTPUtils } from "../../../../shared/otp/otpUtils";
 import { UpdateTeacherInput } from "../types/teacher.types";
 import { Course } from "../../../course/models/course.model";
 import { Payment } from "../../../payment/models/payment.model";
+import { TeacherInvoice } from "../teacherInvoice/models/teacherInvoice.model";
 
 export class CtrlTeacherService {
   // ~ Get => /api/hackit/ctrl/teacher/profile/:id ~ Get Profile Teacher
@@ -46,15 +47,26 @@ export class CtrlTeacherService {
     }).lean();
 
     const totalRevenue = payments.reduce((sum, payment) => sum + payment.price, 0);
-  
+
     // حساب نسبة الأستاذ من إجمالي الإيرادات
     const teacherPercentage = teacher.percentage || 0;
     const teacherEarnings = (totalRevenue * teacherPercentage) / 100;
 
+    // جلب جميع فواتير الأستاذ
+    const invoices = await TeacherInvoice.find({ teacherId: id }).lean();
+    
+    // حساب المبلغ المقدم للأستاذ (مجموع priceTaken من جميع الفواتير)
+    const totalPriceTaken = invoices.reduce((sum, invoice) => sum + invoice.priceTaken, 0);
+    
+    // حساب المبلغ المتبقي للأستاذ (أرباح الأستاذ - المبلغ المقدم)
+    const remainingEarnings = teacherEarnings - totalPriceTaken;
+
     const paymentsStats = {
       totalPayments: payments.length,
-      totalRevenue: payments.reduce((sum, payment) => sum + payment.price, 0),
-      teacherEarnings: teacherEarnings,
+      totalRevenue: totalRevenue,
+      teacherEarnings: teacherEarnings, // نسبة الأستاذ
+      totalPriceTaken: totalPriceTaken, // المبلغ المقدم للأستاذ
+      remainingEarnings: remainingEarnings, // لمبلغ المتبقي للأستاذ 
       usedPayments: payments.filter((p) => p.used).length,
       unusedPayments: payments.filter((p) => !p.used).length,
       expiredPayments: payments.filter(
@@ -66,7 +78,7 @@ export class CtrlTeacherService {
       ...teacher,
       paymentsStats,
       courses,
-      totalStudents,
+      totalStudents
     };
   }
 
