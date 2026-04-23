@@ -43,6 +43,18 @@ export class SingleQuestionService {
     // شرط إجابة صحيحة واحدة
     this.ensureHasCorrectAnswer(parsed.answers);
 
+     // التحقق من مجموع علامات الأسئلة
+    const allQuestions = await SingleQuestion.find({ examId: exam.id });
+    const currentTotalMarks = allQuestions.reduce((sum, q) => sum + q.mark, 0);
+    const newTotalMarks = currentTotalMarks + parsed.mark;
+    
+    if (newTotalMarks > exam.totalMark) {
+      const remaining = exam.totalMark - currentTotalMarks;
+      throw badRequest(
+        `لا يمكن إضافة السؤال. المتبقي من العلامات هو ${remaining} من أصل ${exam.totalMark}`
+      );
+    }
+    
     // جلب أكبر رقم سؤال في هذا الامتحان
     const lastQuestion = await SingleQuestion.findOne({ examId: exam.id })
       .sort({ number: -1 })

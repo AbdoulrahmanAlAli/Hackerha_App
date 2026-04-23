@@ -4,9 +4,6 @@ import { IBank } from "../types/bank.types";
 // Regex للتحقق من صيغة المدة
 const DURATION_REGEX = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
 
-// PDF URL Regex (optional, can be handled by validator)
-const PDF_URL_REGEX = /\.pdf$/i;
-
 // Schema الخاص بالـ Bank
 const BankSchema = new Schema<IBank>(
   {
