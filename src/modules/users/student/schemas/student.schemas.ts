@@ -135,6 +135,12 @@ export const updateDeviceIdResetSchema = z.object({
   device_id_reset: z.boolean({ message: "device_id_reset مطلوب" }),
 });
 
+export const refreshTokenSchema = z.object({
+  studentId: z.string().min(1, "معرف الطالب مطلوب"),
+  token: z.string().min(1, "التوكن القديم مطلوب"),
+});
+
+
 // Types
 export type CreateStudentInput = z.infer<typeof createStudentSchema>;
 export type LoginStudentInput = z.infer<typeof loginStudentSchema>;
@@ -142,3 +148,4 @@ export type UpdateStudentInput = z.infer<typeof updateStudentSchema>;
 export type UpdateImportantStudentInput = z.infer<
   typeof updateImportantStudentSchema
 >;
+export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;

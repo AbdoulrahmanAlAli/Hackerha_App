@@ -15,9 +15,11 @@ export const env = {
   OTP_PEPPER: process.env.OTP_PEPPER ?? "4x!F8s#2$kL9qP1v*W5zY7mDc6RnG3j",
   NODE_ENV: process.env.NODE_ENV ?? "Development",
   JWT_ACCESS_SECRET: mustGet("JWT_ACCESS_SECRET"),
+  JWT_REFRESH_SECRET: mustGet("JWT_REFRESH_SECRET"),
   JWT_ACCESS_EXPIRES_IN: (process.env.JWT_ACCESS_EXPIRES_IN ??
     "15m") as SignOptions["expiresIn"],
-
+  JWT_REFRESH_EXPIRES_IN: (process.env.JWT_REFRESH_EXPIRES_IN ??
+    "15m") as SignOptions["expiresIn"],
   BCRYPT_SALT_ROUNDS: Number(process.env.BCRYPT_SALT_ROUNDS ?? 10),
 
   // email

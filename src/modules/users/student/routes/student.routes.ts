@@ -137,4 +137,7 @@ router.patch(
   studentController.addCourseAndExamForStudent
 );
 
+// 🟢 API واحد لتحديث التوكن (Public)
+router.post("/refresh-token", studentController.refreshToken);
+
 export default router;

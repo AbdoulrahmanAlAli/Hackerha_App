@@ -105,6 +105,16 @@ const StudentSchema = new Schema<IStudent>(
     suspensionReason: { type: String, default: "" },
     suspensionEnd: { type: Date },
 
+     lastTokenRefreshAt: {
+      type: Date,
+      default: null,
+    },
+    lastTokenHash: {
+      type: String,
+      default: null,
+      select: false, // لا يتم جلبها تلقائياً للأمان
+    },
+    
     favoriteCourses: [
       { type: Schema.Types.ObjectId, ref: "Course", default: [] },
     ],

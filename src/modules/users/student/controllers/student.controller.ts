@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { StudentService } from "../services/student.service";
-import { forbidden } from "../../../../core/errors/httpErrors";
+import { badRequest, forbidden } from "../../../../core/errors/httpErrors";
 
 export class StudentController {
   // GET /api/hackit/ctrl/student
@@ -177,6 +177,18 @@ export class StudentController {
       res.status(200).json(result);
     }
   );
+
+  // POST /api/hackit/ctrl/student/refresh-token
+  refreshToken = asyncHandler(async (req: Request, res: Response) => {
+    // الـ Service سيتولى التحقق من صحة البيانات
+    const result = await StudentService.refreshStudentToken(req.body);
+    
+    // إرجاع التوكن الجديد
+    res.status(200).json({
+      token: result.token,
+      message: result.message
+    });
+  });
 }
 
 export const studentController = new StudentController();

@@ -2,6 +2,8 @@ import bcrypt from "bcrypt";
 import { Student } from "../models/student.model";
 import {
   passwordSchema,
+  RefreshTokenInput,
+  refreshTokenSchema,
   resetPassSchema,
   sendEmailSchema,
   updateDeviceIdResetSchema,
@@ -23,6 +25,9 @@ import { Course } from "../../../course/models/course.model";
 import { Exam } from "../../../exam/models/exam.model";
 import { Session } from "../../../session/models/session.model";
 import mongoose, { Types } from "mongoose";
+import jwt from "jsonwebtoken";
+import { JwtPayload, signAccessToken, verifyAccessToken } from "../../../../shared/security/jwt";
+import crypto from 'crypto';
 
 export class StudentService {
   // ~ Get => /api/hackit/ctrl/student ~ Get All Student
@@ -489,6 +494,94 @@ export class StudentService {
 
     return { message: "تم تحديث البيانات بنجاح" };
   }
+
+  // student.service.ts - التعديل النهائي
+
+static async refreshStudentToken(refreshData: RefreshTokenInput) {
+  let parsed: RefreshTokenInput;
+  try {
+    parsed = refreshTokenSchema.parse(refreshData);
+  } catch (e) {
+    throw badRequest(zodFirstMessage(e));
+  }
+  
+  const { studentId, token: oldToken } = parsed;
+  
+  const student = await Student.findById(studentId).select(
+    "available suspended universityBranch lastTokenRefreshAt lastTokenHash"
+  );
+  
+  if (!student) throw notFound("الطالب غير موجود");
+  if (!student.available) throw badRequest("الحساب غير مفعل");
+  if (student.suspended) throw badRequest("حسابك مقيد لا يمكنك تحديث التوكن");
+  
+  try {
+    // ✅ التحقق من صحة التوكن أولاً
+    const verified = verifyAccessToken(oldToken);
+    
+    // التأكد من أن id الطالب يطابق
+    if (verified.id !== studentId) {
+      throw badRequest("التوكن لا يخص هذا الطالب");
+    }
+    
+    // ✅ إنشاء hash للتوكن المرسل
+    const tokenHash = crypto.createHash('sha256').update(oldToken).digest('hex');
+    
+    // ✅ التحقق من آخر تحديث
+    if (student.lastTokenRefreshAt) {
+      const secondsSinceLastRefresh = (Date.now() - student.lastTokenRefreshAt.getTime()) / 1000;
+      const minIntervalSeconds = 300; // 5 دقائق
+      
+      // إذا كان آخر تحديث خلال 5 دقائق
+      if (secondsSinceLastRefresh < minIntervalSeconds) {
+        // التحقق: هل هذا التوكن هو نفس التوكن الذي تم إنشاؤه آخر مرة؟
+        if (student.lastTokenHash === tokenHash) {
+          const remainingSeconds = Math.ceil(minIntervalSeconds - secondsSinceLastRefresh);
+          throw badRequest(
+            `❌ هذا التوكن تم استخدامه بالفعل للتحديث. يرجى استخدام التوكن الجديد الذي حصلت عليه. ` +
+            `يمكنك المحاولة مرة أخرى بعد ${Math.floor(remainingSeconds / 60)} دقيقة و ${remainingSeconds % 60} ثانية`
+          );
+        }
+        // إذا كان توكن مختلف (جديد) ولكن خلال 5 دقائق - أيضاً ارفض
+        else {
+          const remainingSeconds = Math.ceil(minIntervalSeconds - secondsSinceLastRefresh);
+          throw badRequest(
+            `❌ تم تحديث التوكن مؤخراً. يرجى الانتظار ${Math.floor(remainingSeconds / 60)} دقيقة و ${remainingSeconds % 60} ثانية قبل المحاولة مرة أخرى`
+          );
+        }
+      }
+    }
+    
+    // ✅ إنشاء توكن جديد
+    const newToken = signAccessToken({ 
+      id: student.id, 
+      role: "student", 
+      university: student.universityBranch 
+    });
+    
+    // ✅ حساب hash للتوكن الجديد
+    const newTokenHash = crypto.createHash('sha256').update(newToken).digest('hex');
+    
+    // ✅ تحديث المعلومات
+    student.lastTokenRefreshAt = new Date();
+    student.lastTokenHash = newTokenHash; // تخزين hash التوكن الجديد
+    await student.save();
+    
+    return {
+      token: newToken,
+      message: "✅ تم تحديث التوكن بنجاح. استخدم التوكن الجديد للمرة القادمة"
+    };
+    
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      throw badRequest("❌ انتهت صلاحية التوكن، يرجى تسجيل الدخول مرة أخرى");
+    }
+    if (error instanceof jwt.JsonWebTokenError) {
+      throw badRequest("❌ التوكن غير صالح");
+    }
+    throw error;
+  }
+}
 
   // ~ Delete => /api/hackit/ctrl/student/account/:id ~ Delete Student Account
   static async deleteStudentAccount(id: string) {

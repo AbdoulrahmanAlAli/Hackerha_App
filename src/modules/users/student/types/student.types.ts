@@ -31,6 +31,10 @@ export interface IStudent {
   suspensionReason?: string;
   suspensionEnd?: Date;
 
+  // 🟢 الحقول الجديدة لتحديث التوكن
+  lastTokenRefreshAt?: Date | null;
+  lastTokenHash?: string | null;
+  
   favoriteCourses: Types.ObjectId[];
   favoriteSessions: Types.ObjectId[];
   favoriteBank: Types.ObjectId[];

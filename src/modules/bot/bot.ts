@@ -11,6 +11,28 @@ if (!TELEGRAM_BOT_TOKEN) {
 
 export const telegramBot = new Telegraf<MyContext>(TELEGRAM_BOT_TOKEN);
 
+telegramBot.command("support", async (ctx) => {
+  await ctx.reply(
+    [
+      "🛟 الدعم الفني",
+      "",
+      "WhatsApp: 0985069024",
+    ].join("\n"),
+  );
+});
+
+telegramBot.command("social", async (ctx) => {
+  await ctx.reply(
+    [
+      "🌐 روابط هكرها",
+      "",
+      "Instagram: hackerha_app",
+      "Telegram: t.me/hackerha_app",
+      "Download App: https://t.me/hackerha_app/14",
+    ].join("\n"),
+  );
+});
+
 const stage = new Scenes.Stage<MyContext>([enrollCourseScene]);
 
 telegramBot.use(session());
@@ -31,6 +53,15 @@ telegramBot.catch((err, ctx) => {
 });
 
 export async function launchTelegramBot() {
+  await telegramBot.telegram.setMyCommands([
+  { command: "start", description: "بدء استخدام البوت" },
+  { command: "support", description: "الدعم الفني" },
+  { command: "social", description: "روابط التواصل" },
+  { command: "cancel", description: "إلغاء العملية" },
+  ]);
+
   await telegramBot.launch();
+  process.once("SIGINT", () => telegramBot.stop("SIGINT"));
+  process.once("SIGTERM", () => telegramBot.stop("SIGTERM"));
   console.log("Telegram bot is running...");
 }
