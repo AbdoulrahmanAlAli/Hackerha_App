@@ -28,12 +28,6 @@ class QuestionController {
     res.status(200).json(questions);
   });
 
-  // ~ PUT => /api/.../question/:id
-  updateQuestion = asyncHandler(async (req: Request, res: Response) => {
-    const result = await SingleQuestionService.updateSingleQuestion(req.params.id, req.body);
-    res.status(200).json(result);
-  });
-
   // ✅ NEW: ~ PATCH => /api/.../question/:id/answers
   updateAnswers = asyncHandler(async (req: Request, res: Response) => {
     const result = await SingleQuestionService.updateAnswers(req.params.id, req.body);
@@ -41,10 +35,11 @@ class QuestionController {
   });
 
   // ~ PUT => /api/.../question/:id/image
-  updateQuestionImage = asyncHandler(async (req: Request, res: Response) => {
-    const result = await SingleQuestionService.updateSingleQuestionImage(
-      req.params.id,
-      req.file as ICloudinaryFile
+  updateQuestion = asyncHandler(async (req: Request, res: Response) => {
+    const result = await SingleQuestionService.updateSingleQuestion(
+      req.params.id, 
+      req.body,
+      req.file as ICloudinaryFile  // إضافة هذا الباراميتر
     );
     res.status(200).json(result);
   });

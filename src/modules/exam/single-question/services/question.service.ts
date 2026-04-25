@@ -43,7 +43,7 @@ export class SingleQuestionService {
     // شرط إجابة صحيحة واحدة
     this.ensureHasCorrectAnswer(parsed.answers);
 
-     // التحقق من مجموع علامات الأسئلة
+    // التحقق من مجموع علامات الأسئلة
     const allQuestions = await SingleQuestion.find({ examId: exam.id });
     const currentTotalMarks = allQuestions.reduce((sum, q) => sum + q.mark, 0);
     const newTotalMarks = currentTotalMarks + parsed.mark;
@@ -63,18 +63,19 @@ export class SingleQuestionService {
     const maxNumber = lastQuestion?.number || 0;
     const newNumber = maxNumber + 1;
 
-    const image = file?.path;
+    // معالجة الصورة: إذا كان هناك ملف مرفق استخدمه، وإلا استخدم الـ image من الـ body (يمكن أن يكون string فارغ)
+    const image = file?.path ?? (parsed.image || "");
 
     const created = await SingleQuestion.create({
       examId,
       title: parsed.title ?? "",
       subTitle: parsed.subTitle ?? "",
-      image: image ?? (parsed.image || ""),
+      image: image,
       answers: parsed.answers,
       mark: parsed.mark,
       note: parsed.note ?? "",
       direction: parsed.direction ?? "rtl",
-      number: newNumber, // ✅ يتم إضافة الرقم تلقائياً
+      number: newNumber,
     });
 
     console.log(created)
@@ -103,7 +104,7 @@ export class SingleQuestionService {
     return all;
   }
 
-  static async updateSingleQuestion(id: string, data: ISingleQuestion) {
+  static async updateSingleQuestion(id: string, data: ISingleQuestion, file?: ICloudinaryFile) {
     this.assertObjectId(id, "معرف السؤال غير صالح");
 
     let parsed: any;
@@ -114,9 +115,9 @@ export class SingleQuestionService {
     }
 
     if (parsed.examId) {
-      this.assertObjectId(parsed.examId, "معرف السؤال غير صالح");
+      this.assertObjectId(parsed.examId, "معرف الامتحان غير صالح");
       const exam = await Exam.findById(parsed.examId);
-      if (!exam) throw notFound("السؤال غير موجودة");
+      if (!exam) throw notFound("الامتحان غير موجود");
     }
 
     // إذا عدلت answers لازم تحقق إجابة صحيحة
@@ -125,11 +126,22 @@ export class SingleQuestionService {
     const question = await SingleQuestion.findById(id);
     if (!question) throw notFound("السؤال غير موجود");
 
-    // تحديث بسيط وواضح
+    // تحديث البيانات
     if (parsed.examId) question.examId = parsed.examId;
     if (parsed.title !== undefined) question.title = parsed.title;
     if (parsed.subTitle !== undefined) question.subTitle = parsed.subTitle;
-    if (parsed.image !== undefined) question.image = parsed.image;
+    
+    // معالجة الصورة:
+    // 1. إذا تم رفع ملف جديد، استخدمه
+    // 2. إذا تم إرسال image في الـ body (حتى لو كان string فارغ)، استخدمه
+    // 3. إذا لم يتم إرسال أي شيء، تبقى الصورة كما هي
+    if (file) {
+      question.image = file.path;
+    } else if (parsed.image !== undefined) {
+      // تقبل أي string (فارغ أو غير فارغ)
+      question.image = parsed.image;
+    }
+    
     if (parsed.answers !== undefined) question.answers = parsed.answers;
     if (parsed.mark !== undefined) question.mark = parsed.mark;
     if (parsed.note !== undefined) question.note = parsed.note;
@@ -137,19 +149,6 @@ export class SingleQuestionService {
 
     await question.save();
     return { message: "تم تحديث السؤال بنجاح" };
-  }
-
-  static async updateSingleQuestionImage(id: string, file: ICloudinaryFile) {
-    this.assertObjectId(id, "معرف السؤال غير صالح");
-    if (!file) throw badRequest("صورة السؤال مطلوبة");
-
-    const question = await SingleQuestion.findById(id);
-    if (!question) throw notFound("السؤال غير موجود");
-
-    question.image = file.path;
-    await question.save();
-
-    return { message: "تم تحديث صورة السؤال بنجاح" };
   }
 
   static async deleteSingleQuestion(id: string) {

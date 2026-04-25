@@ -30,7 +30,11 @@ class QuestionController {
 
   // ~ PUT => /api/.../question/:id
   updateQuestion = asyncHandler(async (req: Request, res: Response) => {
-    const result = await SingleQuestionService.updateSingleQuestion(req.params.id, req.body);
+    const result = await SingleQuestionService.updateSingleQuestion(
+      req.params.id, 
+      req.body,
+      req.file as ICloudinaryFile
+    );
     res.status(200).json(result);
   });
 
@@ -40,14 +44,6 @@ class QuestionController {
     res.status(200).json(result);
   });
 
-  // ~ PUT => /api/.../question/:id/image
-  updateQuestionImage = asyncHandler(async (req: Request, res: Response) => {
-    const result = await SingleQuestionService.updateSingleQuestionImage(
-      req.params.id,
-      req.file as ICloudinaryFile
-    );
-    res.status(200).json(result);
-  });
 
   // ~ DELETE => /api/.../question/:id
   deleteQuestion = asyncHandler(async (req: Request, res: Response) => {

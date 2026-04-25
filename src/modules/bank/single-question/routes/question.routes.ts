@@ -46,16 +46,6 @@ router
   .route("/:id/answers")
   .patch(verifyToken, requireAdmin, questionController.updateAnswers);
 
-// Update image (Admin)
-router
-  .route("/:id/image")
-  .put(
-    verifyToken,
-    requireAdmin,
-    upload,
-    questionController.updateQuestionImage
-  );
-
 // Delete question image (Admin)
 router
   .route("/:id/image")
@@ -82,7 +72,7 @@ router.route("/:id").get(verifyToken, questionController.getQuestionById);
 // Update question (Admin)
 router
   .route("/:id")
-  .put(verifyToken, requireAdmin, questionController.updateQuestion);
+  .put(verifyToken, requireAdmin, upload, questionController.updateQuestion);
 
 // Delete question (Admin)
 router

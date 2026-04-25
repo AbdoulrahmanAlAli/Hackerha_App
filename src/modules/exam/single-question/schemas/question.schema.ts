@@ -34,7 +34,7 @@ export const createSingleQuestionSchema = z.object({
   number: examNumber.optional(),
   title: z.string().optional().default(""),
   subTitle: z.string().optional().default(""),
-  image: z.string().url("يجب أن يكون رابط الصورة صحيحًا").optional(),
+  image: z.string().optional().default(""),
   answers: z
     .array(answerSchema)
     .min(1, "يجب أن يحتوي السؤال على الأقل على إجابة واحدة"),
@@ -51,7 +51,7 @@ export const updateSingleQuestionSchema = z.object({
   examId: objectId.optional(),
   title: z.string().optional(),
   subTitle: z.string().optional(),
-  image: z.string().url("يجب أن يكون رابط الصورة صحيحًا").optional(),
+  image: z.string().optional(),
   answers: z
     .array(answerSchema)
     .min(1, "يجب أن يحتوي السؤال على الأقل على إجابة واحدة")
