@@ -3,6 +3,7 @@ import asyncHandler from "express-async-handler";
 import { CtrlTeacherService } from "../services/teacher.service";
 import { forbidden, badRequest } from "../../../../core/errors/httpErrors";
 import { AuthenticatedRequest } from "../../../../core/http/authenticatedRequest";
+import { ICloudinaryFile } from "../../../../core/types/cloudinary.types";
 
 class TeacherController {
   // GET /api/hackit/ctrl/teacher/accountprofileteacher/:id
@@ -21,7 +22,8 @@ class TeacherController {
   updateProfileTeacher = asyncHandler(async (req: Request, res: Response) => {
     const result = await CtrlTeacherService.updateProfileTeacher(
       req.params.id,
-      req.body
+      req.body,
+      req.file as ICloudinaryFile
     );
     res.status(200).json(result);
   });
@@ -31,7 +33,8 @@ class TeacherController {
     async (req: Request, res: Response) => {
       const result = await CtrlTeacherService.updateImportantTeacherAdmin(
         req.params.id,
-        req.body
+        req.body,
+        req.file as ICloudinaryFile
       );
 
       res.status(200).json(result);

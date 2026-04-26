@@ -5,6 +5,8 @@ import {
 } from "../../../../core/middlewares/requireRole.middleware";
 import { teacherController } from "../controllers/teacher.controller"; // عدّل
 import verifyToken from "../../../../core/middlewares/verifyToken";
+import { upload } from "../../../../core/middlewares/upload.middleware";
+import { normalizeTeacherFormData } from "../../../../core/middlewares/normalizeFormData";
 
 const router = Router();
 
@@ -25,6 +27,8 @@ router.put(
   "/update-important/:id",
   verifyToken,
   requireAdmin,
+  upload,
+  normalizeTeacherFormData,
   teacherController.updateImportantTeacherAdmin
 );
 
@@ -57,6 +61,8 @@ router.put(
   "/profile/:id",
   verifyToken,
   requireTeacherOwner("id"),
+  upload,
+  normalizeTeacherFormData,
   teacherController.updateProfileTeacher
 );
 

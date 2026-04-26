@@ -20,6 +20,7 @@ import { UpdateTeacherInput } from "../types/teacher.types";
 import { Course } from "../../../course/models/course.model";
 import { Payment } from "../../../payment/models/payment.model";
 import { TeacherInvoice } from "../teacherInvoice/models/teacherInvoice.model";
+import { ICloudinaryFile } from "../../../../core/types/cloudinary.types";
 
 export class CtrlTeacherService {
   // ~ Get => /api/hackit/ctrl/teacher/profile/:id ~ Get Profile Teacher
@@ -33,12 +34,22 @@ export class CtrlTeacherService {
     if (!teacher.available) throw badRequest("الحساب غير مفعل");
     if (teacher.suspended) throw forbidden("حسابك مقيد");
 
-    const courses = await Course.find({ teacher: id })
-      .select("_id name price students")
-      .lean();
+      const teacherObjectId = new mongoose.Types.ObjectId(id);
 
+    const courses = await Course.aggregate([
+      { $match: { teachers: teacherObjectId } }, // ✅ Convert to ObjectId
+      {
+        $project: {
+          name: 1,
+          price: 1,
+          studentCount: { $size: "$students" }
+        }
+      }
+    ]);
+  
+    // ✅ Fix: use studentCount instead of students.length
     const totalStudents = courses.reduce((sum, course) => {
-      return sum + (course.students?.length || 0);
+      return sum + (course.studentCount || 0);
     }, 0);
 
     const courseIds = courses.map((course) => course._id);
@@ -122,7 +133,7 @@ export class CtrlTeacherService {
   }
 
   // ~ Get => /api/hackit/ctrl/teacher/profile/:id ~ Update Profile Teacher
-  static async updateProfileTeacher(id: string, data: UpdateTeacherInput) {
+  static async updateProfileTeacher(id: string, data: UpdateTeacherInput, file?: ICloudinaryFile) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف غير صالح");
 
     let parsed: any;
@@ -138,6 +149,9 @@ export class CtrlTeacherService {
     if (teacher.suspended) throw forbidden("حسابك مقيد");
 
     // تحديث بسيط بدون تعقيد types
+    if(file?.path){
+     parsed.image = file?.path
+    }
     if (parsed.fullName) teacher.fullName = parsed.fullName;
     if (parsed.phoneNumber) teacher.phoneNumber = parsed.phoneNumber;
     if (parsed.about) teacher.about = parsed.about;
@@ -148,7 +162,7 @@ export class CtrlTeacherService {
   }
 
   // ~ Put => /api/hackit/ctrl/teacher/update-important/:id ~ Update Important Details Teacher (admin)
-  static async updateImportantTeacherAdmin(id: string, data: any) {
+  static async updateImportantTeacherAdmin(id: string, data: any, file?: ICloudinaryFile) {
     if (!mongoose.isValidObjectId(id)) throw badRequest("معرف غير صالح");
 
     let parsed: any;
@@ -161,6 +175,9 @@ export class CtrlTeacherService {
     const teacher = await Teacher.findById(id);
     if (!teacher) throw notFound("المعلم غير موجود");
 
+    if(file?.path){
+     parsed.image = file?.path
+    }
     if (parsed.fullName) teacher.fullName = parsed.fullName;
     if (parsed.phoneNumber) teacher.phoneNumber = parsed.phoneNumber;
     if (parsed.gender) teacher.gender = parsed.gender;
