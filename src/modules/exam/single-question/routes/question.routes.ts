@@ -73,7 +73,7 @@ router.route("/:id").get(verifyToken, questionController.getQuestionById);
 // Update question (Admin)
 router
   .route("/:id")
-  .put(verifyToken, requireAdmin, upload, questionController.updateQuestion);
+  .put(verifyToken, requireAdmin, upload, normalizeFormData, questionController.updateQuestion);
 
 // Delete question (Admin)
 router
