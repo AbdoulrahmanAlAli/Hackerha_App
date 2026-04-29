@@ -198,7 +198,7 @@ export class CtrlCourseService {
     const courses = await Course.find(filter)
       .sort({ createdAt: -1 })
       .select("-__v -whatsapp -students")
-      .populate("teachers")
+      .populate("teachers", "profilePhoto fullName phoneNumber about email gender")
       .lean();
 
     return courses.map((c: any) => ({
