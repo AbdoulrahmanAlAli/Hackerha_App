@@ -60,6 +60,33 @@ export class StudentService {
     return student;
   }
 
+
+  // student.service.ts - Add this method
+  static async getEnrolledCourses(studentId: string) {
+    if (!mongoose.isValidObjectId(studentId)) {
+      throw badRequest("معرف الطالب غير صالح");
+    }
+
+    const student = await Student.findById(studentId)
+      .select("enrolledCourses available suspended")
+      .populate({
+        path: "enrolledCourses",
+        populate: {
+          path: "instructor",
+          select: "fullName profilePhoto"
+        }
+      })
+      .lean();
+
+    if (!student) throw notFound("الطالب غير موجود");
+    if (!student.available) throw badRequest("الحساب غير مفعل");
+    if (student.suspended) throw badRequest("حسابك مقيد");
+
+    return {
+      enrolledCourses: student.enrolledCourses || [],
+    };
+  }
+
   // ~ Post => /api/hackit/ctrl/student/sendemailpassword ~ Send Email For Password For Student
   static async sendEmailForPassword(studentData: Pick<IStudent, "email">) {
     try {

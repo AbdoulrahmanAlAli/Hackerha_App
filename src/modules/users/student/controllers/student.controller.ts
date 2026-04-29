@@ -28,6 +28,23 @@ export class StudentController {
     res.status(200).json(result);
   });
 
+  // student.controller.ts - Add this method
+  getEnrolledCourses = asyncHandler(async (req: Request, res: Response) => {
+    const user = req.user;
+    const targetId = req.params.id;
+
+    // السماح للطالب بمشاهدة كورساته المسجلة فقط، أو الأدمن لأي طالب
+    const isOwner = user?.id === targetId;
+    const isAdmin = user?.role === "admin";
+
+    if (!isOwner && !isAdmin) {
+      throw forbidden("غير مصرح لك بمشاهدة الكورسات المسجلة لهذا الطالب");
+    }
+
+    const result = await StudentService.getEnrolledCourses(targetId);
+    res.status(200).json(result);
+  });
+
   // POST /api/hackit/ctrl/student/sendemailpassword
   sendResetPasswordEmail = asyncHandler(async (req: Request, res: Response) => {
     const result = await StudentService.sendEmailForPassword(req.body);

@@ -92,7 +92,7 @@ router.put(
 // router.get("/favorites/check/:id", verifyToken, checkRole(["student"]), ...);
 
 // router.get("/workcontinue/:id", verifyToken, checkRole(["student"]), ...);
-// router.get("/enrolledcourses/:id", verifyToken, checkRole(["student"]), ...);
+router.get("/enrolledcourses/:id", verifyToken, checkRole(["student"]), studentController.getEnrolledCourses);
 // router.get("/student-content/:id", verifyToken, checkRole(["student"]), ...);
 
 // router.patch("/bank/:bankId/content/:contentId/user/:id", verifyToken, checkRole(["student"]), ...);
