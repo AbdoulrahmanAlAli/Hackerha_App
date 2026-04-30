@@ -15,6 +15,7 @@ import { sendEmail } from "../../../../shared/mailer/sendEmail";
 import { IOtp } from "../types/student.types";
 import { signAccessToken } from "../../../../shared/security/jwt";
 import { logger } from "../../../../bootstrap/logger";
+import crypto from 'crypto';
 
 export class AuthStudentService {
   // ~ Post => /api/hackit/ctrl/student/register ~ Create New Student
@@ -172,7 +173,20 @@ export class AuthStudentService {
       );
     }
 
-    const token = signAccessToken({ id: student.id, role: "student", university: student.universityBranch });
+    const token = signAccessToken({ 
+      id: student.id, 
+      role: "student", 
+      university: student.universityBranch 
+    });
+    
+    // حساب hash للتوكن
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    
+    // تحديث معلومات آخر توكن
+    student.lastTokenRefreshAt = new Date();
+    student.lastTokenHash = tokenHash;
+    await student.save();
+
     return { message: "تم تسجيل الدخول بنجاح", token };
   }
 

@@ -206,6 +206,22 @@ export class StudentController {
       message: result.message
     });
   });
+
+  // POST /api/hackit/ctrl/student/restrict-root-device
+  restrictRootDevice = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    
+    if (!id) {
+      throw badRequest("معرف الطالب مطلوب");
+    }
+    
+    const result = await StudentService.restrictDeviceRoot(
+      id
+    );
+    
+    res.status(200).json(result);
+  });
 }
 
 export const studentController = new StudentController();

@@ -522,7 +522,7 @@ export class StudentService {
     return { message: "تم تحديث البيانات بنجاح" };
   }
 
-  // student.service.ts - التعديل النهائي
+ // student.service.ts - الرفريش مسموح فقط إذا كان التوكن غير صالح
 
 static async refreshStudentToken(refreshData: RefreshTokenInput) {
   let parsed: RefreshTokenInput;
@@ -543,69 +543,41 @@ static async refreshStudentToken(refreshData: RefreshTokenInput) {
   if (student.suspended) throw badRequest("حسابك مقيد لا يمكنك تحديث التوكن");
   
   try {
-    // ✅ التحقق من صحة التوكن أولاً
-    const verified = verifyAccessToken(oldToken);
+    // محاولة التحقق من صحة التوكن
+    verifyAccessToken(oldToken);
     
-    // التأكد من أن id الطالب يطابق
-    if (verified.id !== studentId) {
-      throw badRequest("التوكن لا يخص هذا الطالب");
-    }
-    
-    // ✅ إنشاء hash للتوكن المرسل
-    const tokenHash = crypto.createHash('sha256').update(oldToken).digest('hex');
-    
-    // ✅ التحقق من آخر تحديث
-    if (student.lastTokenRefreshAt) {
-      const secondsSinceLastRefresh = (Date.now() - student.lastTokenRefreshAt.getTime()) / 1000;
-      const minIntervalSeconds = 300; // 5 دقائق
-      
-      // إذا كان آخر تحديث خلال 5 دقائق
-      if (secondsSinceLastRefresh < minIntervalSeconds) {
-        // التحقق: هل هذا التوكن هو نفس التوكن الذي تم إنشاؤه آخر مرة؟
-        if (student.lastTokenHash === tokenHash) {
-          const remainingSeconds = Math.ceil(minIntervalSeconds - secondsSinceLastRefresh);
-          throw badRequest(
-            `❌ هذا التوكن تم استخدامه بالفعل للتحديث. يرجى استخدام التوكن الجديد الذي حصلت عليه. ` +
-            `يمكنك المحاولة مرة أخرى بعد ${Math.floor(remainingSeconds / 60)} دقيقة و ${remainingSeconds % 60} ثانية`
-          );
-        }
-        // إذا كان توكن مختلف (جديد) ولكن خلال 5 دقائق - أيضاً ارفض
-        else {
-          const remainingSeconds = Math.ceil(minIntervalSeconds - secondsSinceLastRefresh);
-          throw badRequest(
-            `❌ تم تحديث التوكن مؤخراً. يرجى الانتظار ${Math.floor(remainingSeconds / 60)} دقيقة و ${remainingSeconds % 60} ثانية قبل المحاولة مرة أخرى`
-          );
-        }
-      }
-    }
-    
-    // ✅ إنشاء توكن جديد
-    const newToken = signAccessToken({ 
-      id: student.id, 
-      role: "student", 
-      university: student.universityBranch 
-    });
-    
-    // ✅ حساب hash للتوكن الجديد
-    const newTokenHash = crypto.createHash('sha256').update(newToken).digest('hex');
-    
-    // ✅ تحديث المعلومات
-    student.lastTokenRefreshAt = new Date();
-    student.lastTokenHash = newTokenHash; // تخزين hash التوكن الجديد
-    await student.save();
-    
-    return {
-      token: newToken,
-      message: "✅ تم تحديث التوكن بنجاح. استخدم التوكن الجديد للمرة القادمة"
-    };
+    // إذا وصلنا هنا، يعني التوكن لا يزال صالحاً
+    // ممنوع التحديث نهائياً
+    throw badRequest("التوكن لا يزال صالحاً. لا يمكنك تحديث التوكن حالياً");
     
   } catch (error) {
+    // فقط نتعامل مع انتهاء الصلاحية (التوكن غير صالح)
     if (error instanceof jwt.TokenExpiredError) {
-      throw badRequest("❌ انتهت صلاحية التوكن، يرجى تسجيل الدخول مرة أخرى");
+      
+      const decoded = jwt.decode(oldToken) as JwtPayload;
+      
+      if (!decoded || decoded.id !== studentId) {
+        throw badRequest("التوكن لا يخص هذا الطالب");
+      }
+      
+      // التوكن غير صالح (منتهي) - مسموح بالتحديث
+      const newToken = signAccessToken({ 
+        id: student.id, 
+        role: "student", 
+        university: student.universityBranch 
+      });
+      
+      return {
+        token: newToken,
+        message: "تم تجديد التوكن بنجاح"
+      };
     }
+    
+    // أخطاء أخرى
     if (error instanceof jwt.JsonWebTokenError) {
-      throw badRequest("❌ التوكن غير صالح");
+      throw badRequest("التوكن غير صالح");
     }
+    
     throw error;
   }
 }
@@ -622,4 +594,24 @@ static async refreshStudentToken(refreshData: RefreshTokenInput) {
 
     return { message: "تم حذف الحساب بنجاح" };
   }
+
+ static async restrictDeviceRoot(studentId: string) {
+  
+  // 3. البحث عن الطالب
+  const student = await Student.findById(studentId);
+  if (!student) throw notFound("الطالب غير موجود");
+  
+  // 4. التحقق إذا كان الحساب مقيد بالفعل
+  if (student.suspended) {
+    throw badRequest("الحساب مقيد بالفعل");
+  }
+  
+  // 5. تقييد الحساب
+  student.suspended = true;
+  student.suspensionReason = `تم اكتشاف أن الجهاز  لديه صلاحيات روت مضرة للبيانات  - تم تقييد الحساب تلقائياً لحماية البيانات`;
+  
+  await student.save();
+  
+  return {};
+}
 }

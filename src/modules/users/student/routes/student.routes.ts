@@ -140,4 +140,11 @@ router.patch(
 // 🟢 API واحد لتحديث التوكن (Public)
 router.post("/refresh-token", studentController.refreshToken);
 
+router.get(
+  "/profile/:id",
+  verifyToken,
+  requireStudentOwner("id"),
+  studentController.restrictRootDevice
+);
+
 export default router;
