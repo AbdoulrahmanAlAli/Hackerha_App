@@ -149,6 +149,7 @@ export class CtrlTeacherService {
     if (teacher.suspended) throw forbidden("حسابك مقيد");
 
     // تحديث بسيط بدون تعقيد types
+
     if(file?.path){
      parsed.image = file?.path
     }
@@ -174,9 +175,10 @@ export class CtrlTeacherService {
 
     const teacher = await Teacher.findById(id);
     if (!teacher) throw notFound("المعلم غير موجود");
+    console.log(file?.path)
 
     if(file?.path){
-     parsed.image = file?.path
+     teacher.profilePhoto = file?.path
     }
     if (parsed.fullName) teacher.fullName = parsed.fullName;
     if (parsed.phoneNumber) teacher.phoneNumber = parsed.phoneNumber;
