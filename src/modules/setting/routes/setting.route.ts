@@ -13,4 +13,12 @@ router.patch(
   settingController.resetStudentsRelations
 );
 
+// Get statistics (Admin only)
+router.get(
+  "/statistics",
+  verifyToken,
+  requireAdmin,
+  settingController.getStatistics
+);
+
 export default router;
