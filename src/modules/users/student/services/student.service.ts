@@ -72,7 +72,7 @@ export class StudentService {
       .populate({
         path: "enrolledCourses",
         populate: {
-          path: "instructor",
+          path: "teachers",
           select: "fullName profilePhoto"
         }
       })
