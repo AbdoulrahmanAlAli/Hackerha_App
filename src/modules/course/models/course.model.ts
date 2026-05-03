@@ -31,7 +31,6 @@ const CourseSchema = new Schema<ICourse>(
       required: [true, "اسم الكورس مطلوب"],
       trim: true,
       maxlength: [100, "الاسم يجب ألا يتجاوز 100 حرف"],
-      unique: true,
     },
 
     teachers: {
