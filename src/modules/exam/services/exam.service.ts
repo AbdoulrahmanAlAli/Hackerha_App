@@ -49,18 +49,22 @@ export class ExamService {
     return exam;
   }
 
-  static async getExamsByCourseId(courseId: string) {
+  static async getExamsByCourseId(courseId: string, userRole: string) {
     if (!mongoose.isValidObjectId(courseId)) throw badRequest("معرف غير صالح");
 
-
-    
     // وجود الكورس (اختياري لكن مفيد)
     const course = await Course.findById(courseId).select("_id")
     console.log(course)
     if (!course) throw notFound("الكورس غير موجود");
 
-    const exams = await Exam.find({ courseId })
-      .sort({ number: 1 }) // أفضل للعرض (مثل sessions حسب number)
+    let query: any = { courseId };
+  
+    if (userRole === 'student') {
+      query.available = true;
+    }
+
+    const exams = await Exam.find(query)
+      .sort({ number: 1 })
       .populate("courseId", "name");
 
     return exams;

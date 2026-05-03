@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { CtrlSessionService } from "../services/session.service";
 import { AuthenticatedRequest } from "../../../core/http/authenticatedRequest";
+import { badRequest } from "../../../core/errors/httpErrors";
 
 class CtrlSessionController {
   // POST /api/hackit/ctrl/sessions  (Admin)
@@ -19,9 +20,20 @@ class CtrlSessionController {
 
   // GET /api/hackit/ctrl/sessions/course/:courseId  (Public)
   getSessionsByCourseId = asyncHandler(async (req: Request, res: Response) => {
-    const sessions = await CtrlSessionService.getSessionsByCourseId(req.params.courseId);
+    // Get user role from authenticated request
+    const userRole = (req as AuthenticatedRequest).user?.role;
+    
+    if (!userRole) {
+      throw badRequest("دور المستخدم غير محدد");
+    }
+  
+    const sessions = await CtrlSessionService.getSessionsByCourseId(
+      req.params.courseId,
+      userRole
+    );
+    
     res.status(200).json(sessions);
-  });
+});
 
   // PUT /api/hackit/ctrl/sessions/:id  (Admin)
   updateSession = asyncHandler(async (req: Request, res: Response) => {

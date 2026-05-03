@@ -73,17 +73,27 @@ export class CtrlSessionService {
     return sessionObj;
   }
 
-  // ~ Get => /api/hackit/ctrl/sessions/course/:courseId ~ Get Seesions By Coruse Id
-  static async getSessionsByCourseId(courseId: string) {
+  // ~ Get => /api/hackit/ctrl/sessions/course/:courseId ~ Get Sessions By Course Id
+  static async getSessionsByCourseId(courseId: string, userRole: string) {
     if (!mongoose.isValidObjectId(courseId))
       throw badRequest("معرف الكورس غير صالح");
 
     const course = await Course.findById(courseId);
     if (!course) throw notFound("الكورس غير موجود");
 
-    const sessions = await Session.find({ courseId })
+    // Build query based on user role
+    let query: any = { courseId };
+    
+    // For students: only return available sessions
+    if (userRole === 'student') {
+      query.available = true;
+    }
+    // For admin: return all sessions (no additional filter)
+    // For teacher: you might want to add similar logic
+
+    const sessions = await Session.find(query)
       .sort({ number: 1 })
-      .lean(); // Use lean() for better performance
+      .lean();
 
     // Transform each session to include counts
     const transformedSessions = sessions.map(session => ({

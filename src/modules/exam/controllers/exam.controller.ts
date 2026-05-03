@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { ExamService } from "../services/exam.service";
+import { AuthenticatedRequest } from "../../../core/http/authenticatedRequest";
+import { badRequest } from "../../../core/errors/httpErrors";
 
 class ExamController {
   createExam = asyncHandler(async (req: Request, res: Response) => {
@@ -14,7 +16,13 @@ class ExamController {
   });
 
   getExamsByCourseId = asyncHandler(async (req: Request, res: Response) => {
-    const exams = await ExamService.getExamsByCourseId(req.params.courseId);
+    const userRole = (req as AuthenticatedRequest).user?.role;
+    
+    if (!userRole) {
+      throw badRequest("دور المستخدم غير محدد");
+    }
+
+    const exams = await ExamService.getExamsByCourseId(req.params.courseId, userRole);
     res.status(200).json(exams);
   });
 
