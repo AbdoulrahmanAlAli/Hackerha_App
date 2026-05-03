@@ -65,40 +65,75 @@ export class CtrlCourseService {
     return { message: "تم إنشاء الكورس بنجاح" };
   }
 
-
-  // ~ Get => /api/hackit/ctrl/course/:id ~ get single course
+// ~ Get => /api/hackit/ctrl/course/:id ~ get single course
   static async getCourseById(courseId: string, actor: any) {
     if (!mongoose.isValidObjectId(courseId))
       throw badRequest("معرف الكورس غير صالح");
 
     const course = await Course.findById(courseId)
       .populate("teachers")
-      .populate({ path: "sessions", options: { sort: { number: 1 } } })
-      .populate({ path: "exams", options: { sort: { number: 1 } } })
+      .populate({ 
+        path: "sessions", 
+        options: { sort: { number: 1 } },
+        // لا نطبق فلتر هنا، سنفلتر لاحقاً حسب الدور
+      })
+      .populate({ 
+        path: "exams", 
+        options: { sort: { number: 1 } },
+        // لا نطبق فلتر هنا، سنفلتر لاحقاً حسب الدور
+      })
       .populate("students", "firstName lastName phoneNumber universityNumber email")
       .lean();
 
     if (!course) throw notFound("الكورس غير موجود");
 
-    if(actor.role !== "admin") {
-       if (actor && actor.universityBranch && course.universityBranch !== actor.universityBranch) {
-      throw badRequest("لا يمكنك الوصول إلى هذا الكورس من فرعك");
+    // التحقق من صلاحية الفرع (لغير الأدمن)
+    if (actor.role !== "admin") {
+      if (actor && actor.universityBranch && course.universityBranch !== actor.universityBranch) {
+        throw badRequest("لا يمكنك الوصول إلى هذا الكورس من فرعك");
       }
     }
 
-    const sessions = (course as any).sessions ?? [];
-    const exams = (course as any).exams ?? [];
+    // الحصول على الجلسات والامتحانات
+    let sessions = (course as any).sessions ?? [];
+    let exams = (course as any).exams ?? [];
+
+    // تطبيق الفلتر حسب دور المستخدم
+    if (actor.role === "student") {
+      // للطلاب: فقط الجلسات والامتحانات المتاحة (available: true)
+      sessions = sessions.filter((session: any) => session.available === true);
+      exams = exams.filter((exam: any) => exam.available === true);
+    }
+    // للأدمن والمدرسين: جميع الجلسات والامتحانات (بدون فلتر)
 
     const totalFiles = sessions.reduce(
       (t: number, s: any) => t + (Array.isArray(s?.files) ? s.files.length : 0),
       0
     );
 
-    const firstSession = await Session.findOne({ courseId, number: 1 }).lean();
-    const firstExam = await Exam.findOne({ courseId })
-      .sort({ number: 1 })
-      .lean();
+    // البحث عن أول جلسة متاحة (إذا كان الطالب) أو أول جلسة بشكل عام
+    let firstSession = null;
+    let firstExam = null;
+    
+    if (actor.role === "student") {
+      // للطالب: أول جلسة متاحة
+      firstSession = sessions.find((s: any) => s.number === 1 && s.available === true);
+      if (!firstSession && sessions.length > 0) {
+        firstSession = sessions[0]; // أول جلسة متاحة
+      }
+      
+      // لأول امتحان متاح
+      firstExam = exams.find((e: any) => e.number === 1 && e.available === true);
+      if (!firstExam && exams.length > 0) {
+        firstExam = exams[0];
+      }
+    } else {
+      // للأدمن: أول جلسة وامتحان بشكل عام
+      firstSession = await Session.findOne({ courseId, number: 1 }).lean();
+      firstExam = await Exam.findOne({ courseId }).sort({ number: 1 }).lean();
+    }
 
+    // بناء قائمة الأنشطة (الجلسات والامتحانات معاً)
     const activities = [
       ...sessions.map((s: any) => ({
         ...s,
@@ -160,7 +195,7 @@ export class CtrlCourseService {
       return { ...base, isEnrolled, sessionsAndExams, whatsapp: whatsappField };
     }
 
-    // admin/teacher: عرض كامل
+    // admin/teacher: عرض كامل (جميع الجلسات والامتحانات)
     return { ...base, sessionsAndExams, whatsapp: whatsappField };
   }
 
