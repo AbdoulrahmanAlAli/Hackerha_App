@@ -46,7 +46,8 @@ class CtrlCourseController {
   updateCourse = asyncHandler(async (req: Request, res: Response) => {
     const result = await CtrlCourseService.updateCourse(
       req.params.id,
-      req.body
+      req.body,
+      req.file as ICloudinaryFile
     );
     res.status(200).json(result);
   });

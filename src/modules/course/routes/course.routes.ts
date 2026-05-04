@@ -45,6 +45,8 @@ router.put(
   "/:id",
   verifyToken,
   requireAdmin,
+  upload,
+  normalizeCourseFormData,
   ctrlCourseController.updateCourse
 );
 
