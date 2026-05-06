@@ -156,7 +156,6 @@ StudentSchema.set("toJSON", {
 // Indexes
 StudentSchema.index({ createdAt: -1 });
 StudentSchema.index({ banks: 1 });
-StudentSchema.index({ contents: 1 });
 StudentSchema.index({ email: 1, available: 1 });
 StudentSchema.index({ phoneNumber: 1, available: 1 });
 StudentSchema.index({ universityNumber: 1, available: 1 });
