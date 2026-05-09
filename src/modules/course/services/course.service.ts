@@ -66,7 +66,8 @@ export class CtrlCourseService {
   }
 
 // ~ Get => /api/hackit/ctrl/course/:id ~ get single course
-  static async getCourseById(courseId: string, actor: any) {
+ // get single course
+static async getCourseById(courseId: string, actor: any) {
     if (!mongoose.isValidObjectId(courseId))
       throw badRequest("معرف الكورس غير صالح");
 
@@ -75,12 +76,10 @@ export class CtrlCourseService {
       .populate({ 
         path: "sessions", 
         options: { sort: { number: 1 } },
-        // لا نطبق فلتر هنا، سنفلتر لاحقاً حسب الدور
       })
       .populate({ 
         path: "exams", 
         options: { sort: { number: 1 } },
-        // لا نطبق فلتر هنا، سنفلتر لاحقاً حسب الدور
       })
       .populate("students", "firstName lastName phoneNumber universityNumber email")
       .lean();
@@ -98,13 +97,20 @@ export class CtrlCourseService {
     let sessions = (course as any).sessions ?? [];
     let exams = (course as any).exams ?? [];
 
+    // تحويل الجلسات: تحويل likes و disLikes إلى أعداد
+    sessions = sessions.map((session: any) => ({
+      ...session,
+      likesCount: session.likes?.length || 0,
+      disLikesCount: session.disLikes?.length || 0,
+      likes: undefined,
+      disLikes: undefined
+    }));
+
     // تطبيق الفلتر حسب دور المستخدم
     if (actor.role === "student") {
-      // للطلاب: فقط الجلسات والامتحانات المتاحة (available: true)
       sessions = sessions.filter((session: any) => session.available === true);
       exams = exams.filter((exam: any) => exam.available === true);
     }
-    // للأدمن والمدرسين: جميع الجلسات والامتحانات (بدون فلتر)
 
     const totalFiles = sessions.reduce(
       (t: number, s: any) => t + (Array.isArray(s?.files) ? s.files.length : 0),
@@ -116,24 +122,30 @@ export class CtrlCourseService {
     let firstExam = null;
     
     if (actor.role === "student") {
-      // للطالب: أول جلسة متاحة
       firstSession = sessions.find((s: any) => s.number === 1 && s.available === true);
       if (!firstSession && sessions.length > 0) {
-        firstSession = sessions[0]; // أول جلسة متاحة
+        firstSession = sessions[0];
       }
       
-      // لأول امتحان متاح
       firstExam = exams.find((e: any) => e.number === 1 && e.available === true);
       if (!firstExam && exams.length > 0) {
         firstExam = exams[0];
       }
     } else {
-      // للأدمن: أول جلسة وامتحان بشكل عام
-      firstSession = await Session.findOne({ courseId, number: 1 }).lean();
+      const rawSession = await Session.findOne({ courseId, number: 1 }).lean();
+      if (rawSession) {
+        firstSession = {
+          ...rawSession,
+          likesCount: rawSession.likes?.length || 0,
+          disLikesCount: rawSession.disLikes?.length || 0,
+          likes: undefined,
+          disLikes: undefined
+        };
+      }
       firstExam = await Exam.findOne({ courseId }).sort({ number: 1 }).lean();
     }
 
-    // بناء قائمة الأنشطة (الجلسات والامتحانات معاً)
+    // بناء قائمة الأنشطة
     const activities = [
       ...sessions.map((s: any) => ({
         ...s,
@@ -153,6 +165,7 @@ export class CtrlCourseService {
       sessions: _s,
       exams: _e,
       whatsapp: whatsappField,
+      students: studentsArray,
       ...courseWithoutArrays
     } = course as any;
 
@@ -161,29 +174,22 @@ export class CtrlCourseService {
 
     const base = {
       ...courseWithoutArrays,
-      studentsCount:
-        ((course as any).students?.length ?? 0) +
-        ((course as any).fakeCount || 0),
+      students: (studentsArray?.length ?? 0) + ((course as any).fakeCount || 0),
       sessionsCount: sessions.length,
       examsCount: exams.length,
       commentsCount: (course as any).comments?.length ?? 0,
-      discountedPrice:
-        discount?.dis && discount?.rate
-          ? price * (1 - discount.rate / 100)
-          : price,
+      discountedPrice: discount?.dis && discount?.rate ? price * (1 - discount.rate / 100) : price,
       isDiscounted: !!discount?.dis,
       totalFiles,
       firstSession,
       firstExam,
     };
 
-    // الطالب: يرجع isEnrolled دائماً + يخفي whatsapp و sessionsAndExams إن لم يكن مسجلاً
+    // الطالب
     if (actor.role === "student") {
       if (!actor.id) throw badRequest("معرف الطالب مطلوب");
 
-      const student = await Student.findById(actor.id).select(
-        "enrolledCourses"
-      );
+      const student = await Student.findById(actor.id).select("enrolledCourses");
       if (!student) throw notFound("الطالب غير موجود");
 
       const isEnrolled = (student.enrolledCourses ?? []).some(
@@ -191,13 +197,12 @@ export class CtrlCourseService {
       );
 
       if (!isEnrolled) return { ...base, isEnrolled };
-
       return { ...base, isEnrolled, sessionsAndExams, whatsapp: whatsappField };
     }
 
-    // admin/teacher: عرض كامل (جميع الجلسات والامتحانات)
+    // admin/teacher
     return { ...base, sessionsAndExams, whatsapp: whatsappField };
-  }
+}
 
   // ~ Get => /api/hackit/ctrl/course ~ get all courses
   static async getAllCourses(query: any, actor: any) {

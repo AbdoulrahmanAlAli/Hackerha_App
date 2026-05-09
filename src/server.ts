@@ -19,9 +19,9 @@ async function bootstrap() {
     });
 
     // 🚀 تشغيل البوت بدون ما يوقف السيرفر
-    launchTelegramBot().catch((err) => {
-      logger.error("Telegram bot failed to start", err);
-    });
+    // launchTelegramBot().catch((err) => {
+    //   logger.error("Telegram bot failed to start", err);
+    // });
 
   } catch (e) {
     logger.error("Failed to start", e);
