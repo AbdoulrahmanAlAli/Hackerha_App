@@ -75,7 +75,7 @@ static async getCourseById(courseId: string, actor: any) {
         path: "sessions", 
         options: { sort: { number: 1 } },
         populate: {
-          path: "files", // إضافة populate للملفات
+          path: "files",
           model: "SessionFile"
         }
       })
@@ -99,14 +99,34 @@ static async getCourseById(courseId: string, actor: any) {
     let sessions = (course as any).sessions ?? [];
     let exams = (course as any).exams ?? [];
 
-    // تحويل الجلسات: تحويل likes و disLikes إلى أعداد
-    const convertSession = (session: any) => ({
-      ...session,
-      likes: session.likes?.length || 0,
-      disLikes: session.disLikes?.length || 0,
-    });
+    // للطالب: جلب معلومات الـ likes و disLikes
+    let studentId = null;
+    if (actor.role === "student") {
+      if (!actor.id) throw badRequest("معرف الطالب مطلوب");
+      studentId = actor.id;
+    }
 
-    sessions = sessions.map(convertSession);
+    // تحويل الجلسات: تحويل likes و disLikes إلى أعداد + isLiked/isDisliked للطالب
+    const convertSession = (session: any, studentIdParam: string | null = null) => {
+      const likesArray = session.likes || [];
+      const disLikesArray = session.disLikes || [];
+      
+      const converted: any = {
+        ...session,
+        likes: likesArray.length,
+        disLikes: disLikesArray.length,
+      };
+      
+      // إذا كان هناك طالب، أضف isLiked و isDisliked
+      if (studentIdParam) {
+        converted.isLiked = likesArray.some((id: any) => id.toString() === studentIdParam);
+        converted.isDisliked = disLikesArray.some((id: any) => id.toString() === studentIdParam);
+      }
+      
+      return converted;
+    };
+
+    sessions = sessions.map((session: any) => convertSession(session, studentId));
 
     // تطبيق الفلتر حسب دور المستخدم
     if (actor.role === "student") {
@@ -135,12 +155,12 @@ static async getCourseById(courseId: string, actor: any) {
         firstExam = exams[0];
       }
     } else {
-      // للأدمن/المدرس: أول جلسة وامتحان
+      // للأدمن/المدرس: أول جلسة وامتحان (بدون isLiked/isDisliked)
       const rawSession = await Session.findOne({ courseId, number: 1 })
-      .populate("files") // هذا سيجلب الملفات مع firstSession
-      .lean();
+        .populate("files")
+        .lean();
       if (rawSession) {
-        firstSession = convertSession(rawSession);
+        firstSession = convertSession(rawSession, null);
       }
       firstExam = await Exam.findOne({ courseId }).sort({ number: 1 }).lean();
     }
@@ -186,8 +206,6 @@ static async getCourseById(courseId: string, actor: any) {
 
     // الطالب
     if (actor.role === "student") {
-      if (!actor.id) throw badRequest("معرف الطالب مطلوب");
-
       const student = await Student.findById(actor.id).select("enrolledCourses");
       if (!student) throw notFound("الطالب غير موجود");
 
@@ -198,14 +216,13 @@ static async getCourseById(courseId: string, actor: any) {
       // غير مسجل: firstSession, firstExam موجودة
       if (!isEnrolled) return { ...base, isEnrolled };
 
-      // مسجل: كل شيء
+      // مسجل: كل شيء مع isLiked/isDisliked
       return { ...base, isEnrolled, sessionsAndExams, whatsapp: whatsappField };
     }
 
     // admin/teacher
     return { ...base, sessionsAndExams, whatsapp: whatsappField };
 }
-
   // ~ Get => /api/hackit/ctrl/course ~ get all courses
   static async getAllCourses(query: any, actor: any) {
     let parsed: any;

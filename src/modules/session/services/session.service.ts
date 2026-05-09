@@ -52,25 +52,35 @@ export class CtrlSessionService {
 
   // ~ Get => /api/hackit/ctrl/sessions/:id ~ Get Single Session
   static async getSessionById(id: string, userId?: string) {
-    if (!mongoose.isValidObjectId(id)) throw badRequest("معرف الجلسة غير صالح");
+      if (!mongoose.isValidObjectId(id)) throw badRequest("معرف الجلسة غير صالح");
 
-    const session = await Session.findById(id).populate("files");
-    if (!session) throw notFound("الجلسة غير موجودة");
+      const session = await Session.findById(id).populate("files");
+      if (!session) throw notFound("الجلسة غير موجودة");
 
-    const sessionObj = session.toObject() as any;
+      const sessionObj = session.toObject() as any;
 
-    // Transform likes and dislikes to counts
-    sessionObj.likes = sessionObj.likes?.length || 0;
-    sessionObj.disLikes = sessionObj.disLikes?.length || 0;
+      // حفظ المصفوفات الأصلية للتحقق
+      const likesArray = sessionObj.likes || [];
+      const disLikesArray = sessionObj.disLikes || [];
 
-    // One-time video token proxy
-    sessionObj.video = await VideoTokenService.createVideoToken(
-      id,
-      session.video,
-      userId,
-    );
+      // Transform likes and dislikes to counts
+      sessionObj.likes = likesArray.length;
+      sessionObj.disLikes = disLikesArray.length;
 
-    return sessionObj;
+      // إضافة isLiked و isDisliked إذا كان userId موجود
+      if (userId) {
+          sessionObj.isLiked = likesArray.some((id: any) => id.toString() === userId);
+          sessionObj.isDisliked = disLikesArray.some((id: any) => id.toString() === userId);
+      }
+
+      // One-time video token proxy
+      sessionObj.video = await VideoTokenService.createVideoToken(
+          id,
+          session.video,
+          userId,
+      );
+
+      return sessionObj;
   }
 
   // ~ Get => /api/hackit/ctrl/sessions/course/:courseId ~ Get Sessions By Course Id
