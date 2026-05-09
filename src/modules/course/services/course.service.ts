@@ -97,6 +97,17 @@ static async getCourseById(courseId: string, actor: any) {
     let sessions = (course as any).sessions ?? [];
     let exams = (course as any).exams ?? [];
 
+    // تحويل الجلسات: تحويل likes و disLikes إلى أعداد
+    const convertSession = (session: any) => ({
+      ...session,
+      likesCount: session.likes?.length || 0,
+      disLikesCount: session.disLikes?.length || 0,
+      likes: undefined,
+      disLikes: undefined
+    });
+
+    sessions = sessions.map(convertSession);
+
     // تطبيق الفلتر حسب دور المستخدم
     if (actor.role === "student") {
       // للطلاب: فقط الجلسات والامتحانات المتاحة (available: true)
@@ -110,7 +121,7 @@ static async getCourseById(courseId: string, actor: any) {
       0
     );
 
-    // البحث عن أول جلسة متاحة (إذا كان الطالب) أو أول جلسة بشكل عام
+    // البحث عن أول جلسة وامتحان (دائماً)
     let firstSession = null;
     let firstExam = null;
     
@@ -118,17 +129,20 @@ static async getCourseById(courseId: string, actor: any) {
       // للطالب: أول جلسة متاحة
       firstSession = sessions.find((s: any) => s.number === 1 && s.available === true);
       if (!firstSession && sessions.length > 0) {
-        firstSession = sessions[0]; // أول جلسة متاحة
+        firstSession = sessions[0];
       }
       
-      // لأول امتحان متاح
+      // أول امتحان متاح
       firstExam = exams.find((e: any) => e.number === 1 && e.available === true);
       if (!firstExam && exams.length > 0) {
         firstExam = exams[0];
       }
     } else {
-      // للأدمن: أول جلسة وامتحان بشكل عام
-      firstSession = await Session.findOne({ courseId, number: 1 }).lean();
+      // للأدمن/المدرس: أول جلسة وامتحان بشكل عام مع تحويل ال likes
+      const rawSession = await Session.findOne({ courseId, number: 1 }).lean();
+      if (rawSession) {
+        firstSession = convertSession(rawSession);
+      }
       firstExam = await Exam.findOne({ courseId }).sort({ number: 1 }).lean();
     }
 
@@ -176,7 +190,7 @@ static async getCourseById(courseId: string, actor: any) {
       firstExam,
     };
 
-    // الطالب: يرجع isEnrolled دائماً + يخفي whatsapp و sessionsAndExams إن لم يكن مسجلاً
+    // الطالب
     if (actor.role === "student") {
       if (!actor.id) throw badRequest("معرف الطالب مطلوب");
 
@@ -189,14 +203,16 @@ static async getCourseById(courseId: string, actor: any) {
         (x: any) => x.toString() === courseId
       );
 
-      if (!isEnrolled) return { ...base, isEnrolled };
+      // الطالب غير مسجل: يرجع firstSession, firstExam بدون whatsapp و sessionsAndExams
+      if (!isEnrolled) return { ...base, isEnrolled, firstSession, firstExam };
 
-      return { ...base, isEnrolled, sessionsAndExams, whatsapp: whatsappField };
+      // الطالب مسجل: يرجع كل شيء
+      return { ...base, isEnrolled, sessionsAndExams, whatsapp: whatsappField, firstSession, firstExam };
     }
 
-    // admin/teacher: عرض كامل (جميع الجلسات والامتحانات)
-    return { ...base, sessionsAndExams, whatsapp: whatsappField };
-  }
+    // admin/teacher: عرض كامل
+    return { ...base, sessionsAndExams, whatsapp: whatsappField, firstSession, firstExam };
+}
 
   // ~ Get => /api/hackit/ctrl/course ~ get all courses
   static async getAllCourses(query: any, actor: any) {
