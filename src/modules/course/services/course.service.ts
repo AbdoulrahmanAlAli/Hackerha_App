@@ -100,10 +100,8 @@ static async getCourseById(courseId: string, actor: any) {
     // تحويل الجلسات: تحويل likes و disLikes إلى أعداد
     sessions = sessions.map((session: any) => ({
       ...session,
-      likesCount: session.likes?.length || 0,
-      disLikesCount: session.disLikes?.length || 0,
-      likes: undefined,
-      disLikes: undefined
+      likes: session.likes?.length || 0,
+      disLikes: session.disLikes?.length || 0,
     }));
 
     // تطبيق الفلتر حسب دور المستخدم
@@ -136,10 +134,8 @@ static async getCourseById(courseId: string, actor: any) {
       if (rawSession) {
         firstSession = {
           ...rawSession,
-          likesCount: rawSession.likes?.length || 0,
-          disLikesCount: rawSession.disLikes?.length || 0,
-          likes: undefined,
-          disLikes: undefined
+          likes: rawSession.likes?.length || 0,
+          disLikes: rawSession.disLikes?.length || 0,
         };
       }
       firstExam = await Exam.findOne({ courseId }).sort({ number: 1 }).lean();
