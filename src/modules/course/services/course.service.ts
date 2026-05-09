@@ -66,8 +66,7 @@ export class CtrlCourseService {
   }
 
 // ~ Get => /api/hackit/ctrl/course/:id ~ get single course
- // get single course
-static async getCourseById(courseId: string, actor: any) {
+ static async getCourseById(courseId: string, actor: any) {
     if (!mongoose.isValidObjectId(courseId))
       throw badRequest("معرف الكورس غير صالح");
 
@@ -125,15 +124,31 @@ static async getCourseById(courseId: string, actor: any) {
     let firstSession = null;
     let firstExam = null;
     
-    firstSession = sessions.find((s: any) => s.number === 1 && s.available === true);
-    if (!firstSession && sessions.length > 0) {
-      firstSession = sessions[0];
-    }
-    
-    // لأول امتحان متاح
-    firstExam = exams.find((e: any) => e.number === 1 && e.available === true);
-    if (!firstExam && exams.length > 0) {
-      firstExam = exams[0];
+    if (actor.role === "student") {
+      // للطالب: أول جلسة متاحة
+      firstSession = sessions.find((s: any) => s.number === 1 && s.available === true);
+      if (!firstSession && sessions.length > 0) {
+        firstSession = sessions[0]; // أول جلسة متاحة
+      }
+      
+      // لأول امتحان متاح
+      firstExam = exams.find((e: any) => e.number === 1 && e.available === true);
+      if (!firstExam && exams.length > 0) {
+        firstExam = exams[0];
+      }
+    } else {
+      // للأدمن: أول جلسة وامتحان بشكل عام
+      const rawSession = await Session.findOne({ courseId, number: 1 }).lean();
+      if (rawSession) {
+        firstSession = {
+          ...rawSession,
+          likesCount: rawSession.likes?.length || 0,
+          disLikesCount: rawSession.disLikes?.length || 0,
+          likes: undefined,
+          disLikes: undefined
+        };
+      }
+      firstExam = await Exam.findOne({ courseId }).sort({ number: 1 }).lean();
     }
 
     // بناء قائمة الأنشطة (الجلسات والامتحانات معاً)
@@ -156,7 +171,6 @@ static async getCourseById(courseId: string, actor: any) {
       sessions: _s,
       exams: _e,
       whatsapp: whatsappField,
-      students: studentsArray,
       ...courseWithoutArrays
     } = course as any;
 
@@ -165,7 +179,9 @@ static async getCourseById(courseId: string, actor: any) {
 
     const base = {
       ...courseWithoutArrays,
-      studentsCount: (studentsArray?.length ?? 0) + ((course as any).fakeCount || 0),
+      studentsCount:
+        ((course as any).students?.length ?? 0) +
+        ((course as any).fakeCount || 0),
       sessionsCount: sessions.length,
       examsCount: exams.length,
       commentsCount: (course as any).comments?.length ?? 0,
@@ -192,13 +208,7 @@ static async getCourseById(courseId: string, actor: any) {
         (x: any) => x.toString() === courseId
       );
 
-      if (!isEnrolled) return { 
-        ...base, 
-        isEnrolled,
-        firstSession,
-        firstExam,
-        sessionsAndExams
-      };
+      if (!isEnrolled) return { ...base, isEnrolled };
 
       return { ...base, isEnrolled, sessionsAndExams, whatsapp: whatsappField };
     }
