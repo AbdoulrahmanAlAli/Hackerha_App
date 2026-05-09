@@ -102,10 +102,8 @@ static async getCourseById(courseId: string, actor: any) {
     // تحويل الجلسات: تحويل likes و disLikes إلى أعداد
     const convertSession = (session: any) => ({
       ...session,
-      likesCount: session.likes?.length || 0,
-      disLikesCount: session.disLikes?.length || 0,
-      likes: undefined,
-      disLikes: undefined
+      likes: session.likes?.length || 0,
+      disLikes: session.disLikes?.length || 0,
     });
 
     sessions = sessions.map(convertSession);
@@ -138,7 +136,9 @@ static async getCourseById(courseId: string, actor: any) {
       }
     } else {
       // للأدمن/المدرس: أول جلسة وامتحان
-      const rawSession = await Session.findOne({ courseId, number: 1 }).lean();
+      const rawSession = await Session.findOne({ courseId, number: 1 })
+      .populate("files") // هذا سيجلب الملفات مع firstSession
+      .lean();
       if (rawSession) {
         firstSession = convertSession(rawSession);
       }
@@ -173,7 +173,7 @@ static async getCourseById(courseId: string, actor: any) {
 
     const base = {
       ...courseWithoutArrays,
-      studentsCount: ((course as any).students?.length ?? 0) + ((course as any).fakeCount || 0),
+      students: ((course as any).students?.length ?? 0) + ((course as any).fakeCount || 0),
       sessionsCount: sessions.length,
       examsCount: exams.length,
       commentsCount: (course as any).comments?.length ?? 0,
