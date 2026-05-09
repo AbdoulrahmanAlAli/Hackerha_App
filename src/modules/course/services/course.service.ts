@@ -195,30 +195,6 @@ static async getCourseById(courseId: string, actor: any) {
       firstExam,
     };
 
-    // الطالب: يرجع isEnrolled دائماً + يخفي whatsapp و sessionsAndExams إن لم يكن مسجلاً
-    if (actor.role === "student") {
-      if (!actor.id) throw badRequest("معرف الطالب مطلوب");
-
-      const student = await Student.findById(actor.id).select(
-        "enrolledCourses"
-      );
-      if (!student) throw notFound("الطالب غير موجود");
-
-      const isEnrolled = (student.enrolledCourses ?? []).some(
-        (x: any) => x.toString() === courseId
-      );
-
-      if (!isEnrolled) return { 
-        ...base, 
-        isEnrolled,
-        firstSession,
-        firstExam,
-        sessionsAndExams
-      };
-
-      return { ...base, isEnrolled, sessionsAndExams, whatsapp: whatsappField };
-    }
-
     // admin/teacher: عرض كامل (جميع الجلسات والامتحانات)
     return { ...base, sessionsAndExams, whatsapp: whatsappField };
 }
