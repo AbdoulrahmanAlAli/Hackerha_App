@@ -74,6 +74,10 @@ static async getCourseById(courseId: string, actor: any) {
       .populate({ 
         path: "sessions", 
         options: { sort: { number: 1 } },
+        populate: {
+          path: "files", // إضافة populate للملفات
+          model: "SessionFile"
+        }
       })
       .populate({ 
         path: "exams", 
