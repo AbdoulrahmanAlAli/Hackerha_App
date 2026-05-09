@@ -74,12 +74,10 @@ static async getCourseById(courseId: string, actor: any) {
       .populate({ 
         path: "sessions", 
         options: { sort: { number: 1 } },
-        // لا نطبق فلتر هنا، سنفلتر لاحقاً حسب الدور
       })
       .populate({ 
         path: "exams", 
         options: { sort: { number: 1 } },
-        // لا نطبق فلتر هنا، سنفلتر لاحقاً حسب الدور
       })
       .populate("students", "firstName lastName phoneNumber universityNumber email")
       .lean();
@@ -110,18 +108,16 @@ static async getCourseById(courseId: string, actor: any) {
 
     // تطبيق الفلتر حسب دور المستخدم
     if (actor.role === "student") {
-      // للطلاب: فقط الجلسات والامتحانات المتاحة (available: true)
       sessions = sessions.filter((session: any) => session.available === true);
       exams = exams.filter((exam: any) => exam.available === true);
     }
-    // للأدمن والمدرسين: جميع الجلسات والامتحانات (بدون فلتر)
 
     const totalFiles = sessions.reduce(
       (t: number, s: any) => t + (Array.isArray(s?.files) ? s.files.length : 0),
       0
     );
 
-    // البحث عن أول جلسة وامتحان (دائماً)
+    // البحث عن أول جلسة وامتحان
     let firstSession = null;
     let firstExam = null;
     
@@ -132,13 +128,12 @@ static async getCourseById(courseId: string, actor: any) {
         firstSession = sessions[0];
       }
       
-      // أول امتحان متاح
       firstExam = exams.find((e: any) => e.number === 1 && e.available === true);
       if (!firstExam && exams.length > 0) {
         firstExam = exams[0];
       }
     } else {
-      // للأدمن/المدرس: أول جلسة وامتحان بشكل عام مع تحويل ال likes
+      // للأدمن/المدرس: أول جلسة وامتحان
       const rawSession = await Session.findOne({ courseId, number: 1 }).lean();
       if (rawSession) {
         firstSession = convertSession(rawSession);
@@ -146,7 +141,7 @@ static async getCourseById(courseId: string, actor: any) {
       firstExam = await Exam.findOne({ courseId }).sort({ number: 1 }).lean();
     }
 
-    // بناء قائمة الأنشطة (الجلسات والامتحانات معاً)
+    // بناء قائمة الأنشطة
     const activities = [
       ...sessions.map((s: any) => ({
         ...s,
@@ -174,16 +169,11 @@ static async getCourseById(courseId: string, actor: any) {
 
     const base = {
       ...courseWithoutArrays,
-      studentsCount:
-        ((course as any).students?.length ?? 0) +
-        ((course as any).fakeCount || 0),
+      studentsCount: ((course as any).students?.length ?? 0) + ((course as any).fakeCount || 0),
       sessionsCount: sessions.length,
       examsCount: exams.length,
       commentsCount: (course as any).comments?.length ?? 0,
-      discountedPrice:
-        discount?.dis && discount?.rate
-          ? price * (1 - discount.rate / 100)
-          : price,
+      discountedPrice: discount?.dis && discount?.rate ? price * (1 - discount.rate / 100) : price,
       isDiscounted: !!discount?.dis,
       totalFiles,
       firstSession,
@@ -194,29 +184,22 @@ static async getCourseById(courseId: string, actor: any) {
     if (actor.role === "student") {
       if (!actor.id) throw badRequest("معرف الطالب مطلوب");
 
-      const student = await Student.findById(actor.id).select(
-        "enrolledCourses"
-      );
+      const student = await Student.findById(actor.id).select("enrolledCourses");
       if (!student) throw notFound("الطالب غير موجود");
 
       const isEnrolled = (student.enrolledCourses ?? []).some(
         (x: any) => x.toString() === courseId
       );
 
-      // الطالب غير مسجل: يرجع firstSession, firstExam بدون whatsapp و sessionsAndExams
-      if (!isEnrolled) return { 
-          ...base, 
-          isEnrolled,
-          firstSession,
-          firstExam 
-        };
+      // غير مسجل: firstSession, firstExam موجودة
+      if (!isEnrolled) return { ...base, isEnrolled };
 
-      // الطالب مسجل: يرجع كل شيء
-      return { ...base, isEnrolled, sessionsAndExams, whatsapp: whatsappField, firstSession, firstExam };
+      // مسجل: كل شيء
+      return { ...base, isEnrolled, sessionsAndExams, whatsapp: whatsappField };
     }
 
-    // admin/teacher: عرض كامل
-    return { ...base, sessionsAndExams, whatsapp: whatsappField, firstSession, firstExam };
+    // admin/teacher
+    return { ...base, sessionsAndExams, whatsapp: whatsappField };
 }
 
   // ~ Get => /api/hackit/ctrl/course ~ get all courses
