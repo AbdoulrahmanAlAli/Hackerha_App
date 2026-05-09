@@ -65,8 +65,7 @@ export class CtrlCourseService {
     return { message: "تم إنشاء الكورس بنجاح" };
   }
 
-// ~ Get => /api/hackit/ctrl/course/:id ~ get single course
- static async getCourseById(courseId: string, actor: any) {
+static async getCourseById(courseId: string, actor: any) {
     if (!mongoose.isValidObjectId(courseId))
       throw badRequest("معرف الكورس غير صالح");
 
@@ -97,15 +96,6 @@ export class CtrlCourseService {
     // الحصول على الجلسات والامتحانات
     let sessions = (course as any).sessions ?? [];
     let exams = (course as any).exams ?? [];
-
-    // ONLY CHANGE: تحويل الجلسات - تحويل likes و disLikes إلى أعداد
-    sessions = sessions.map((session: any) => ({
-      ...session,
-      likesCount: session.likes?.length || 0,
-      disLikesCount: session.disLikes?.length || 0,
-      likes: undefined,
-      disLikes: undefined
-    }));
 
     // تطبيق الفلتر حسب دور المستخدم
     if (actor.role === "student") {
@@ -138,16 +128,7 @@ export class CtrlCourseService {
       }
     } else {
       // للأدمن: أول جلسة وامتحان بشكل عام
-      const rawSession = await Session.findOne({ courseId, number: 1 }).lean();
-      if (rawSession) {
-        firstSession = {
-          ...rawSession,
-          likesCount: rawSession.likes?.length || 0,
-          disLikesCount: rawSession.disLikes?.length || 0,
-          likes: undefined,
-          disLikes: undefined
-        };
-      }
+      firstSession = await Session.findOne({ courseId, number: 1 }).lean();
       firstExam = await Exam.findOne({ courseId }).sort({ number: 1 }).lean();
     }
 
@@ -215,7 +196,7 @@ export class CtrlCourseService {
 
     // admin/teacher: عرض كامل (جميع الجلسات والامتحانات)
     return { ...base, sessionsAndExams, whatsapp: whatsappField };
-}
+  }
 
   // ~ Get => /api/hackit/ctrl/course ~ get all courses
   static async getAllCourses(query: any, actor: any) {
