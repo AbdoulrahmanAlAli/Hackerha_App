@@ -204,7 +204,12 @@ static async getCourseById(courseId: string, actor: any) {
       );
 
       // الطالب غير مسجل: يرجع firstSession, firstExam بدون whatsapp و sessionsAndExams
-      if (!isEnrolled) return { ...base, isEnrolled, firstSession, firstExam };
+      if (!isEnrolled) return { 
+          ...base, 
+          isEnrolled,
+          firstSession,
+          firstExam 
+        };
 
       // الطالب مسجل: يرجع كل شيء
       return { ...base, isEnrolled, sessionsAndExams, whatsapp: whatsappField, firstSession, firstExam };
