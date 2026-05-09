@@ -262,7 +262,7 @@ static async getCourseById(courseId: string, actor: any) {
 
     return courses.map((c: any) => ({
       ...c,
-      studentsCount: (c.students?.length || 0) + (c.fakeCount || 0),
+      students: (c.students?.length || 0) + (c.fakeCount || 0),
       discountedPrice:
         c.discount?.dis && c.discount?.rate
           ? c.price * (1 - c.discount.rate / 100)
