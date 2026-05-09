@@ -125,31 +125,15 @@ static async getCourseById(courseId: string, actor: any) {
     let firstSession = null;
     let firstExam = null;
     
-    if (actor.role === "student") {
-      // للطالب: أول جلسة متاحة
-      firstSession = sessions.find((s: any) => s.number === 1 && s.available === true);
-      if (!firstSession && sessions.length > 0) {
-        firstSession = sessions[0]; // أول جلسة متاحة
-      }
-      
-      // لأول امتحان متاح
-      firstExam = exams.find((e: any) => e.number === 1 && e.available === true);
-      if (!firstExam && exams.length > 0) {
-        firstExam = exams[0];
-      }
-    } else {
-      // للأدمن: أول جلسة وامتحان بشكل عام
-      const rawSession = await Session.findOne({ courseId, number: 1 }).lean();
-      if (rawSession) {
-        firstSession = {
-          ...rawSession,
-          likesCount: rawSession.likes?.length || 0,
-          disLikesCount: rawSession.disLikes?.length || 0,
-          likes: undefined,
-          disLikes: undefined
-        };
-      }
-      firstExam = await Exam.findOne({ courseId }).sort({ number: 1 }).lean();
+    firstSession = sessions.find((s: any) => s.number === 1 && s.available === true);
+    if (!firstSession && sessions.length > 0) {
+      firstSession = sessions[0];
+    }
+    
+    // لأول امتحان متاح
+    firstExam = exams.find((e: any) => e.number === 1 && e.available === true);
+    if (!firstExam && exams.length > 0) {
+      firstExam = exams[0];
     }
 
     // بناء قائمة الأنشطة (الجلسات والامتحانات معاً)
@@ -194,6 +178,30 @@ static async getCourseById(courseId: string, actor: any) {
       firstSession,
       firstExam,
     };
+
+    // الطالب: يرجع isEnrolled دائماً + يخفي whatsapp و sessionsAndExams إن لم يكن مسجلاً
+    if (actor.role === "student") {
+      if (!actor.id) throw badRequest("معرف الطالب مطلوب");
+
+      const student = await Student.findById(actor.id).select(
+        "enrolledCourses"
+      );
+      if (!student) throw notFound("الطالب غير موجود");
+
+      const isEnrolled = (student.enrolledCourses ?? []).some(
+        (x: any) => x.toString() === courseId
+      );
+
+      if (!isEnrolled) return { 
+        ...base, 
+        isEnrolled,
+        firstSession,
+        firstExam,
+        sessionsAndExams
+      };
+
+      return { ...base, isEnrolled, sessionsAndExams, whatsapp: whatsappField };
+    }
 
     // admin/teacher: عرض كامل (جميع الجلسات والامتحانات)
     return { ...base, sessionsAndExams, whatsapp: whatsappField };
