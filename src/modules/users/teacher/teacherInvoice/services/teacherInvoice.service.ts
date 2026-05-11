@@ -50,6 +50,14 @@ export class CtrlTeacherInvoiceService {
     // ✅ حساب المبلغ المتبقي من أرباح الأستاذ وليس من totalRevenue
     const remainingEarnings = teacherEarnings - totalPriceTaken;
     
+    console.log({
+      totalRevenue,        // 50
+      teacherPercentage,   // 40%
+      teacherEarnings,     // 20 (50 * 40% = 20)
+      totalPriceTaken,     // 10
+      remainingEarnings    // 10 (20 - 10 = 10) ✅ وليس 40!
+    });
+    
     // التحقق
     if (remainingEarnings <= 0) {
       throw badRequest(`لا يوجد مبلغ متبقي. أرباح الأستاذ: ${teacherEarnings}, المأخوذ: ${totalPriceTaken}`);
