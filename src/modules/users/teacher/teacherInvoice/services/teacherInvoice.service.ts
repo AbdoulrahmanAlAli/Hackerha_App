@@ -11,7 +11,7 @@ import { Course } from "../../../../course/models/course.model";
 import { Payment } from "../../../../payment/models/payment.model";
 
 export class CtrlTeacherInvoiceService {
-  // ~ POST => Create invoice
+ // ~ POST => Create invoice
   static async createInvoice(data: any) {
     let parsed: any;
     try {
@@ -47,7 +47,7 @@ export class CtrlTeacherInvoiceService {
     // حساب المبلغ المقدم سابقاً (مجموع priceTaken)
     const totalPriceTaken = previousInvoices.reduce((sum, inv) => sum + inv.priceTaken, 0);
     
-    // حساب المبلغ المتبقي للأستاذ (إجمالي المستحق - المبلغ المأخوذ)
+    // حساب المبلغ المتبقي للأستاذ
     const remainingEarnings = teacherEarnings - totalPriceTaken;
     
     // التحقق من أن هناك مبلغ متبقي للأستاذ
@@ -60,10 +60,10 @@ export class CtrlTeacherInvoiceService {
       throw badRequest(`المبلغ المطلوب (${parsed.priceTaken}) يتجاوز المبلغ المتبقي للأستاذ (${remainingEarnings})`);
     }
     
-    // إنشاء الفاتورة مع تعيين total = المبلغ المستحق الكامل للأستاذ (teacherEarnings)
+    // إنشاء الفاتورة مع تعيين total = remainingEarnings (المبلغ المتبقي للأستاذ)
     const invoice = await TeacherInvoice.create({
       ...parsed,
-      total: teacherEarnings, // ✅ إجمالي المستحق للأستاذ (نسبته من الإيرادات)
+      total: remainingEarnings, // ✅ المبلغ المتبقي للأستاذ (وليس إجمالي المستحق)
     });
 
     return {
