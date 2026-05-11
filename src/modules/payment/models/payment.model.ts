@@ -18,9 +18,8 @@ const PaymentSchema = new Schema<PaymentDocument>(
     },
 
     price: {
-      type: Number,
+      type: String,
       required: [true, "سعر الكورس مطلوب"],
-      min: [0, "السعر لا يمكن أن يكون سالبًا"],
     },
 
     courseId: {

@@ -16,7 +16,7 @@ export const createPaymentSchema = z.object({
 
   studentId: objectId.optional(),
 
-  price: z.number().min(0, "السعر لا يمكن أن يكون سالبًا"),
+  price: z.string(),
 
   adminName: z.string().min(1, "اسم المسؤول مطلوب"),
 
@@ -34,7 +34,7 @@ export const generatePaymentCodeSchema = z.object({
 
   courseId: objectId,
 
-  price: z.number().min(0, "السعر لا يمكن أن يكون سالبًا"),
+  price: z.string()
 });
 
 // ===== Update Payment =a====

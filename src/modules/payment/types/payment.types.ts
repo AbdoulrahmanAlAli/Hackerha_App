@@ -5,7 +5,7 @@ import { Types } from "mongoose";
 export interface PaymentDocument extends mongoose.Document {
   code: string;
   universityNumber: number;
-  price: number;
+  price: string;
   courseId: Types.ObjectId;
   studentId?: Types.ObjectId | null;
   adminName?: string;
