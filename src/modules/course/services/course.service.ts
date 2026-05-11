@@ -445,19 +445,19 @@ static async getCourseById(courseId: string, actor: any) {
 
   // calculate Total Duration (Static Method)
 private static calculateTotalDuration = (sessionsList: any[]): string => {
-    // دالة لتحويل مدة الجلسة إلى دقائق
+    // دالة لتحويل مدة الجلسة (MM:SS) إلى دقائق
     const durationToMinutes = (duration: string): number => {
         if (!duration) return 0;
         
-        // التعامل مع صيغة HH:MM:SS أو HH:MM
         if (duration.includes(':')) {
             const parts = duration.split(':').map(Number);
             if (parts.length === 3) {
-                // HH:MM:SS -> تحويل إلى دقائق (نتجاهل الثواني)
+                // HH:MM:SS (نادر)
                 return parts[0] * 60 + parts[1];
             } else if (parts.length === 2) {
-                // HH:MM
-                return parts[0] * 60 + parts[1];
+                // MM:SS (المستخدم في نظامك)
+                // parts[0] = دقائق, parts[1] = ثواني
+                return parts[0] + (parts[1] / 60);
             }
         }
         
@@ -478,7 +478,7 @@ private static calculateTotalDuration = (sessionsList: any[]): string => {
 
     // تحويل الدقائق إلى صيغة HH:MM
     const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
+    const minutes = Math.floor(totalMinutes % 60);
     
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 };
