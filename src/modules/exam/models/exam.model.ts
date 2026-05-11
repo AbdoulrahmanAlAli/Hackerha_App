@@ -2,7 +2,7 @@ import mongoose, { Schema, Model } from "mongoose";
 import { IExam } from "../types/exam.types";
 
 // Duration Regex
-const DURATION_REGEX = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+const DURATION_REGEX = /^([0-5]?[0-9]):([0-5][0-9])$/;
 
 // Exam Schema
 const ExamSchema = new Schema<IExam>(

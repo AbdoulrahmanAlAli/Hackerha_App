@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Regex للتحقق من صيغة الوقت:
 // يقبل 00:00 أو 00:00:00
-export const durationRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
+export const durationRegex = /^([0-5]?[0-9]):([0-5][0-9])$/;
 
 // تحويل القيمة إلى رقم إذا كانت string
 const toNumber = (v: unknown) => {

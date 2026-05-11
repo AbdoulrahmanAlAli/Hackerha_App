@@ -2,7 +2,7 @@ import mongoose, { Schema, Model } from "mongoose";
 import { IBank } from "../types/bank.types";
 
 // Regex للتحقق من صيغة المدة
-const DURATION_REGEX = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
+const DURATION_REGEX = /^([0-5]?[0-9]):([0-5][0-9])$/;
 
 // Schema الخاص بالـ Bank
 const BankSchema = new Schema<IBank>(
