@@ -63,14 +63,19 @@ export class CtrlTeacherInvoiceService {
       throw badRequest(`لا يوجد مبلغ متبقي. أرباح الأستاذ: ${teacherEarnings}, المأخوذ: ${totalPriceTaken}`);
     }
     
+    const remainingBefore = teacherEarnings - totalPriceTaken;
+
     if (parsed.priceTaken > remainingEarnings) {
       throw badRequest(`المبلغ المطلوب (${parsed.priceTaken}) يتجاوز المتبقي (${remainingEarnings})`);
     }
     
+
+    const totalAfter = remainingBefore - parsed.priceTaken;
+
     // ✅ إنشاء الفاتورة
     const invoice = await TeacherInvoice.create({
       ...parsed,
-      total: remainingEarnings, // ✅ الآن ستكون 10 وليس 40
+      total: totalAfter, // ✅ الآن ستكون 10 وليس 40
     });
 
     return {
