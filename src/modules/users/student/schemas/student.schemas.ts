@@ -41,7 +41,7 @@ export const createStudentSchema = z.object({
   // يسمح null مثل القديم
   fcmToken: z.union([z.string(), z.null()]).optional().default(null),
 
-  device_id: z.string().min(1, "device_Id is required"),
+  device_id: z.string().min(1, "يرجى إعادة المحاولة"), // device_Id is required
 });
 
 export const loginStudentSchema = z.object({
@@ -51,7 +51,7 @@ export const loginStudentSchema = z.object({
     .max(100, "البريد الإلكتروني يجب ألا يتجاوز 100 حرف")
     .email("البريد الإلكتروني غير صالح"),
   password: z.string().min(8, "كلمة السر يجب أن تكون على الأقل 8 أحرف"),
-  device_id: z.string().min(1, "device_Id is required"),
+  device_id: z.string().min(1, "يرجى إعادة المحاولة"), // device_Id is required
 });
 
 export const sendEmailSchema = z.object({
