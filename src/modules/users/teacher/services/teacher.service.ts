@@ -70,7 +70,7 @@ export class CtrlTeacherService {
     const totalPriceTaken = invoices.reduce((sum, invoice) => sum + invoice.priceTaken, 0);
     
     // حساب المبلغ المتبقي للأستاذ (أرباح الأستاذ - المبلغ المقدم)
-    const remainingEarnings = teacherEarnings - totalPriceTaken;
+    const remainingEarnings = totalRevenue - totalPriceTaken;
 
     const paymentsStats = {
       totalPayments: payments.length,
