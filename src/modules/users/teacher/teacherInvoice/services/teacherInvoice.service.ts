@@ -35,10 +35,6 @@ export class CtrlTeacherInvoiceService {
     // حساب إجمالي الإيرادات
     const totalRevenue = payments.reduce((sum, payment) => sum + payment.price, 0);
     
-    // حساب أرباح الأستاذ المستحقة بناءً على نسبته
-    const teacherPercentage = teacher.percentage || 0;
-    const teacherEarnings = (totalRevenue * teacherPercentage) / 100;
-    
     // جلب جميع الفواتير السابقة للأستاذ
     const previousInvoices = await TeacherInvoice.find({ 
       teacherId: teacher._id 
@@ -47,12 +43,12 @@ export class CtrlTeacherInvoiceService {
     // حساب المبلغ المقدم سابقاً (مجموع priceTaken)
     const totalPriceTaken = previousInvoices.reduce((sum, inv) => sum + inv.priceTaken, 0);
     
-    // حساب المبلغ المتبقي للأستاذ
-    const remainingEarnings = teacherEarnings - totalPriceTaken;
+    // حساب المبلغ المتبقي للأستاذ (إجمالي الإيرادات - المبلغ المأخوذ)
+    const remainingEarnings = totalRevenue - totalPriceTaken; // ✅ حسب منطقك
     
     // التحقق من أن هناك مبلغ متبقي للأستاذ
     if (remainingEarnings <= 0) {
-      throw badRequest(`لا يوجد مبلغ متبقي للأستاذ. المبلغ المستحق: ${teacherEarnings}, المبلغ المأخوذ: ${totalPriceTaken}`);
+      throw badRequest(`لا يوجد مبلغ متبقي للأستاذ. إجمالي الإيرادات: ${totalRevenue}, المبلغ المأخوذ: ${totalPriceTaken}`);
     }
     
     // التحقق من أن priceTaken لا يتجاوز remainingEarnings
@@ -63,7 +59,7 @@ export class CtrlTeacherInvoiceService {
     // إنشاء الفاتورة مع تعيين total = remainingEarnings (المبلغ المتبقي للأستاذ)
     const invoice = await TeacherInvoice.create({
       ...parsed,
-      total: remainingEarnings, // ✅ المبلغ المتبقي للأستاذ (وليس إجمالي المستحق)
+      total: remainingEarnings, // ✅ المبلغ المتبقي من إجمالي الإيرادات
     });
 
     return {
