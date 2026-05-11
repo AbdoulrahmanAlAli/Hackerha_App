@@ -12,7 +12,7 @@ import { Payment } from "../../../../payment/models/payment.model";
 
 export class CtrlTeacherInvoiceService {
  // ~ POST => Create invoice
-  static async createInvoice(data: any) {
+   static async createInvoice(data: any) {
     let parsed: any;
     try {
       parsed = createTeacherInvoiceSchema.parse(data);
@@ -35,6 +35,10 @@ export class CtrlTeacherInvoiceService {
     // حساب إجمالي الإيرادات
     const totalRevenue = payments.reduce((sum, payment) => sum + payment.price, 0);
     
+    // حساب أرباح الأستاذ المستحقة بناءً على نسبته
+    const teacherPercentage = teacher.percentage || 0;
+    const teacherEarnings = (totalRevenue * teacherPercentage) / 100;
+    
     // جلب جميع الفواتير السابقة للأستاذ
     const previousInvoices = await TeacherInvoice.find({ 
       teacherId: teacher._id 
@@ -43,12 +47,12 @@ export class CtrlTeacherInvoiceService {
     // حساب المبلغ المقدم سابقاً (مجموع priceTaken)
     const totalPriceTaken = previousInvoices.reduce((sum, inv) => sum + inv.priceTaken, 0);
     
-    // حساب المبلغ المتبقي للأستاذ (إجمالي الإيرادات - المبلغ المأخوذ)
-    const remainingEarnings = totalRevenue - totalPriceTaken; // ✅ حسب منطقك
+    // ✅ حساب المبلغ المتبقي للأستاذ (من أرباح الأستاذ وليس إجمالي الإيرادات)
+    const remainingEarnings = teacherEarnings - totalPriceTaken;
     
     // التحقق من أن هناك مبلغ متبقي للأستاذ
     if (remainingEarnings <= 0) {
-      throw badRequest(`لا يوجد مبلغ متبقي للأستاذ. إجمالي الإيرادات: ${totalRevenue}, المبلغ المأخوذ: ${totalPriceTaken}`);
+      throw badRequest(`لا يوجد مبلغ متبقي للأستاذ. أرباح الأستاذ: ${teacherEarnings}, المبلغ المأخوذ: ${totalPriceTaken}`);
     }
     
     // التحقق من أن priceTaken لا يتجاوز remainingEarnings
@@ -56,10 +60,10 @@ export class CtrlTeacherInvoiceService {
       throw badRequest(`المبلغ المطلوب (${parsed.priceTaken}) يتجاوز المبلغ المتبقي للأستاذ (${remainingEarnings})`);
     }
     
-    // إنشاء الفاتورة مع تعيين total = remainingEarnings (المبلغ المتبقي للأستاذ)
+    // ✅ إنشاء الفاتورة مع تعيين total = remainingEarnings
     const invoice = await TeacherInvoice.create({
       ...parsed,
-      total: remainingEarnings, // ✅ المبلغ المتبقي من إجمالي الإيرادات
+      total: remainingEarnings, // ✅ الآن ستكون 190 وليس 200
     });
 
     return {
