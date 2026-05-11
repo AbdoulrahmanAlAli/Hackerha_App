@@ -12,7 +12,7 @@ import { Payment } from "../../../../payment/models/payment.model";
 
 export class CtrlTeacherInvoiceService {
  // ~ POST => Create invoice
-   static async createInvoice(data: any) {
+    static async createInvoice(data: any) {
     let parsed: any;
     try {
       parsed = createTeacherInvoiceSchema.parse(data);
@@ -35,7 +35,7 @@ export class CtrlTeacherInvoiceService {
     // حساب إجمالي الإيرادات
     const totalRevenue = payments.reduce((sum, payment) => sum + payment.price, 0);
     
-    // حساب أرباح الأستاذ المستحقة بناءً على نسبته
+    // ✅ حساب أرباح الأستاذ المستحقة بناءً على نسبته
     const teacherPercentage = teacher.percentage || 0;
     const teacherEarnings = (totalRevenue * teacherPercentage) / 100;
     
@@ -44,26 +44,25 @@ export class CtrlTeacherInvoiceService {
       teacherId: teacher._id 
     }).lean();
     
-    // حساب المبلغ المقدم سابقاً (مجموع priceTaken)
+    // حساب المبلغ المقدم سابقاً
     const totalPriceTaken = previousInvoices.reduce((sum, inv) => sum + inv.priceTaken, 0);
     
-    // ✅ حساب المبلغ المتبقي للأستاذ (من أرباح الأستاذ وليس إجمالي الإيرادات)
+    // ✅ حساب المبلغ المتبقي من أرباح الأستاذ وليس من totalRevenue
     const remainingEarnings = teacherEarnings - totalPriceTaken;
     
-    // التحقق من أن هناك مبلغ متبقي للأستاذ
+    // التحقق
     if (remainingEarnings <= 0) {
-      throw badRequest(`لا يوجد مبلغ متبقي للأستاذ. أرباح الأستاذ: ${teacherEarnings}, المبلغ المأخوذ: ${totalPriceTaken}`);
+      throw badRequest(`لا يوجد مبلغ متبقي. أرباح الأستاذ: ${teacherEarnings}, المأخوذ: ${totalPriceTaken}`);
     }
     
-    // التحقق من أن priceTaken لا يتجاوز remainingEarnings
     if (parsed.priceTaken > remainingEarnings) {
-      throw badRequest(`المبلغ المطلوب (${parsed.priceTaken}) يتجاوز المبلغ المتبقي للأستاذ (${remainingEarnings})`);
+      throw badRequest(`المبلغ المطلوب (${parsed.priceTaken}) يتجاوز المتبقي (${remainingEarnings})`);
     }
     
-    // ✅ إنشاء الفاتورة مع تعيين total = remainingEarnings
+    // ✅ إنشاء الفاتورة
     const invoice = await TeacherInvoice.create({
       ...parsed,
-      total: remainingEarnings, // ✅ الآن ستكون 190 وليس 200
+      total: remainingEarnings, // ✅ الآن ستكون 10 وليس 40
     });
 
     return {
@@ -71,7 +70,6 @@ export class CtrlTeacherInvoiceService {
       invoice
     };
   }
-
   // ~ PUT => Update invoice
   static async updateInvoice(invoiceId: string, data: any) {
     if (!mongoose.isValidObjectId(invoiceId)) {
