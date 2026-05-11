@@ -48,7 +48,7 @@ export class CtrlTeacherInvoiceService {
     const totalPriceTaken = previousInvoices.reduce((sum, inv) => sum + inv.priceTaken, 0);
     
     // حساب المبلغ المتبقي للأستاذ
-    const remainingEarnings = teacherEarnings - totalPriceTaken;
+    const remainingEarnings = totalRevenue - totalPriceTaken;
     
     // التحقق من أن هناك مبلغ متبقي للأستاذ
     if (remainingEarnings <= 0) {
