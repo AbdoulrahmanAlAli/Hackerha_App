@@ -24,7 +24,7 @@ export class CtrlTeacherInvoiceService {
     if (!teacher) throw notFound("الأستاذ غير موجود");
 
     // جلب جميع الكورسات الخاصة بالأستاذ
-    const courses = await Course.find({ teacher: teacher._id }).select("_id");
+    const courses = await Course.find({ teachers: teacher._id }).select("_id");
     const courseIds = courses.map(course => course._id);
     
     // جلب جميع المدفوعات للكورسات
@@ -47,8 +47,8 @@ export class CtrlTeacherInvoiceService {
     // حساب المبلغ المقدم سابقاً (مجموع priceTaken)
     const totalPriceTaken = previousInvoices.reduce((sum, inv) => sum + inv.priceTaken, 0);
     
-    // حساب المبلغ المتبقي للأستاذ
-    const remainingEarnings = totalRevenue - totalPriceTaken;
+    // حساب المبلغ المتبقي للأستاذ (إجمالي المستحق - المبلغ المأخوذ)
+    const remainingEarnings = teacherEarnings - totalPriceTaken;
     
     // التحقق من أن هناك مبلغ متبقي للأستاذ
     if (remainingEarnings <= 0) {
@@ -60,10 +60,10 @@ export class CtrlTeacherInvoiceService {
       throw badRequest(`المبلغ المطلوب (${parsed.priceTaken}) يتجاوز المبلغ المتبقي للأستاذ (${remainingEarnings})`);
     }
     
-    // إنشاء الفاتورة مع تعيين total = remainingEarnings (المبلغ المتبقي قبل السحب)
+    // إنشاء الفاتورة مع تعيين total = المبلغ المستحق الكامل للأستاذ (teacherEarnings)
     const invoice = await TeacherInvoice.create({
       ...parsed,
-      total: remainingEarnings, // المبلغ المتبقي للأستاذ قبل هذه الفاتورة
+      total: teacherEarnings, // ✅ إجمالي المستحق للأستاذ (نسبته من الإيرادات)
     });
 
     return {
