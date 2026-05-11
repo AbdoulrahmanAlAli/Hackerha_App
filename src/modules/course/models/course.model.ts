@@ -180,12 +180,6 @@ CourseSchema.virtual("exams", {
   foreignField: "courseId",
 });
 
-CourseSchema.virtual("comments", {
-  ref: "Comment",
-  localField: "_id",
-  foreignField: "courseId",
-});
-
 // السعر بعد التخفيض
 CourseSchema.virtual("discountedPrice").get(function (this: ICourse) {
   if (this.free) return 0;

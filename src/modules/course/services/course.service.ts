@@ -99,6 +99,9 @@ static async getCourseById(courseId: string, actor: any) {
     let sessions = (course as any).sessions ?? [];
     let exams = (course as any).exams ?? [];
 
+    const totalCourseDuration = CtrlCourseService.calculateTotalDuration(sessions);
+
+
     // للطالب: جلب معلومات الـ likes و disLikes
     let studentId = null;
     if (actor.role === "student") {
@@ -196,12 +199,12 @@ static async getCourseById(courseId: string, actor: any) {
       students: ((course as any).students?.length ?? 0) + ((course as any).fakeCount || 0),
       sessionsCount: sessions.length,
       examsCount: exams.length,
-      commentsCount: (course as any).comments?.length ?? 0,
       discountedPrice: discount?.dis && discount?.rate ? price * (1 - discount.rate / 100) : price,
       isDiscounted: !!discount?.dis,
       totalFiles,
       firstSession,
       firstExam,
+      totalDuration: totalCourseDuration,
     };
 
     // الطالب
@@ -438,4 +441,45 @@ static async getCourseById(courseId: string, actor: any) {
       throw err;
     }
   }
+
+
+  // calculate Total Duration (Static Method)
+private static calculateTotalDuration = (sessionsList: any[]): string => {
+    // دالة لتحويل مدة الجلسة إلى دقائق
+    const durationToMinutes = (duration: string): number => {
+        if (!duration) return 0;
+        
+        // التعامل مع صيغة HH:MM:SS أو HH:MM
+        if (duration.includes(':')) {
+            const parts = duration.split(':').map(Number);
+            if (parts.length === 3) {
+                // HH:MM:SS -> تحويل إلى دقائق (نتجاهل الثواني)
+                return parts[0] * 60 + parts[1];
+            } else if (parts.length === 2) {
+                // HH:MM
+                return parts[0] * 60 + parts[1];
+            }
+        }
+        
+        // إذا كانت المدة رقم فقط (بالدقائق)
+        const num = Number(duration);
+        if (!isNaN(num)) return num;
+        
+        return 0;
+    };
+
+    // حساب مجموع الدقائق لجميع الجلسات
+    let totalMinutes = 0;
+    sessionsList.forEach((session: any) => {
+        if (session.duration) {
+            totalMinutes += durationToMinutes(session.duration);
+        }
+    });
+
+    // تحويل الدقائق إلى صيغة HH:MM
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+};
 }
