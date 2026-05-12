@@ -14,13 +14,12 @@ services:
       MONGO_URI: mongodb://root:${MONGO_ROOT_PASSWORD}@mongo:27017/backend_db?authSource=admin
     depends_on:
       - mongo
+
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:1000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-    networks:
-      - internal
 
   mongo:
     image: mongo:7
@@ -32,27 +31,6 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
     volumes:
       - mongo_data_prod:/data/db
-    networks:
-      - internal
-
-  mongo-express:
-    image: mongo-express:latest
-    container_name: hackit_mongo_express_prod
-    restart: unless-stopped
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD}
-      ME_CONFIG_MONGODB_SERVER: mongo
-      ME_CONFIG_MONGODB_PORT: 27017
-      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
-      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USER}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD}
-      ME_CONFIG_SITE_BASEURL: "/mongo-express"
-      ME_CONFIG_OPTIONS_EDITORTHEME: "auto"
-    depends_on:
-      - mongo
-    networks:
-      - internal
 
   caddy:
     image: caddy:2
@@ -67,13 +45,6 @@ services:
       - caddy_config_prod:/config
     depends_on:
       - app
-      - mongo-express
-    networks:
-      - internal
-
-networks:
-  internal:
-    driver: bridge
 
 volumes:
   mongo_data_prod:

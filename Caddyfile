@@ -1,12 +1,8 @@
 hackerha.cloud, www.hackerha.cloud {
-    encode gzip zstd
+	encode gzip zstd
 
-    @blocked path /.env /.env.* /admin
-    respond @blocked 404
+	@blocked path /.env /.env.* /admin
+	respond @blocked 404
 
-    handle_path /mongo-express* {
-        reverse_proxy mongo-express:8081
-    }
-
-    reverse_proxy app:1000
+	reverse_proxy app:1000
 }
