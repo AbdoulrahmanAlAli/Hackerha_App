@@ -8,8 +8,5 @@ hackerha.cloud, www.hackerha.cloud {
 }
 
 hackerha.cloud/mongo-express* {
-    route {
-        strip_prefix /mongo-express
-        reverse_proxy mongo-express:8081
-    }
+    reverse_proxy mongo-express:8081
 }
