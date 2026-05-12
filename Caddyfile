@@ -1,16 +1,12 @@
+mongo.hackerha.cloud {
+    reverse_proxy mongo-express:8081
+}
+
 hackerha.cloud, www.hackerha.cloud {
     encode gzip zstd
 
     @blocked path /.env /.env.* /admin
     respond @blocked 404
 
-    # mongo-express يأخذ الأولوية
-    handle_path /mongo-express* {
-        reverse_proxy mongo-express:8081
-    }
-
-    # باقي الطلبات للتطبيق
-    handle {
-        reverse_proxy app:1000
-    }
+    reverse_proxy app:1000
 }
