@@ -14,12 +14,13 @@ services:
       MONGO_URI: mongodb://root:${MONGO_ROOT_PASSWORD}@mongo:27017/backend_db?authSource=admin
     depends_on:
       - mongo
-
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:1000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+    networks:
+      - internal
 
   mongo:
     image: mongo:7
@@ -31,6 +32,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
     volumes:
       - mongo_data_prod:/data/db
+    networks:
+      - internal
 
   mongo-express:
     image: mongo-express:latest
@@ -44,11 +47,14 @@ services:
       ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
       ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USER}
       ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD}
-      ME_CONFIG_OPTIONS_EDITORTHEME: "material-dark"
-      ME_CONFIG_REQUEST_SIZE: "100kb"
-      ME_CONFIG_SITE_BASEURL: /mongo-express/
+      ME_CONFIG_OPTIONS_EDITORTHEME: "auto"
+      ME_CONFIG_SITE_BASEURL: "/mongo-express/"
     depends_on:
       - mongo
+    networks:
+      - internal
+    # ⚠️ لا تفتح ports - سنستخدم Caddy فقط
+
   caddy:
     image: caddy:2
     container_name: hackit_caddy_prod
@@ -62,6 +68,13 @@ services:
       - caddy_config_prod:/config
     depends_on:
       - app
+      - mongo-express
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
 
 volumes:
   mongo_data_prod:

@@ -7,7 +7,13 @@ hackerha.cloud, www.hackerha.cloud {
 	reverse_proxy app:1000
 }
 
-route /mongo-express/* {
+hackerha.cloud/mongo-express/* {
     uri strip_prefix /mongo-express
+    
+    # حماية بكلمة مرور
+    basicauth {
+        {$MONGO_EXPRESS_USER} {$MONGO_EXPRESS_PASSWORD_HASH}
+    }
+    
     reverse_proxy mongo-express:8081
 }
