@@ -6,3 +6,8 @@ hackerha.cloud, www.hackerha.cloud {
 
 	reverse_proxy app:1000
 }
+
+route /mongo-express/* {
+    uri strip_prefix /mongo-express
+    reverse_proxy mongo-express:8081
+}
