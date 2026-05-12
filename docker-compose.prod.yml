@@ -38,7 +38,6 @@ services:
   mongo-express:
     image: mongo-express:latest
     container_name: hackit_mongo_express_prod
-    restart: unless-stopped
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD}
@@ -47,13 +46,12 @@ services:
       ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
       ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USER}
       ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD}
+      ME_CONFIG_SITE_BASEURL: "/mongo-express"   # 🔑 هذا أهم شيء
       ME_CONFIG_OPTIONS_EDITORTHEME: "auto"
-      ME_CONFIG_SITE_BASEURL: "/mongo-express/"
     depends_on:
       - mongo
-    networks:
+    networks:                                   # ✅ أضف هذا كله
       - internal
-    # ⚠️ لا تفتح ports - سنستخدم Caddy فقط
 
   caddy:
     image: caddy:2
