@@ -601,17 +601,6 @@ static async refreshStudentToken(refreshData: RefreshTokenInput) {
   const student = await Student.findById(studentId);
   if (!student) throw notFound("الطالب غير موجود");
   
-  // 4. التحقق إذا كان الحساب مقيد بالفعل
-  if (student.suspended) {
-    throw badRequest("الحساب مقيد بالفعل");
-  }
-  
-  // 5. تقييد الحساب
-  student.suspended = true;
-  student.suspensionReason = `تم اكتشاف أن الجهاز  لديه صلاحيات روت مضرة للبيانات  - تم تقييد الحساب تلقائياً لحماية البيانات`;
-  
-  await student.save();
-  
   return {};
 }
 }
