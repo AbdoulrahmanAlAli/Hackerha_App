@@ -32,6 +32,26 @@ const BankSchema = new Schema<IBank>(
       },
     },
 
+    // السنة
+    year: {
+      type: String,
+      enum: [
+        "السنة الأولى",
+        "السنة الثانية",
+        "السنة الثالثة",
+        "السنة الرابعة",
+        "السنة الخامسة",
+      ],
+      required: [true, "السنة مطلوبة"],
+    },
+
+    // الفصل
+    semester: {
+      type: String,
+      enum: ["الفصل الأول", "الفصل الثاني"],
+      required: [true, "الفصل مطلوب"],
+    },
+
     // هل البنك متاح أم لا
     available: {
       type: Boolean,
@@ -39,23 +59,39 @@ const BankSchema = new Schema<IBank>(
     },
   },
   {
-    // timestamps يضيف createdAt و updatedAt تلقائياً
     timestamps: true,
-
-    // تفعيل virtuals عند التحويل إلى JSON أو Object
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
 );
 
+// Virtual: bankExams
 BankSchema.virtual("bankExams", {
   ref: "BankExam",
   localField: "_id",
   foreignField: "bankId",
 });
 
-// Index للفرز حسب الأحدث
+// Virtual: عدد الامتحانات
+BankSchema.virtual("bankExamsCount", {
+  ref: "BankExam",
+  localField: "_id",
+  foreignField: "bankId",
+  count: true,
+});
+
+// Virtual: إجمالي عدد الأسئلة في كل امتحانات البنك
+BankSchema.virtual("totalQuestionsCount", {
+  ref: "BankExam",
+  localField: "_id",
+  foreignField: "bankId",
+  options: { sort: { number: 1 } },
+});
+
+// Indexes
 BankSchema.index({ createdAt: -1 });
+BankSchema.index({ year: 1, semester: 1 });
+BankSchema.index({ title: 1 });
 
 // إنشاء أو إعادة استخدام الموديل إذا كان موجوداً
 export const Bank: Model<IBank> =

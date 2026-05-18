@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-// Regex للتحقق من صيغة الوقت:
-// يقبل 00:00 أو 00:00:00
+// Regex للتحقق من صيغة الوقت
 export const durationRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
 
 // تحويل القيمة إلى رقم إذا كانت string
@@ -18,6 +17,17 @@ const numRequired = (msg: string) =>
     z.number({ message: msg })
   );
 
+// Enum للسنة
+const yearEnum = z.enum([
+  "السنة الأولى",
+  "السنة الثانية",
+  "السنة الثالثة",
+  "السنة الرابعة",
+  "السنة الخامسة",
+]);
+
+// Enum للفصل
+const semesterEnum = z.enum(["الفصل الأول", "الفصل الثاني"]);
 
 // Schema إنشاء بنك جديد
 export const createBankSchema = z.object({
@@ -32,6 +42,10 @@ export const createBankSchema = z.object({
     .string()
     .min(1, "المدة مطلوبة")
     .regex(durationRegex, "المدة يجب أن تكون بالتنسيق 00:00 أو 00:00:00"),
+
+  year: yearEnum,
+
+  semester: semesterEnum,
 });
 
 // Schema تحديث بنك
@@ -50,6 +64,11 @@ export const updateBankSchema = z.object({
     .string()
     .regex(durationRegex, "المدة يجب أن تكون بالتنسيق 00:00 أو 00:00:00")
     .optional(),
+
+  year: yearEnum.optional(),
+
+  semester: semesterEnum.optional(),
+
   available: z.boolean().optional(),
 });
 

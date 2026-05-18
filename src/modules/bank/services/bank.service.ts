@@ -8,8 +8,8 @@ import {
 } from "../schemas/bank.schema";
 import { badRequest, notFound } from "../../../core/errors/httpErrors";
 import { zodFirstMessage } from "../../../core/http/zodMessage";
-// import { Group } from "../group/models/group.model";
-// import { Question } from "../group/question/models/question.model";
+import { BankExam } from "../../bankExam/models/bank-exam.model";
+import { SingleQuestionBank } from "../../bankExam/single-question/models/question.model";
 
 export class BankService {
   // إنشاء بنك جديد
@@ -17,13 +17,11 @@ export class BankService {
     let parsed: CreateBankInput;
 
     try {
-      // التحقق من البيانات القادمة
       parsed = createBankSchema.parse(data);
     } catch (e) {
       throw badRequest(zodFirstMessage(e));
     }
 
-    // إنشاء البنك في قاعدة البيانات
     const bank = await Bank.create({
       ...parsed,
       available: false,
@@ -35,33 +33,137 @@ export class BankService {
     };
   }
 
-  // جلب بنك واحد بواسطة id
+  // جلب بنك واحد بواسطة id مع الإحصائيات
   static async getBankById(id: string) {
-    // التحقق من صحة الـ id
     if (!mongoose.isValidObjectId(id)) {
       throw badRequest("معرف غير صالح");
     }
 
     const bank = await Bank.findById(id);
 
-    // إذا لم يكن موجوداً
     if (!bank) {
       throw notFound("البنك غير موجود");
     }
 
-    return bank;
+    // جلب إحصائيات الامتحانات والأسئلة
+    const bankExams = await BankExam.find({ bankId: bank._id });
+    
+    // عدد الامتحانات
+    const bankExamsCount = bankExams.length;
+    
+    // إجمالي عدد الأسئلة في كل امتحانات البنك
+    let totalQuestionsCount = 0;
+    for (const exam of bankExams) {
+      const questionsCount = await SingleQuestionBank.countDocuments({ bankExamId: exam._id });
+      totalQuestionsCount += questionsCount;
+    }
+
+    // تحويل البنك إلى كائن عادي وإضافة الإحصائيات
+    const bankObject = bank.toObject();
+    
+    return {
+      ...bankObject,
+      bankExamsCount,
+      totalQuestionsCount,
+      bankExams, // optionally include exams list
+    };
   }
 
-  // جلب كل البنوك
-  static async getAllBanks() {
-    // ترتيب تنازلي حسب تاريخ الإنشاء
-    const banks = await Bank.find().sort({ createdAt: -1 });
-    return banks;
+  // جلب كل البنوك مع الإحصائيات
+  static async getAllBanks(filters?: { year?: string; semester?: string }) {
+    // بناء query للتصفية
+    let query: any = {};
+    if (filters?.year) query.year = filters.year;
+    if (filters?.semester) query.semester = filters.semester;
+
+    // جلب البنوك مع الترتيب
+    const banks = await Bank.find(query).sort({ createdAt: -1 });
+
+    // جلب الإحصائيات لكل بنك
+    const banksWithStats = await Promise.all(
+      banks.map(async (bank) => {
+        // جلب امتحانات هذا البنك
+        const bankExams = await BankExam.find({ bankId: bank._id });
+        
+        // عدد الامتحانات
+        const bankExamsCount = bankExams.length;
+        
+        // إجمالي عدد الأسئلة في كل امتحانات البنك
+        let totalQuestionsCount = 0;
+        for (const exam of bankExams) {
+          const questionsCount = await SingleQuestionBank.countDocuments({ bankExamId: exam._id });
+          totalQuestionsCount += questionsCount;
+        }
+        
+        // إجمالي العلامات المتاحة (مجموع totalMark لجميع الامتحانات)
+  const totalAvailableMarks = bankExams.reduce((sum: number, exam: any) => sum + exam.totalMark, 0);
+        
+        const bankObject = bank.toObject();
+        
+        return {
+          ...bankObject,
+          bankExamsCount,
+          totalQuestionsCount,
+          totalAvailableMarks,
+          usedPercentage: bank.totalMark > 0 
+            ? Math.round((totalAvailableMarks / bank.totalMark) * 100) 
+            : 0,
+        };
+      })
+    );
+
+    // إضافة إحصائيات عامة
+    const totalBanks = banksWithStats.length;
+    const totalExams = banksWithStats.reduce((sum, bank) => sum + bank.bankExamsCount, 0);
+    const totalQuestions = banksWithStats.reduce((sum, bank) => sum + bank.totalQuestionsCount, 0);
+    const availableBanks = banksWithStats.filter(bank => bank.available).length;
+
+    return {
+      banks: banksWithStats,
+      summary: {
+        totalBanks,
+        totalExams,
+        totalQuestions,
+        availableBanks,
+      },
+    };
+  }
+
+  // جلب البنوك مع فلتر السنة والفصل
+  static async getBanksByYearAndSemester(year: string, semester: string) {
+    if (!year || !semester) {
+      throw badRequest("السنة والفصل مطلوبان");
+    }
+
+    const banks = await Bank.find({ year, semester }).sort({ createdAt: -1 });
+
+    // إضافة الإحصائيات لكل بنك
+    const banksWithStats = await Promise.all(
+      banks.map(async (bank) => {
+        const bankExams = await BankExam.find({ bankId: bank._id });
+        const bankExamsCount = bankExams.length;
+        
+        let totalQuestionsCount = 0;
+        for (const exam of bankExams) {
+          const questionsCount = await SingleQuestionBank.countDocuments({ bankExamId: exam._id });
+          totalQuestionsCount += questionsCount;
+        }
+        
+        const bankObject = bank.toObject();
+        
+        return {
+          ...bankObject,
+          bankExamsCount,
+          totalQuestionsCount,
+        };
+      })
+    );
+
+    return banksWithStats;
   }
 
   // تحديث بنك
   static async updateBank(bankId: string, data: UpdateBankInput) {
-    // التحقق من صحة المعرف
     if (!mongoose.isValidObjectId(bankId)) {
       throw badRequest("معرف غير صالح");
     }
@@ -69,22 +171,19 @@ export class BankService {
     let parsed: UpdateBankInput;
 
     try {
-      // التحقق من البيانات قبل التحديث
       parsed = updateBankSchema.parse(data);
     } catch (e) {
       throw badRequest(zodFirstMessage(e));
     }
 
-    // التأكد أن البنك موجود
     const bank = await Bank.findById(bankId);
     if (!bank) {
       throw notFound("البنك غير موجود");
     }
 
-    // تنفيذ التحديث
     const updated = await Bank.findByIdAndUpdate(bankId, parsed, {
-      new: true, // يرجع النسخة المحدثة
-      runValidators: true, // يشغل validators الخاصة بـ mongoose
+      new: true,
+      runValidators: true,
     }).select("-__v");
 
     if (!updated) {
@@ -96,24 +195,74 @@ export class BankService {
     };
   }
 
-  // حذف بنك
+  // حذف بنك (مع حذف جميع الامتحانات والأسئلة المرتبطة)
   static async deleteBank(bankId: string) {
-    // التحقق من صحة المعرف
     if (!mongoose.isValidObjectId(bankId)) {
       throw badRequest("معرف غير صالح");
     }
 
-    // التأكد من وجود البنك
     const bank = await Bank.findById(bankId).select("_id");
     if (!bank) {
       throw notFound("البنك غير موجود");
     }
 
-    // 4) حذف البنك نفسه
+    // جلب جميع امتحانات هذا البنك
+    const bankExams = await BankExam.find({ bankId: bank._id });
+    
+    // حذف جميع الأسئلة المرتبطة بكل امتحان
+    for (const exam of bankExams) {
+      await SingleQuestionBank.deleteMany({ bankExamId: exam._id });
+    }
+    
+    // حذف جميع امتحانات البنك
+    await BankExam.deleteMany({ bankId: bank._id });
+    
+    // حذف البنك نفسه
     await Bank.findByIdAndDelete(bankId);
 
     return {
-      message: "تم حذف البنك بنجاح",
+      message: "تم حذف البنك وجميع امتحاناته وأسئلته بنجاح"
+    };
+  }
+
+  // الحصول على إحصائيات كاملة للنظام
+  static async getSystemStats() {
+    const totalBanks = await Bank.countDocuments();
+    const totalBankExams = await BankExam.countDocuments();
+    const totalQuestions = await SingleQuestionBank.countDocuments();
+    
+    // البنوك المتاحة
+    const availableBanks = await Bank.countDocuments({ available: true });
+    
+    // البنوك حسب السنة
+    const banksByYear = await Bank.aggregate([
+      {
+        $group: {
+          _id: "$year",
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+    
+    // البنوك حسب الفصل
+    const banksBySemester = await Bank.aggregate([
+      {
+        $group: {
+          _id: "$semester",
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    return {
+      totalBanks,
+      totalBankExams,
+      totalQuestions,
+      availableBanks,
+      banksByYear,
+      banksBySemester,
     };
   }
 }
