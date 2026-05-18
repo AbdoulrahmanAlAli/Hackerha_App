@@ -1,12 +1,5 @@
 import { z } from "zod";
 
-// تحويل القيمة إلى رقم إذا كانت string
-const toNumber = (v: unknown) => {
-  if (typeof v === "number") return v;
-  if (typeof v === "string" && v.trim() !== "") return Number(v);
-  return v;
-};
-
 // Enum للسنة
 const yearEnum = z.enum([
   "السنة الأولى",
@@ -26,6 +19,11 @@ export const createBankSchema = z.object({
     .min(1, "عنوان البنك مطلوب")
     .max(100, "العنوان يجب ألا يتجاوز 100 حرف"),
 
+  image: z
+    .string()
+    .min(1, "صورة البنك مطلوبة")
+    .url("رابط الصورة غير صالح"),
+
   year: yearEnum,
 
   semester: semesterEnum,
@@ -37,6 +35,12 @@ export const updateBankSchema = z.object({
     .string()
     .min(1, "عنوان البنك مطلوب")
     .max(100, "العنوان يجب ألا يتجاوز 100 حرف")
+    .optional(),
+
+  image: z
+    .string()
+    .min(1, "صورة البنك مطلوبة")
+    .url("رابط الصورة غير صالح")
     .optional(),
 
   year: yearEnum.optional(),

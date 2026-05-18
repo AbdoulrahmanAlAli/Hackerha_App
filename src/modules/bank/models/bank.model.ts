@@ -12,6 +12,13 @@ const BankSchema = new Schema<IBank>(
       maxlength: [100, "العنوان يجب ألا يتجاوز 100 حرف"],
     },
 
+    // صورة البنك
+    image: {
+      type: String,
+      required: [true, "صورة البنك مطلوبة"],
+      trim: true,
+    },
+
     // السنة
     year: {
       type: String,

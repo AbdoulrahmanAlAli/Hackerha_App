@@ -8,13 +8,14 @@ import {
 } from "../schemas/bank.schema";
 import { badRequest, notFound } from "../../../core/errors/httpErrors";
 import { zodFirstMessage } from "../../../core/http/zodMessage";
+import { ICloudinaryFile } from "../../../core/types/cloudinary.types";
+import { SingleQuestionBank } from "../../bankExam/single-question/models/question.model";
 import { IBankExam } from "../../bankExam/types/bank-exam.types";
 import { BankExam } from "../../bankExam/models/bank-exam.model";
-import { SingleQuestionBank } from "../../bankExam/single-question/models/question.model";
 
 export class BankService {
-  // إنشاء بنك جديد
-  static async createBank(data: CreateBankInput) {
+  // إنشاء بنك جديد مع صورة
+  static async createBank(data: CreateBankInput, file?: ICloudinaryFile) {
     let parsed: CreateBankInput;
 
     try {
@@ -23,8 +24,18 @@ export class BankService {
       throw badRequest(zodFirstMessage(e));
     }
 
+    // استخدام الصورة المرفوعة أو الصورة من البيانات
+    const image = file?.path || parsed.image;
+
+    if (!image) {
+      throw badRequest("الصورة مطلوبة");
+    }
+
     const bank = await Bank.create({
-      ...parsed,
+      title: parsed.title,
+      image: image,
+      year: parsed.year,
+      semester: parsed.semester,
       available: false,
     });
 
@@ -156,8 +167,8 @@ export class BankService {
     return banksWithStats;
   }
 
-  // تحديث بنك
-  static async updateBank(bankId: string, data: UpdateBankInput) {
+  // تحديث بنك مع إمكانية تغيير الصورة
+  static async updateBank(bankId: string, data: UpdateBankInput, file?: ICloudinaryFile) {
     if (!mongoose.isValidObjectId(bankId)) {
       throw badRequest("معرف غير صالح");
     }
@@ -175,7 +186,15 @@ export class BankService {
       throw notFound("البنك غير موجود");
     }
 
-    const updated = await Bank.findByIdAndUpdate(bankId, parsed, {
+    // تحضير بيانات التحديث
+    const updateData: any = { ...parsed };
+    
+    // إذا تم رفع ملف جديد، استخدمه كصورة
+    if (file) {
+      updateData.image = file.path;
+    }
+
+    const updated = await Bank.findByIdAndUpdate(bankId, updateData, {
       new: true,
       runValidators: true,
     }).select("-__v");
@@ -186,6 +205,25 @@ export class BankService {
 
     return {
       message: "تم تحديث البنك بنجاح",
+    };
+  }
+
+  // حذف صورة البنك
+  static async deleteBankImage(bankId: string) {
+    if (!mongoose.isValidObjectId(bankId)) {
+      throw badRequest("معرف غير صالح");
+    }
+
+    const bank = await Bank.findById(bankId);
+    if (!bank) {
+      throw notFound("البنك غير موجود");
+    }
+
+    bank.image = "";
+    await bank.save();
+
+    return { 
+      message: "تم حذف صورة البنك بنجاح" 
     };
   }
 

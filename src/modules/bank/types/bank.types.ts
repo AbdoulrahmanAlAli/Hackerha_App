@@ -12,6 +12,7 @@ export type SemesterType = "الفصل الأول" | "الفصل الثاني";
 // تعريف واجهة البنك داخل MongoDB
 export interface IBank extends Document {
   title: string;
+  image: string;  // إضافة حقل الصورة
   available: boolean;
   year: YearType;
   semester: SemesterType;
