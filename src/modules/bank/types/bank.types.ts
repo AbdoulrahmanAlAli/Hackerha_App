@@ -6,6 +6,5 @@ export interface IBank extends Document {
   totalMark: number;
   duration: string;
   available: boolean;
-  pdfUrl: string;
   questions?: Types.ObjectId[];
 }

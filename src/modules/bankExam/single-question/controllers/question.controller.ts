@@ -22,7 +22,7 @@ class QuestionController {
 
   // ~ GET => /api/.../question/bank/:bankId
   getQuestionsByBankId = asyncHandler(async (req: Request, res: Response) => {
-    const questions = await SingleQuestionService.getSingleQuestionsByBankId(
+    const questions = await SingleQuestionService.getSingleQuestionsByBankExamId(
       req.params.bankId
     );
     res.status(200).json(questions);
@@ -54,7 +54,7 @@ class QuestionController {
   // ~ DELETE => /api/.../question/bank/:bankId
   deleteQuestionsBybankId = asyncHandler(
     async (req: Request, res: Response) => {
-      const result = await SingleQuestionService.deleteSingleQuestionsBybankId(
+      const result = await SingleQuestionService.deleteSingleQuestionsByBankExamId(
         req.params.bankId
       );
       res.status(200).json(result);

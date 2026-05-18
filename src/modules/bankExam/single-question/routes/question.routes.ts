@@ -20,12 +20,12 @@ router
 
 // Get questions by bankId (Auth)
 router
-  .route("/bank/:bankId")
+  .route("/bankExam/:bankId")
   .get(verifyToken, questionController.getQuestionsByBankId);
 
 // Delete questions by bankId (Admin)
 router  
-  .route("/bank/:bankId")
+  .route("/bankExam/:bankId")
   .delete(
     verifyToken,
     requireAdmin,

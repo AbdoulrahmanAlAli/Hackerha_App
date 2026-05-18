@@ -47,8 +47,11 @@ import reorderRouter from "./shared/reorder/routes/reorder.routes";
 // Bank Api
 import routeBank from "./modules/bank/routes/bank.routes";
 
+// Bank Exam Api
+import routeBankExam from "./modules/bankExam/routes/bank-exam.routes";
+
 // Single Questions Api
-import routeSingleQuestionBank from "./modules/bank/single-question/routes/question.routes"
+import routeSingleQuestionBank from "./modules/bankExam/single-question/routes/question.routes"
 
 // ============= Notification =============
 
@@ -132,6 +135,9 @@ export function createApp() {
   // ============= Bank =============
   // Bank routes
   app.use("/api/hackit/ctrl/bank", routeBank);
+
+  // Bank Exam routes
+  app.use("/api/hackit/ctrl/bankExam", routeBankExam);
 
   // Single Questions Bank routes
   app.use("/api/hackit/ctrl/singleQuestionBank", routeSingleQuestionBank);

@@ -8,7 +8,7 @@ export interface IAnswerBank {
 }
 
 export interface ISingleQuestionBank {
-  bankId: Types.ObjectId;
+  bankExamId: Types.ObjectId;
   number: number;
   title?: string;
   subTitle?: string;

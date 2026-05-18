@@ -37,11 +37,6 @@ const BankSchema = new Schema<IBank>(
       type: Boolean,
       default: false,
     },
-
-    pdfUrl: {
-      type: String,
-      required: [true, "ملف PDF مطلوب"],
-    },
   },
   {
     // timestamps يضيف createdAt و updatedAt تلقائياً
@@ -52,6 +47,12 @@ const BankSchema = new Schema<IBank>(
     toObject: { virtuals: true },
   }
 );
+
+BankSchema.virtual("bankExams", {
+  ref: "BankExam",
+  localField: "_id",
+  foreignField: "bankId",
+});
 
 // Index للفرز حسب الأحدث
 BankSchema.index({ createdAt: -1 });

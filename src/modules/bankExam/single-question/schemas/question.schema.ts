@@ -20,18 +20,18 @@ const toNumber = (v: unknown) => {
   return v;
 };
 
-const examNumber = z.preprocess(
-    toNumber,
-    z
-      .number({ error: "رقم الامتحان مطلوب" })
-      .int("رقم الامتحان يجب أن يكون رقمًا صحيحًا")
-      .min(1, "رقم الامتحان يجب أن يكون 1 أو أكثر")
+const questionNumber = z.preprocess(
+  toNumber,
+  z
+    .number({ message: "رقم السؤال مطلوب" })
+    .int("رقم السؤال يجب أن يكون رقمًا صحيحًا")
+    .min(1, "رقم السؤال يجب أن يكون 1 أو أكثر")
 );
-  
+
 // create
 export const createSingleQuestionSchemaBank = z.object({
-  bankId: objectId,
-  number: examNumber.optional(),
+  bankExamId: objectId,
+  number: questionNumber.optional(),
   title: z.string().optional().default(""),
   subTitle: z.string().optional().default(""),
   image: z.string().optional().default(""),
@@ -48,7 +48,7 @@ export const createSingleQuestionSchemaBank = z.object({
 
 // update
 export const updateSingleQuestionSchemaBank = z.object({
-  bankId: objectId.optional(),
+  bankExamId: objectId.optional(),
   title: z.string().optional(),
   subTitle: z.string().optional(),
   image: z.string().optional(),

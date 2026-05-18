@@ -1,17 +1,15 @@
 import mongoose from "mongoose";
 import { SingleQuestionBank } from "../models/question.model";
-
 import { badRequest, notFound } from "../../../../core/errors/httpErrors";
 import { zodFirstMessage } from "../../../../core/http/zodMessage";
 import {
   createSingleQuestionSchemaBank,
   updateSingleQuestionSchemaBank,
-  answerSchema,
   zodAnswersArraySchema,
 } from "../schemas/question.schema";
 import { ICloudinaryFile } from "../../../../core/types/cloudinary.types";
 import { ISingleQuestionBank } from "../types/question.types";
-import { Bank } from "../../models/bank.model";
+import { BankExam } from "../../models/bank-exam.model";
 
 export class SingleQuestionService {
   // ===== helpers =====
@@ -34,40 +32,37 @@ export class SingleQuestionService {
       throw badRequest(zodFirstMessage(e));
     }
 
-    const bankId = parsed.bankId as string;
-    this.assertObjectId(bankId, "معرف البنك غير صالح");
+    const bankExamId = parsed.bankExamId as string;
+    this.assertObjectId(bankExamId, "معرف امتحان البنك غير صالح");
 
-    const bank = await Bank.findById(bankId);
-    if (!bank) throw notFound("البنك غير موجود");
+    const bankExam = await BankExam.findById(bankExamId);
+    if (!bankExam) throw notFound("امتحان البنك غير موجود");
 
-    // شرط إجابة صحيحة واحدة
-    this.ensureHasCorrectAnswer(parsed.answers);
-
-    // التحقق من مجموع علامات الأسئلة في البنك
-    const allQuestions = await SingleQuestionBank.find({ bankId: bank.id });
+    // التحقق من مجموع علامات الأسئلة في امتحان البنك
+    const allQuestions = await SingleQuestionBank.find({ bankExamId: bankExam.id });
     const currentTotalMarks = allQuestions.reduce((sum, q) => sum + q.mark, 0);
     const newTotalMarks = currentTotalMarks + parsed.mark;
     
-    if (newTotalMarks > bank.totalMark) {
-      const remaining = bank.totalMark - currentTotalMarks;
+    if (newTotalMarks > bankExam.totalMark) {
+      const remaining = bankExam.totalMark - currentTotalMarks;
       throw badRequest(
-        `لا يمكن إضافة السؤال. المتبقي من العلامات هو ${remaining} من أصل ${bank.totalMark}`
+        `لا يمكن إضافة السؤال. المتبقي من العلامات هو ${remaining} من أصل ${bankExam.totalMark}`
       );
     }
 
     // جلب أكبر رقم سؤال في هذا الامتحان
-    const lastQuestion = await SingleQuestionBank.findOne({ bankId: bank.id })
+    const lastQuestion = await SingleQuestionBank.findOne({ bankExamId: bankExam.id })
       .sort({ number: -1 })
       .select('number');
     
     const maxNumber = lastQuestion?.number || 0;
     const newNumber = maxNumber + 1;
 
-    // معالجة الصورة: إذا كان هناك ملف مرفق استخدمه، وإلا استخدم الـ image من الـ body (يمكن أن يكون string فارغ)
+    // معالجة الصورة
     const image = file?.path ?? (parsed.image || "");
 
     const created = await SingleQuestionBank.create({
-      bankId,
+      bankExamId,
       title: parsed.title ?? "",
       subTitle: parsed.subTitle ?? "",
       image: image,
@@ -78,7 +73,7 @@ export class SingleQuestionService {
       number: newNumber,
     });
 
-    await created.populate("bankId", "mainTitle");
+    await created.populate("bankExamId", "title");
 
     return { id: created.id, message: "تم إنشاء السؤال بنجاح" };
   }
@@ -87,23 +82,23 @@ export class SingleQuestionService {
     this.assertObjectId(id, "معرف السؤال غير صالح");
 
     const question = await SingleQuestionBank.findById(id).populate(
-      "bankId",
-      "mainTitle totalMark"
+      "bankExamId",
+      "title totalMark"
     );
     if (!question) throw notFound("السؤال غير موجود");
 
     return question;
   }
 
-  static async getSingleQuestionsByBankId(bankId: string) {
-    this.assertObjectId(bankId, "معرف المجموعة غير صالح");
+  static async getSingleQuestionsByBankExamId(bankExamId: string) {  // تغيير الاسم
+    this.assertObjectId(bankExamId, "معرف امتحان البنك غير صالح");
 
-    const all = await SingleQuestionBank.find({ bankId }).sort({ number: 1, createdAt: 1 });;
+    const all = await SingleQuestionBank.find({ bankExamId }).sort({ number: 1, createdAt: 1 });
 
     return all;
   }
 
-    static async updateSingleQuestion(id: string, data: ISingleQuestionBank, file?: ICloudinaryFile) {
+  static async updateSingleQuestion(id: string, data: ISingleQuestionBank, file?: ICloudinaryFile) {
     this.assertObjectId(id, "معرف السؤال غير صالح");
 
     let parsed: any;
@@ -113,10 +108,10 @@ export class SingleQuestionService {
       throw badRequest(zodFirstMessage(e));
     }
 
-    if (parsed.bankId) {
-      this.assertObjectId(parsed.bankId, "معرف البنك غير صالح");
-      const bank = await Bank.findById(parsed.bankId);
-      if (!bank) throw notFound("البنك غير موجود");
+    if (parsed.bankExamId) {
+      this.assertObjectId(parsed.bankExamId, "معرف امتحان البنك غير صالح");
+      const bankExam = await BankExam.findById(parsed.bankExamId);
+      if (!bankExam) throw notFound("امتحان البنك غير موجود");
     }
 
     // إذا عدلت answers لازم تحقق إجابة صحيحة
@@ -126,21 +121,15 @@ export class SingleQuestionService {
     if (!question) throw notFound("السؤال غير موجود");
 
     // تحديث البيانات
-    if (parsed.bankId) question.bankId = parsed.bankId;
+    if (parsed.bankExamId) question.bankExamId = parsed.bankExamId;
     if (parsed.title !== undefined) question.title = parsed.title;
     if (parsed.subTitle !== undefined) question.subTitle = parsed.subTitle;
     
-    // معالجة الصورة:
-    // 1. إذا تم رفع ملف جديد، استخدمه
-    // 2. إذا تم إرسال image في الـ body (حتى لو كان string فارغ)، استخدمه
-    // 3. إذا لم يتم إرسال أي شيء، تبقى الصورة كما هي
-
-    console.log(file)
+    // معالجة الصورة
     if (file) {
       question.image = file.path;
-    } else if (file === undefined) {
-      // تقبل أي string (فارغ أو غير فارغ)
-      question.image = " ";
+    } else if (file === undefined && parsed.image !== undefined) {
+      question.image = parsed.image;
     }
     
     if (parsed.answers !== undefined) question.answers = parsed.answers;
@@ -161,12 +150,12 @@ export class SingleQuestionService {
     return { message: "تم حذف السؤال بنجاح" };
   }
 
-  static async deleteSingleQuestionsBybankId(bankId: string) {
-    this.assertObjectId(bankId, "معرف المجموعة غير صالح");
+  static async deleteSingleQuestionsByBankExamId(bankExamId: string) {  // تغيير الاسم
+    this.assertObjectId(bankExamId, "معرف امتحان البنك غير صالح");
 
-    const result = await SingleQuestionBank.deleteMany({ bankId });
+    const result = await SingleQuestionBank.deleteMany({ bankExamId });
     return {
-      message: "تم حذف جميع أسئلة المجموعة بنجاح",
+      message: "تم حذف جميع أسئلة امتحان البنك بنجاح",
       deletedCount: result.deletedCount,
     };
   }
@@ -183,36 +172,33 @@ export class SingleQuestionService {
     return { message: "تم حذف صورة السؤال بنجاح" };
   }
 
- static async deleteMultipleQuestions(ids: string[]) {
-  if (!ids || !Array.isArray(ids) || ids.length === 0) {
-    throw badRequest("يجب توفير مصفوفة من معرفات الأسئلة");
-  }
-
-  // تنظيف الـ IDs من أي مسافات أو أحرف خاصة
-  const cleanIds = ids.map(id => id.trim());
-  
-  // التحقق من صحة كل ID
-  for (const id of cleanIds) {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw badRequest(`معرف السؤال غير صالح: ${id}`);
+  static async deleteMultipleQuestions(ids: string[]) {
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      throw badRequest("يجب توفير مصفوفة من معرفات الأسئلة");
     }
+
+    const cleanIds = ids.map(id => id.trim());
+    
+    for (const id of cleanIds) {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw badRequest(`معرف السؤال غير صالح: ${id}`);
+      }
+    }
+
+    const result = await SingleQuestionBank.deleteMany({ 
+      _id: { $in: cleanIds } 
+    });
+
+    if (result.deletedCount === 0) {
+      throw notFound("لم يتم العثور على الأسئلة المحددة");
+    }
+
+    return { 
+      message: "تم حذف الأسئلة بنجاح", 
+      deletedCount: result.deletedCount,
+      totalRequested: cleanIds.length
+    };
   }
-
-  const result = await SingleQuestionBank.deleteMany({ 
-    _id: { $in: cleanIds } 
-  });
-
-  if (result.deletedCount === 0) {
-    throw notFound("لم يتم العثور على الأسئلة المحددة");
-  }
-
-  return { 
-    message: "تم حذف الأسئلة بنجاح", 
-    deletedCount: result.deletedCount,
-    totalRequested: cleanIds.length
-  };
-}
-
 
   // PATCH /SingleQuestions/:id/answers
   static async updateAnswers(id: string, data: ISingleQuestionBank) {
@@ -239,44 +225,37 @@ export class SingleQuestionService {
     return { message: "تم تحديث الإجابات بنجاح" };
   }
 
-  static async reorderQuestionsByArray(bankId: string, questionIds: string[]) {
-     // التحقق من وجود questionIds
+  static async reorderQuestionsByArray(bankExamId: string, questionIds: string[]) {  // تغيير المعامل
     if (!questionIds || !Array.isArray(questionIds)) {
       throw badRequest("يجب توفير مصفوفة من معرفات الأسئلة");
     }
 
-    // تحقق من صحة الـ bankId
-    this.assertObjectId(bankId, "معرف الامتحان غير صالح");
+    this.assertObjectId(bankExamId, "معرف امتحان البنك غير صالح");
     
-    // تحقق من وجود الامتحان
-    const bank = await Bank.findById(bankId);
-    if (!bank) throw notFound("الامتحان غير موجود");
+    const bankExam = await BankExam.findById(bankExamId);
+    if (!bankExam) throw notFound("امتحان البنك غير موجود");
     
-    // تحقق من صحة الـ IDs
     if (!Array.isArray(questionIds) || questionIds.length === 0) {
       throw badRequest("يجب توفير مصفوفة من معرفات الأسئلة");
     }
     
-    // تحقق من صحة كل ID
     for (const id of questionIds) {
       if (!mongoose.Types.ObjectId.isValid(id)) {
         throw badRequest(`معرف السؤال غير صالح: ${id}`);
       }
     }
     
-    // تحقق من أن جميع الأسئلة موجودة وتتبع نفس الامتحان
     const questions = await SingleQuestionBank.find({
       _id: { $in: questionIds },
-      bankId: bankId
+      bankExamId: bankExamId
     });
     
     if (questions.length !== questionIds.length) {
       throw badRequest("بعض الأسئلة غير موجودة أو لا تتبع هذا الامتحان");
     }
     
-    // تحديث الأرقام حسب موقع ID في المصفوفة
     const updatePromises = questionIds.map((id, index) => 
-      SingleQuestionBank.findByIdAndUpdate(id, { number: index + 1 }) // الأرقام تبدأ من 1
+      SingleQuestionBank.findByIdAndUpdate(id, { number: index + 1 })
     );
     
     await Promise.all(updatePromises);

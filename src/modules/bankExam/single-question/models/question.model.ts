@@ -1,4 +1,4 @@
-import mongoose, { Schema, Model, InferSchemaType } from "mongoose";
+import mongoose, { Schema, Model } from "mongoose";
 import { IAnswerBank, ISingleQuestionBank } from "../types/question.types";
 
 // Answer Schema
@@ -13,9 +13,9 @@ const AnswerBankSchema = new Schema<IAnswerBank>(
 // Question Schema
 const SingleQuestionBankSchema = new Schema<ISingleQuestionBank>(
   {
-    bankId: {
+    bankExamId: {
       type: Schema.Types.ObjectId,
-      ref: "Bank",
+      ref: "BankExam",
       required: true,
       index: true,
     },
@@ -38,7 +38,8 @@ const SingleQuestionBankSchema = new Schema<ISingleQuestionBank>(
 
 // Indexes
 SingleQuestionBankSchema.index({ createdAt: -1 });
+SingleQuestionBankSchema.index({ bankExamId: 1, number: 1 });  // تحديث الفهرس
 
 // Group Model
 export const SingleQuestionBank: Model<ISingleQuestionBank> =
-  mongoose.models.SingleQuestionBankSchema || mongoose.model("SingleQuestionBank", SingleQuestionBankSchema);
+  mongoose.models.SingleQuestionBank || mongoose.model("SingleQuestionBank", SingleQuestionBankSchema);
