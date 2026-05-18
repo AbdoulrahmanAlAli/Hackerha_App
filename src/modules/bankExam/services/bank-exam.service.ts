@@ -27,6 +27,8 @@ export class BankExamService {
     const lastBankExam = await BankExam.findOne({ bankId: data.bankId }).sort({ number: -1 });
     const newNumber = (lastBankExam?.number || 0) + 1;
 
+    console.log(data.bankId)
+
     const bankExam = await BankExam.create({
       ...parsed,  // استخدام parsed بدلاً من data لضمان التحقق من الصحة
       number: newNumber,

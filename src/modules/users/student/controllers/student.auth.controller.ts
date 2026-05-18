@@ -17,7 +17,7 @@ export class StudentAuthController {
 
   // POST /api/hackit/ctrl/student/reSendOtp/:id
   resendOtp = asyncHandler(async (req: Request, res: Response) => {
-    const result = await AuthStudentService.reSendOtp(req.body, req.params.id);
+    const result = await AuthStudentService.reSendOtp(req.params.id);
     res.status(200).json(result);
   });
 

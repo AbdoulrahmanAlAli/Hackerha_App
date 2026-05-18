@@ -191,13 +191,7 @@ export class AuthStudentService {
   }
 
   // ~ Post => /api/hackit/ctrl/student/reSendOtp/:id ~ reSend Otp
-  static async reSendOtp(otpData: IOtp, studentId: string) {
-    try {
-      otpSchema.parse(otpData);
-    } catch (e) {
-      throw badRequest(zodFirstMessage(e));
-    }
-
+  static async reSendOtp(studentId: string) {
     const student = await Student.findById(studentId);
     if (!student) throw notFound("الحساب غير موجود");
 
