@@ -2,37 +2,34 @@ import { Router } from "express";
 import { bankController } from "../controllers/bank.controller";
 import verifyToken from "../../../core/middlewares/verifyToken";
 import { requireAdmin } from "../../../core/middlewares/requireRole.middleware";
-import { upload } from "../../../core/middlewares/upload.middleware";
 import { normalizeBankFormData } from "../../../core/middlewares/normalizeFormData";
+import { upload } from "../../../core/middlewares/upload.middleware";
 
 const router = Router();
 
-// Create (Admin) - مع رفع صورة
+// Routes للجميع (تتصرف حسب دور المستخدم)
+router.get("/", verifyToken, bankController.getAllBanks);
+router.get("/:id", verifyToken, bankController.getBankById);
+
+// Routes للمشرفين فقط
 router.post(
   "/", 
   verifyToken, 
   requireAdmin, 
-  upload, // middleware لرفع الصورة
+  upload,
   normalizeBankFormData,
   bankController.createBank
 );
 
-// Read
-router.get("/", verifyToken, bankController.getAllBanks);
-router.get("/stats", verifyToken, requireAdmin, bankController.getSystemStats);
-router.get("/:id", verifyToken, bankController.getBankById);
-router.get("/year/:year/semester/:semester", verifyToken, bankController.getBanksByYearAndSemester);
-
-// Update (Admin) - مع إمكانية رفع صورة جديدة
 router.put(
   "/:id", 
   verifyToken, 
   requireAdmin, 
-  upload, // middleware لرفع الصورة (اختياري)
+  upload,
+  normalizeBankFormData,
   bankController.updateBank
 );
 
-// Delete image (Admin)
 router.delete(
   "/:id/image", 
   verifyToken, 
@@ -40,7 +37,9 @@ router.delete(
   bankController.deleteBankImage
 );
 
-// Delete (Admin)
 router.delete("/:id", verifyToken, requireAdmin, bankController.deleteBank);
+
+// إحصائيات (للمشرفين فقط)
+router.get("/stats", verifyToken, requireAdmin, bankController.getSystemStats);
 
 export default router;

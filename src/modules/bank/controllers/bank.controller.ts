@@ -3,6 +3,7 @@ import asyncHandler from "express-async-handler";
 import { BankService } from "../services/bank.service";
 import { AuthenticatedRequest } from "../../../core/http/authenticatedRequest";
 import { ICloudinaryFile } from "../../../core/types/cloudinary.types";
+import { badRequest } from "../../../core/errors/httpErrors";
 
 class BankController {
   createBank = asyncHandler(async (req: Request, res: Response) => {
@@ -12,25 +13,31 @@ class BankController {
   });
 
   getBankById = asyncHandler(async (req: Request, res: Response) => {
-    const bank = await BankService.getBankById(req.params.id);
+    const userRole = (req as AuthenticatedRequest).user?.role;
+    
+    if (!userRole) {
+      throw badRequest("دور المستخدم غير محدد");
+    }
+    
+    const bank = await BankService.getBankById(req.params.id, userRole);
     res.status(200).json(bank);
   });
 
   getAllBanks = asyncHandler(async (req: Request, res: Response) => {
+    const userRole = (req as AuthenticatedRequest).user?.role;
+    
+    if (!userRole) {
+      throw badRequest("دور المستخدم غير محدد");
+    }
+    
     const { year, semester } = req.query;
     
     const filters: { year?: string; semester?: string } = {};
     if (year && typeof year === 'string') filters.year = year;
     if (semester && typeof semester === 'string') filters.semester = semester;
     
-    const result = await BankService.getAllBanks(filters);
+    const result = await BankService.getAllBanks(userRole, filters);
     res.status(200).json(result);
-  });
-
-  getBanksByYearAndSemester = asyncHandler(async (req: Request, res: Response) => {
-    const { year, semester } = req.params;
-    const banks = await BankService.getBanksByYearAndSemester(year, semester);
-    res.status(200).json(banks);
   });
 
   updateBank = asyncHandler(async (req: Request, res: Response) => {

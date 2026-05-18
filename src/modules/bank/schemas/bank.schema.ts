@@ -19,14 +19,12 @@ export const createBankSchema = z.object({
     .min(1, "عنوان البنك مطلوب")
     .max(100, "العنوان يجب ألا يتجاوز 100 حرف"),
 
-  image: z
-    .string()
-    .min(1, "صورة البنك مطلوبة")
-    .url("رابط الصورة غير صالح"),
-
   year: yearEnum,
 
   semester: semesterEnum,
+  
+  // available غير مطلوب في الإنشاء، سيتم استخدام القيمة الافتراضية
+  available: z.boolean().optional(),
 });
 
 // Schema تحديث بنك
@@ -47,7 +45,7 @@ export const updateBankSchema = z.object({
 
   semester: semesterEnum.optional(),
 
-  available: z.boolean().optional(),
+  available: z.boolean().optional(), // متاح للتحديث
 });
 
 // Types مستنتجة من Zod

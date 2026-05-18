@@ -9,12 +9,12 @@ import {
 import { badRequest, notFound } from "../../../core/errors/httpErrors";
 import { zodFirstMessage } from "../../../core/http/zodMessage";
 import { ICloudinaryFile } from "../../../core/types/cloudinary.types";
-import { SingleQuestionBank } from "../../bankExam/single-question/models/question.model";
 import { IBankExam } from "../../bankExam/types/bank-exam.types";
 import { BankExam } from "../../bankExam/models/bank-exam.model";
+import { SingleQuestionBank } from "../../bankExam/single-question/models/question.model";
 
 export class BankService {
-  // إنشاء بنك جديد مع صورة
+  // إنشاء بنك جديد (available سيكون false تلقائياً)
   static async createBank(data: CreateBankInput, file?: ICloudinaryFile) {
     let parsed: CreateBankInput;
 
@@ -25,18 +25,18 @@ export class BankService {
     }
 
     // استخدام الصورة المرفوعة أو الصورة من البيانات
-    const image = file?.path || parsed.image;
+    const image = file?.path;
 
     if (!image) {
       throw badRequest("الصورة مطلوبة");
     }
 
+    // إنشاء البنك - available سيأخذ القيمة الافتراضية false من الـ Schema
     const bank = await Bank.create({
       title: parsed.title,
       image: image,
       year: parsed.year,
       semester: parsed.semester,
-      available: false,
     });
 
     return {
@@ -45,20 +45,34 @@ export class BankService {
     };
   }
 
-  // جلب بنك واحد بواسطة id مع الإحصائيات
-  static async getBankById(id: string) {
+  // جلب بنك واحد بواسطة id (حسب دور المستخدم)
+  static async getBankById(id: string, userRole: string) {
     if (!mongoose.isValidObjectId(id)) {
       throw badRequest("معرف غير صالح");
     }
 
-    const bank = await Bank.findById(id);
+    let query: any = { _id: id };
+    
+    // إذا كان المستخدم طالب، يعرض فقط البنوك المتاحة
+    if (userRole === 'student') {
+      query.available = true;
+    }
+
+    const bank = await Bank.findOne(query);
 
     if (!bank) {
       throw notFound("البنك غير موجود");
     }
 
     // جلب إحصائيات الامتحانات والأسئلة
-    const bankExams: IBankExam[] = await BankExam.find({ bankId: bank._id });
+    let bankExamsQuery: any = { bankId: bank._id };
+    
+    // إذا كان طالب، يعرض فقط الامتحانات المتاحة
+    if (userRole === 'student') {
+      bankExamsQuery.available = true;
+    }
+    
+    const bankExams: IBankExam[] = await BankExam.find(bankExamsQuery);
     
     // عدد الامتحانات
     const bankExamsCount = bankExams.length;
@@ -81,12 +95,19 @@ export class BankService {
     };
   }
 
-  // جلب كل البنوك مع الإحصائيات
-  static async getAllBanks(filters?: { year?: string; semester?: string }) {
+  // جلب كل البنوك (حسب دور المستخدم)
+  static async getAllBanks(userRole: string, filters?: { year?: string; semester?: string }) {
     // بناء query للتصفية
     let query: any = {};
+    
+    // إضافة الفلاتر إذا وجدت
     if (filters?.year) query.year = filters.year;
     if (filters?.semester) query.semester = filters.semester;
+    
+    // إذا كان المستخدم طالب، يعرض فقط البنوك المتاحة
+    if (userRole === 'student') {
+      query.available = true;
+    }
 
     // جلب البنوك مع الترتيب
     const banks = await Bank.find(query).sort({ createdAt: -1 });
@@ -94,8 +115,14 @@ export class BankService {
     // جلب الإحصائيات لكل بنك
     const banksWithStats = await Promise.all(
       banks.map(async (bank) => {
+        // بناء query للامتحانات حسب دور المستخدم
+        let bankExamsQuery: any = { bankId: bank._id };
+        if (userRole === 'student') {
+          bankExamsQuery.available = true;
+        }
+        
         // جلب امتحانات هذا البنك
-        const bankExams: IBankExam[] = await BankExam.find({ bankId: bank._id });
+        const bankExams: IBankExam[] = await BankExam.find(bankExamsQuery);
         
         // عدد الامتحانات
         const bankExamsCount = bankExams.length;
@@ -117,57 +144,29 @@ export class BankService {
       })
     );
 
-    // إضافة إحصائيات عامة
-    const totalBanks = banksWithStats.length;
-    const totalExams = banksWithStats.reduce((sum: number, bank) => sum + bank.bankExamsCount, 0);
-    const totalQuestions = banksWithStats.reduce((sum: number, bank) => sum + bank.totalQuestionsCount, 0);
-    const availableBanks = banksWithStats.filter(bank => bank.available).length;
+    // إضافة إحصائيات عامة (للمشرفين فقط)
+    if (userRole === 'admin') {
+      const totalBanks = banksWithStats.length;
+      const totalExams = banksWithStats.reduce((sum: number, bank) => sum + bank.bankExamsCount, 0);
+      const totalQuestions = banksWithStats.reduce((sum: number, bank) => sum + bank.totalQuestionsCount, 0);
+      const availableBanks = banksWithStats.filter(bank => bank.available).length;
 
-    return {
-      banks: banksWithStats,
-      summary: {
-        totalBanks,
-        totalExams,
-        totalQuestions,
-        availableBanks,
-      },
-    };
-  }
-
-  // جلب البنوك مع فلتر السنة والفصل
-  static async getBanksByYearAndSemester(year: string, semester: string) {
-    if (!year || !semester) {
-      throw badRequest("السنة والفصل مطلوبان");
+      return {
+        banks: banksWithStats,
+        summary: {
+          totalBanks,
+          totalExams,
+          totalQuestions,
+          availableBanks,
+        },
+      };
     }
 
-    const banks = await Bank.find({ year, semester }).sort({ createdAt: -1 });
-
-    // إضافة الإحصائيات لكل بنك
-    const banksWithStats = await Promise.all(
-      banks.map(async (bank) => {
-        const bankExams: IBankExam[] = await BankExam.find({ bankId: bank._id });
-        const bankExamsCount = bankExams.length;
-        
-        let totalQuestionsCount = 0;
-        for (const exam of bankExams) {
-          const questionsCount = await SingleQuestionBank.countDocuments({ bankExamId: exam._id });
-          totalQuestionsCount += questionsCount;
-        }
-        
-        const bankObject = bank.toObject();
-        
-        return {
-          ...bankObject,
-          bankExamsCount,
-          totalQuestionsCount,
-        };
-      })
-    );
-
+    // للطلاب، يعرض فقط البنوك بدون إحصائيات عامة
     return banksWithStats;
   }
 
-  // تحديث بنك مع إمكانية تغيير الصورة
+  // تحديث بنك (للمشرفين فقط)
   static async updateBank(bankId: string, data: UpdateBankInput, file?: ICloudinaryFile) {
     if (!mongoose.isValidObjectId(bankId)) {
       throw badRequest("معرف غير صالح");
@@ -208,7 +207,7 @@ export class BankService {
     };
   }
 
-  // حذف صورة البنك
+  // حذف صورة البنك (للمشرفين فقط)
   static async deleteBankImage(bankId: string) {
     if (!mongoose.isValidObjectId(bankId)) {
       throw badRequest("معرف غير صالح");
@@ -227,7 +226,7 @@ export class BankService {
     };
   }
 
-  // حذف بنك (مع حذف جميع الامتحانات والأسئلة المرتبطة)
+  // حذف بنك (للمشرفين فقط)
   static async deleteBank(bankId: string) {
     if (!mongoose.isValidObjectId(bankId)) {
       throw badRequest("معرف غير صالح");
@@ -257,21 +256,16 @@ export class BankService {
       deletedCount: {
         bank: 1,
         exams: bankExams.length,
-        questions: await SingleQuestionBank.countDocuments({ 
-          bankExamId: { $in: bankExams.map((e: IBankExam) => e._id) } 
-        }),
       },
     };
   }
 
-  // الحصول على إحصائيات كاملة للنظام
+  // الحصول على إحصائيات كاملة للنظام (للمشرفين فقط)
   static async getSystemStats() {
     const totalBanks = await Bank.countDocuments();
+    const totalAvailableBanks = await Bank.countDocuments({ available: true });
     const totalBankExams = await BankExam.countDocuments();
     const totalQuestions = await SingleQuestionBank.countDocuments();
-    
-    // البنوك المتاحة
-    const availableBanks = await Bank.countDocuments({ available: true });
     
     // البنوك حسب السنة
     const banksByYear = await Bank.aggregate([
@@ -279,6 +273,9 @@ export class BankService {
         $group: {
           _id: "$year",
           count: { $sum: 1 },
+          availableCount: {
+            $sum: { $cond: [{ $eq: ["$available", true] }, 1, 0] }
+          }
         },
       },
       { $sort: { _id: 1 } },
@@ -290,6 +287,9 @@ export class BankService {
         $group: {
           _id: "$semester",
           count: { $sum: 1 },
+          availableCount: {
+            $sum: { $cond: [{ $eq: ["$available", true] }, 1, 0] }
+          }
         },
       },
       { $sort: { _id: 1 } },
@@ -297,9 +297,9 @@ export class BankService {
 
     return {
       totalBanks,
+      totalAvailableBanks,
       totalBankExams,
       totalQuestions,
-      availableBanks,
       banksByYear,
       banksBySemester,
     };

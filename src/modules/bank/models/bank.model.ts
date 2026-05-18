@@ -39,10 +39,10 @@ const BankSchema = new Schema<IBank>(
       required: [true, "الفصل مطلوب"],
     },
 
-    // هل البنك متاح أم لا
+    // هل البنك متاح أم لا (القيمة الافتراضية false)
     available: {
       type: Boolean,
-      default: false,
+      default: false,  // القيمة الافتراضية
     },
   },
   {
@@ -71,6 +71,7 @@ BankSchema.virtual("bankExamsCount", {
 BankSchema.index({ createdAt: -1 });
 BankSchema.index({ year: 1, semester: 1 });
 BankSchema.index({ title: 1 });
+BankSchema.index({ available: 1 }); // إضافة index لحقل available
 
 // إنشاء أو إعادة استخدام الموديل إذا كان موجوداً
 export const Bank: Model<IBank> =
