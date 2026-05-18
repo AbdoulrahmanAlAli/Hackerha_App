@@ -98,3 +98,50 @@ export const normalizeTeacherFormData = (
   req.body = b;
   next();
 };
+
+export const normalizeBankFormData = (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  const b: any = req.body || {};
+
+  // تحويل أنواع أهم الحقول
+  b.available = toBool(b.available);
+
+  // تنظيف النصوص
+  if (b.title) b.title = b.title.trim();
+  if (b.image) b.image = b.image.trim();
+  if (b.year) b.year = b.year.trim();
+  if (b.semester) b.semester = b.semester.trim();
+
+  req.body = b;
+  next();
+};
+
+// ميدلوير لتطبيع بيانات امتحان البنك
+export const normalizeBankExamFormData = (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  const b: any = req.body || {};
+
+  // تحويل الأرقام
+  b.number = toNum(b.number);
+  b.totalMark = toNum(b.totalMark);
+  
+  // تحويل البولين
+  b.available = toBool(b.available);
+  
+  // تنظيف النصوص
+  if (b.title) b.title = b.title.trim();
+  if (b.duration) b.duration = b.duration.trim();
+  if (b.pdfUrl) b.pdfUrl = b.pdfUrl.trim();
+  
+  // تنظيف ObjectId (إزالة المسافات)
+  if (b.bankId) b.bankId = b.bankId.trim();
+
+  req.body = b;
+  next();
+};

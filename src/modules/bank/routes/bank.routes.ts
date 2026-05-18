@@ -3,6 +3,7 @@ import { bankController } from "../controllers/bank.controller";
 import verifyToken from "../../../core/middlewares/verifyToken";
 import { requireAdmin } from "../../../core/middlewares/requireRole.middleware";
 import { upload } from "../../../core/middlewares/upload.middleware";
+import { normalizeBankFormData } from "../../../core/middlewares/normalizeFormData";
 
 const router = Router();
 
@@ -12,6 +13,7 @@ router.post(
   verifyToken, 
   requireAdmin, 
   upload, // middleware لرفع الصورة
+  normalizeBankFormData,
   bankController.createBank
 );
 
