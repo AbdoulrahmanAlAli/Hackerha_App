@@ -1,9 +1,6 @@
 import mongoose, { Schema, Model } from "mongoose";
 import { IBank } from "../types/bank.types";
 
-// Regex للتحقق من صيغة المدة
-const DURATION_REGEX = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
-
 // Schema الخاص بالـ Bank
 const BankSchema = new Schema<IBank>(
   {
@@ -13,23 +10,6 @@ const BankSchema = new Schema<IBank>(
       required: [true, "عنوان البنك مطلوب"],
       trim: true,
       maxlength: [100, "العنوان يجب ألا يتجاوز 100 حرف"],
-    },
-
-    // العلامة الكلية
-    totalMark: {
-      type: Number,
-      required: [true, "العلامة الإجمالية مطلوبة"],
-      min: [0, "العلامة لا يمكن أن تكون سالباً"],
-    },
-
-    // مدة البنك بصيغة 00:00 أو 00:00:00
-    duration: {
-      type: String,
-      required: [true, "المدة مطلوبة"],
-      validate: {
-        validator: (v: string) => DURATION_REGEX.test(v),
-        message: "المدة يجب أن تكون بالتنسيق 00:00 أو 00:00:00",
-      },
     },
 
     // السنة
@@ -78,14 +58,6 @@ BankSchema.virtual("bankExamsCount", {
   localField: "_id",
   foreignField: "bankId",
   count: true,
-});
-
-// Virtual: إجمالي عدد الأسئلة في كل امتحانات البنك
-BankSchema.virtual("totalQuestionsCount", {
-  ref: "BankExam",
-  localField: "_id",
-  foreignField: "bankId",
-  options: { sort: { number: 1 } },
 });
 
 // Indexes

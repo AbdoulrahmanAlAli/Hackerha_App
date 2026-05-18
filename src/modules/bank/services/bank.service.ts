@@ -8,6 +8,7 @@ import {
 } from "../schemas/bank.schema";
 import { badRequest, notFound } from "../../../core/errors/httpErrors";
 import { zodFirstMessage } from "../../../core/http/zodMessage";
+import { IBankExam } from "../../bankExam/types/bank-exam.types";
 import { BankExam } from "../../bankExam/models/bank-exam.model";
 import { SingleQuestionBank } from "../../bankExam/single-question/models/question.model";
 
@@ -46,7 +47,7 @@ export class BankService {
     }
 
     // جلب إحصائيات الامتحانات والأسئلة
-    const bankExams = await BankExam.find({ bankId: bank._id });
+    const bankExams: IBankExam[] = await BankExam.find({ bankId: bank._id });
     
     // عدد الامتحانات
     const bankExamsCount = bankExams.length;
@@ -65,7 +66,7 @@ export class BankService {
       ...bankObject,
       bankExamsCount,
       totalQuestionsCount,
-      bankExams, // optionally include exams list
+      bankExams,
     };
   }
 
@@ -83,7 +84,7 @@ export class BankService {
     const banksWithStats = await Promise.all(
       banks.map(async (bank) => {
         // جلب امتحانات هذا البنك
-        const bankExams = await BankExam.find({ bankId: bank._id });
+        const bankExams: IBankExam[] = await BankExam.find({ bankId: bank._id });
         
         // عدد الامتحانات
         const bankExamsCount = bankExams.length;
@@ -95,27 +96,20 @@ export class BankService {
           totalQuestionsCount += questionsCount;
         }
         
-        // إجمالي العلامات المتاحة (مجموع totalMark لجميع الامتحانات)
-  const totalAvailableMarks = bankExams.reduce((sum: number, exam: any) => sum + exam.totalMark, 0);
-        
         const bankObject = bank.toObject();
         
         return {
           ...bankObject,
           bankExamsCount,
           totalQuestionsCount,
-          totalAvailableMarks,
-          usedPercentage: bank.totalMark > 0 
-            ? Math.round((totalAvailableMarks / bank.totalMark) * 100) 
-            : 0,
         };
       })
     );
 
     // إضافة إحصائيات عامة
     const totalBanks = banksWithStats.length;
-    const totalExams = banksWithStats.reduce((sum, bank) => sum + bank.bankExamsCount, 0);
-    const totalQuestions = banksWithStats.reduce((sum, bank) => sum + bank.totalQuestionsCount, 0);
+    const totalExams = banksWithStats.reduce((sum: number, bank) => sum + bank.bankExamsCount, 0);
+    const totalQuestions = banksWithStats.reduce((sum: number, bank) => sum + bank.totalQuestionsCount, 0);
     const availableBanks = banksWithStats.filter(bank => bank.available).length;
 
     return {
@@ -140,7 +134,7 @@ export class BankService {
     // إضافة الإحصائيات لكل بنك
     const banksWithStats = await Promise.all(
       banks.map(async (bank) => {
-        const bankExams = await BankExam.find({ bankId: bank._id });
+        const bankExams: IBankExam[] = await BankExam.find({ bankId: bank._id });
         const bankExamsCount = bankExams.length;
         
         let totalQuestionsCount = 0;
@@ -207,7 +201,7 @@ export class BankService {
     }
 
     // جلب جميع امتحانات هذا البنك
-    const bankExams = await BankExam.find({ bankId: bank._id });
+    const bankExams: IBankExam[] = await BankExam.find({ bankId: bank._id });
     
     // حذف جميع الأسئلة المرتبطة بكل امتحان
     for (const exam of bankExams) {
@@ -221,7 +215,14 @@ export class BankService {
     await Bank.findByIdAndDelete(bankId);
 
     return {
-      message: "تم حذف البنك وجميع امتحاناته وأسئلته بنجاح"
+      message: "تم حذف البنك وجميع امتحاناته وأسئلته بنجاح",
+      deletedCount: {
+        bank: 1,
+        exams: bankExams.length,
+        questions: await SingleQuestionBank.countDocuments({ 
+          bankExamId: { $in: bankExams.map((e: IBankExam) => e._id) } 
+        }),
+      },
     };
   }
 
