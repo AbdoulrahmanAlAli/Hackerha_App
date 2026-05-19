@@ -15,6 +15,12 @@ const VersionSchema = new Schema<VersionDocument>(
       required: [true, "رابط التحميل مطلوب"],
       trim: true,
     },
+
+    isBankActive: {
+      type: Boolean,
+      required: [true, "حالة البنك مطلوبة"],
+      default: false,
+    },
   },
   {
     timestamps: true,

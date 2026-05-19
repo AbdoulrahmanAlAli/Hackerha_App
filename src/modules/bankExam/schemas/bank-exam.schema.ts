@@ -27,11 +27,6 @@ const examNumber = z.preprocess(
     .min(1, "رقم الامتحان يجب أن يكون 1 أو أكثر")
 );
 
-const pdfUrlSchema = z
-  .string()
-  .min(1, "ملف PDF مطلوب")
-  .url("رابط الملف غير صالح");
-
 export const createBankExamSchema = z.object({
   number: examNumber.optional(),
   bankId: objectId,
@@ -46,8 +41,6 @@ export const createBankExamSchema = z.object({
     .string()
     .min(1, "المدة مطلوبة")
     .regex(durationRegex, "المدة يجب أن تكون بالتنسيق 00:00 أو 00:00:00"),
-
-  pdfUrl: pdfUrlSchema, 
 });
 
 export const updateBankExamSchema = z.object({
@@ -60,7 +53,6 @@ export const updateBankExamSchema = z.object({
     .regex(durationRegex, "المدة يجب أن تكون بالتنسيق 00:00 أو 00:00:00")
     .optional(),
   available: z.boolean().optional(),
-   pdfUrl: z.string().url("رابط الملف غير صالح").optional(),
 });
 
 export type CreateBankExamInput = z.infer<typeof createBankExamSchema>;

@@ -43,7 +43,7 @@ export class CtrlVersionService {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .select("version url createdAt updatedAt")
+        .select("version url isBankActive createdAt updatedAt")
         .lean(),
       Version.countDocuments(),
     ]);
@@ -69,7 +69,7 @@ export class CtrlVersionService {
       throw badRequest("معرف الإصدار غير صالح");
 
     const version = await Version.findById(versionId)
-      .select("version url createdAt updatedAt")
+      .select("version url isBankActive createdAt updatedAt")
       .lean();
 
     if (!version) throw notFound("الإصدار غير موجود");

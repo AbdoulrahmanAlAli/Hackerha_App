@@ -46,11 +46,6 @@ const BankExamSchema = new Schema<IBankExam>(
       type: Boolean, 
       default: false 
     },
-
-     pdfUrl: {  // إضافة حقل pdfUrl
-      type: String,
-      required: [true, "ملف PDF مطلوب"],
-    },
   },
   { 
     timestamps: true, 
