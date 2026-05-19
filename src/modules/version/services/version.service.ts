@@ -10,7 +10,7 @@ import { zodFirstMessage } from "../../../core/http/zodMessage";
 export class CtrlVersionService {
   // ~ Get => /api/hackit/version/current
   static async getCurrentVersion() {
-    const version = await Version.findOne().sort({ createdAt: -1 }).lean();
+    const version = await Version.findOne().select("version url isBankActive createdAt updatedAt __v").sort({ createdAt: -1 }).lean();
 
     if (!version) throw notFound("لا يوجد إصدار مضاف");
 
