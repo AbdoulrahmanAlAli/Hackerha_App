@@ -126,6 +126,7 @@ export class SingleQuestionService {
 
     const question = await SingleQuestionBank.findById(id);
     if (!question) throw notFound("السؤال غير موجود");
+    console.log({file: file, path: file?.path, parsed: parsed});
 
     // تحديث البيانات
     if (parsed.bankExamId) question.bankExamId = parsed.bankExamId;
@@ -133,6 +134,7 @@ export class SingleQuestionService {
     if (parsed.subTitle !== undefined) question.subTitle = parsed.subTitle;
     
     // معالجة الصورة
+
     if (file) {
       question.image = file.path;
     } else if (file === undefined && parsed.image !== undefined) {
