@@ -143,8 +143,7 @@ export class SingleQuestionService {
     // 3. إذا لم يتم إرسال أي شيء، تبقى الصورة كما هي
     if (file) {
       question.image = file.path;
-    } else if (file === undefined) {
-      // تقبل أي string (فارغ أو غير فارغ)
+    } else if (file === undefined && parsed.image !== undefined) {
       question.image = " ";
     }
     
