@@ -137,6 +137,8 @@ export class SingleQuestionService {
       question.image = file.path;
     } else if (file === undefined && parsed.image !== undefined) {
       question.image = parsed.image;
+    } else {
+      question.image = question.image;
     }
     
     if (parsed.answers !== undefined) question.answers = parsed.answers;
