@@ -136,16 +136,15 @@ export class SingleQuestionService {
     if (parsed.subTitle !== undefined) question.subTitle = parsed.subTitle;
     
     // معالجة الصورة:
-    // 1. إذا تم رفع ملف جديد، استخدمه
-    // 2. إذا تم إرسال image في الـ body (حتى لو كان string فارغ)، استخدمه
-    // 3. إذا لم يتم إرسال أي شيء، تبقى الصورة كما هي
-    if (file) {
+    // 1. إذا تم رفع ملف جديد، استبدل الصورة القديمة
+    // 2. إذا تم إرسال image في الـ body (حتى لو كان فارغًا)، حدّث القيمة
+    // 3. إذا لم يتم إرسال حقل image، اترك الصورة كما هي
+   if (file) {
       question.image = file.path;
     } else if (file === undefined) {
-      question.image = " ";
-    } else {
       question.image = question.image;
     }
+    
   
     if (parsed.answers !== undefined) question.answers = parsed.answers;
     if (parsed.mark !== undefined) question.mark = parsed.mark;

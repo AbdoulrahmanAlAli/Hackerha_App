@@ -133,13 +133,13 @@ export class SingleQuestionService {
     if (parsed.title !== undefined) question.title = parsed.title;
     if (parsed.subTitle !== undefined) question.subTitle = parsed.subTitle;
     
-    // معالجة الصورة
+    // معالجة الصورة:
+    // 1. إذا تم رفع ملف جديد، استبدل الصورة القديمة
+    // 2. إذا تم إرسال image في الـ body (حتى لو كان فارغًا)، حدّث القيمة
+    // 3. إذا لم يتم إرسال حقل image، اترك الصورة كما هي
     if (file) {
       question.image = file.path;
     } else if (file === undefined) {
-      // تقبل أي string (فارغ أو غير فارغ)
-      question.image = " ";
-    } else {
       question.image = question.image;
     }
     
