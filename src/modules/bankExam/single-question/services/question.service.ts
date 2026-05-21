@@ -32,6 +32,8 @@ export class SingleQuestionService {
       throw badRequest(zodFirstMessage(e));
     }
 
+    this.ensureHasCorrectAnswer(parsed.answers);
+
     const bankExamId = parsed.bankExamId as string;
     this.assertObjectId(bankExamId, "معرف امتحان البنك غير صالح");
 

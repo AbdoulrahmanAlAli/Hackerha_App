@@ -118,6 +118,8 @@ export class SingleQuestionService {
       throw badRequest(zodFirstMessage(e));
     }
 
+    this.ensureHasCorrectAnswer(parsed.answers);
+
     if (parsed.examId) {
       this.assertObjectId(parsed.examId, "معرف الامتحان غير صالح");
       const exam = await Exam.findById(parsed.examId);
