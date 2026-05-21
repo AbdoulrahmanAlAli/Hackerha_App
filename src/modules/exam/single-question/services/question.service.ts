@@ -20,9 +20,9 @@ export class SingleQuestionService {
   }
 
   private static ensureHasCorrectAnswer(answers: { correct: boolean }[]) {
-    const hasCorrect = answers.some((a) => a.correct);
-    if (!hasCorrect)
-      throw badRequest("يجب أن تحتوي الإجابات على الأقل على إجابة صحيحة واحدة");
+    const correctCount = answers.filter((a) => a.correct).length;
+    if (correctCount !== 1)
+      throw badRequest("يجب أن تحتوي الإجابات على إجابة صحيحة واحدة فقط");
   }
 
   // ===== CRUD =====
@@ -64,13 +64,11 @@ export class SingleQuestionService {
     const newNumber = maxNumber + 1;
 
     // معالجة الصورة: إذا كان هناك ملف مرفق استخدمه، وإلا استخدم الـ image من الـ body (يمكن أن يكون string فارغ)
-    let image = "";
+   let image = "";
       if (file) {
         image = file.path;
-      } else if (parsed.image !== undefined) {
-        image = parsed.image;
-      } else {
-        image = "";
+      } else if (file === undefined) {
+        image = " ";
       }
 
     const created = await SingleQuestion.create({
@@ -144,8 +142,9 @@ export class SingleQuestionService {
     if (file) {
       question.image = file.path;
     } else if (file === undefined) {
-      // تقبل أي string (فارغ أو غير فارغ)
       question.image = " ";
+    } else {
+      question.image = question.image;
     }
   
     if (parsed.answers !== undefined) question.answers = parsed.answers;
