@@ -135,7 +135,8 @@ export class SingleQuestionService {
     // معالجة الصورة
     if (file) {
       question.image = file.path;
-    } else if (file === undefined && parsed.image !== undefined) {
+    } else if (file === undefined) {
+      // تقبل أي string (فارغ أو غير فارغ)
       question.image = " ";
     }
     
