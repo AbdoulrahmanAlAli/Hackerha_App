@@ -126,6 +126,7 @@ export class SingleQuestionService {
 
     const question = await SingleQuestionBank.findById(id);
     if (!question) throw notFound("السؤال غير موجود");
+    console.log({file: file, path: file?.path, parseBodyImage: parsed.image});
 
     // تحديث البيانات
     if (parsed.bankExamId) question.bankExamId = parsed.bankExamId;
