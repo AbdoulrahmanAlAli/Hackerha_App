@@ -7,7 +7,7 @@ export const createVersionSchema = z.object({
   url: z.string().min(1, "رابط التحميل مطلوب"),
 
   isBankActive: z.boolean()
-});
+}).strict();
 
 // ===== Update Version =====
 export const updateVersionSchema = z.object({
@@ -16,4 +16,4 @@ export const updateVersionSchema = z.object({
   url: z.string().min(1, "رابط التحميل مطلوب").optional(),
 
   isBankActive: z.boolean().optional()
-});
+}).strict();

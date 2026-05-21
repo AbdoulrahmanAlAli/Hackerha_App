@@ -59,7 +59,14 @@ export class SingleQuestionService {
     const newNumber = maxNumber + 1;
 
     // معالجة الصورة
-    const image = file?.path ?? (parsed.image || "");
+    let image = "";
+      if (file) {
+        image = file.path;
+      } else if (parsed.image !== undefined) {
+        image = parsed.image;
+      } else {
+        image = "";
+      }
 
     const created = await SingleQuestionBank.create({
       bankExamId,

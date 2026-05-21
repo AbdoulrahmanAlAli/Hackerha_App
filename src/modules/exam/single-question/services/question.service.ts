@@ -64,7 +64,14 @@ export class SingleQuestionService {
     const newNumber = maxNumber + 1;
 
     // معالجة الصورة: إذا كان هناك ملف مرفق استخدمه، وإلا استخدم الـ image من الـ body (يمكن أن يكون string فارغ)
-    const image = file?.path ?? (parsed.image || "");
+    let image = "";
+      if (file) {
+        image = file.path;
+      } else if (parsed.image !== undefined) {
+        image = parsed.image;
+      } else {
+        image = "";
+      }
 
     const created = await SingleQuestion.create({
       examId,
@@ -78,7 +85,6 @@ export class SingleQuestionService {
       number: newNumber,
     });
 
-    console.log(created)
     await created.populate("examId", "mainTitle");
 
     return { id: created.id, message: "تم إنشاء السؤال بنجاح" };
